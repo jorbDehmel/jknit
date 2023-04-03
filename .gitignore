@@ -1,0 +1,9 @@
+jknit/
+.vscode/
+
+*.o
+*.out
+*.tex
+*.aux
+*.log
+*.pdf

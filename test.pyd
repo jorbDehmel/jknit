@@ -1,0 +1,15 @@
+Hi there! This is a test
+of the jknit
+system!
+
+$$
+    math
+$$
+
+hi this should not be math
+
+```{python}
+print('hello, world!')
+```
+
+The above code is code, probably.
