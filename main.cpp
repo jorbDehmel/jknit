@@ -6,41 +6,142 @@ github.com/jorbDehmel
 GPLv3 held by author
 */
 
-#include <iostream>
-#include <chrono>
 #include "engine.hpp"
+#include <chrono>
+#include <iostream>
 using namespace std;
 
+// A better CLI for jknit
 int main(const int argc, const char *argv[])
 {
-    if (argc < 3)
-    {
-        cout << tags::red_bold
-             << "Error: Please provide two arguments (input and output filenames).\n"
-             << tags::reset;
-        return 1;
-    }
+     string inputPath = "", outputPath = "jknit_output.tex";
 
-    cout << tags::green_bold
-         << "Compiling from " << argv[1] << " to " << argv[2] << '\n'
-         << tags::reset;
+     bool doLog = false;
+     bool doTimer = false;
+     bool quiet = false;
 
-    auto start = chrono::high_resolution_clock::now();
+     for (int i = 1; i < argc; i++)
+     {
+          if (argv[i][0] == '-')
+          {
+               int cur = i;
 
-    Engine e(true);
-    e.processFile(argv[1], argv[2]);
+               // Options
+               for (int j = 1; argv[cur][j] != '\0'; j++)
+               {
+                    switch (argv[cur][j])
+                    {
+                    case 'O':
+                    case 'o':
+                         // Set output file, skip next option
+                         if (cur + 1 >= argc)
+                         {
+                              cout << tags::red_bold
+                                   << "Error: -o must be followed by a filepath.\n"
+                                   << tags::reset;
+                              return 2;
+                         }
+                         outputPath = argv[cur + 1];
+                         i = cur + 1;
+                         break;
+                    case 'L':
+                    case 'l':
+                         // Do log
+                         doLog = true;
+                         break;
+                    case 'T':
+                    case 't':
+                         // Do timer
+                         doTimer = true;
+                         break;
+                    case 'Q':
+                    case 'q':
+                         // Quiet
+                         quiet = true;
+                         break;
+                    case 'N':
+                    case 'n':
+                         // No compile
+                         cout << tags::yellow_bold
+                              << "-n called: Aborting.\n"
+                              << tags::reset;
+                         return 0;
+                    case 'H':
+                    case 'h':
+                         // Help
+                         cout << tags::violet_bold
+                              << "JKnit is a lightweight, versatile tool for\n"
+                              << "compiling markdown documents with embedded\n"
+                              << "(running) code to LaTeX. It aims to be easy\n"
+                              << "to use with any embedded language.\n\n"
+                              << "Flags and their meaning:\n"
+                              << " -o \t Set output file to the next argument\n"
+                              << " -l \t Enable log\n"
+                              << " -t \t Enable timer\n"
+                              << " -q \t Quiet (no printing)\n"
+                              << " -n \t No compile (halt before running)\n"
+                              << " -h \t Show help (this)\n\n"
+                              << "Jorb Dehmel, 2023, jdehmel@outlook.com\n"
+                              << "FOSS, Protected by GPLv3\n"
+                              << tags::reset;
 
-    auto end = chrono::high_resolution_clock::now();
-    auto elapsed = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+                         break;
+                    default:
+                         cout << tags::yellow_bold
+                              << "Unrecognized option '" << argv[cur][j] << "'\n"
+                              << tags::reset;
+                         break;
+                    };
+               }
+          }
+          else
+          {
+               inputPath = argv[i];
+          }
+     }
 
-    cout << tags::green_bold
-         << "Done.\n"
-         << elapsed << " ns\n"
-         << elapsed / 1'000'000. << " ms\n"
-         << elapsed / 1'000'000'000. << " s\n"
-         << tags::reset;
+     if (inputPath == "")
+     {
+          cout << tags::red_bold
+               << "Please specify an input path.\n"
+               << tags::reset;
+          return 1;
+     }
 
-    smartSys(string("pdflatex ") + argv[2]);
+     Engine e(doLog);
 
-    return 0;
+     if (!quiet)
+     {
+          cout << tags::green_bold
+               << "Compiling...\n"
+               << tags::reset;
+     }
+
+     if (doTimer && !quiet)
+     {
+          // Timed
+          auto start = chrono::high_resolution_clock::now();
+
+          e.processFile(inputPath, outputPath);
+
+          auto end = chrono::high_resolution_clock::now();
+          int elapsed = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+          cout << tags::violet_bold
+               << "Elapsed ms: " << elapsed << '\n'
+               << tags::reset;
+     }
+     else
+     {
+          // Untimed
+          e.processFile(inputPath, outputPath);
+     }
+
+     if (!quiet)
+     {
+          cout << tags::green_bold
+               << "Done.\n"
+               << tags::reset;
+     }
+
+     return 0;
 }

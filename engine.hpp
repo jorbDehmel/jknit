@@ -5,12 +5,24 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <set>
 #include <fstream>
 #include <cassert>
 #include <vector>
 #include "tags.hpp"
 using namespace std;
+
+// For system independence
+// Luckily, output redirecting via > works as-is
+// on DOS cuz that's basically all this program is
+#if (defined(_WIN32) || defined(_WIN64))
+// Windows because it just has to be different
+const string rm = "rmdir /s /q ";
+const string mkdir = "md ";
+#else
+// UNIX-based OSes
+const string rm = "rm -rf ";
+const string mkdir = "mkdir -p ";
+#endif
 
 struct builder
 {
@@ -50,13 +62,33 @@ public:
         "\\usepackage{graphicx}",
         "\\usepackage{hyperref}",
         "\\geometry{letterpaper}",
+        "\\usepackage{xcolor}",
+        "\\usepackage{color}",
+        "\\usepackage{tcolorbox}",
         "\\begin{document}"};
 
-    string latexFooter = "\\end{document}";
+    vector<string> latexFooter = {
+        "\\end{document}"};
 
-    string startCode = "\\begin{verbatim}\n", endCode = "\n\\end{verbatim}";
-    string startOutput = "\\begin{verbatim}", endOutput = "\n\\end{verbatim}";
-    string startMath = "\\[", endMath = "\\]";
+    vector<string> startCode = {
+        "\\begin{tcolorbox}[colback=lightgray, boxrule=0pt]",
+        "\\begin{verbatim}\n"};
+
+    vector<string> endCode = {
+        "\n\\end{verbatim}",
+        "\\end{tcolorbox}\n"};
+
+    vector<string> startOutput = {
+        "\\begin{verbatim}"};
+
+    vector<string> endOutput = {
+        "\n\\end{verbatim}"};
+
+    vector<string> startMath = {
+        "\\["};
+
+    vector<string> endMath = {
+        "\\]"};
 
     bool doLog = false;
     ofstream log;

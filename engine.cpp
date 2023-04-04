@@ -22,7 +22,7 @@ Engine::Engine(const bool &DoLog)
     if (doLog)
     {
         time_t curTime = time(NULL);
-        string logPath = "jknit_" + to_string(curTime) + ".log";
+        string logPath = "jknit.log";
 
         cout << "Logging to '" << logPath << "'\n";
 
@@ -129,7 +129,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         // Math chunk
         else if (line.substr(0, 2) == "$$")
         {
-            output << startMath << '\n';
+            for (auto l : startMath)
+            {
+                output << l << '\n';
+            }
 
             // Get contents (raw latex)
             do
@@ -148,7 +151,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 }
             } while (line.size() < 2 || line.substr(0, 2) != "$$");
 
-            output << endMath << '\n';
+            for (auto l : endMath)
+            {
+                output << l << '\n';
+            }
         }
 
         // Regular LaTeX
@@ -180,15 +186,15 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
             // --- horizontal line
             // \hrule
-            if (line.substr(0, 2) == "--" || line.substr(0, 2) == "~~" || line.substr(0, 2) == "__" || line.substr(0, 2) == "==")
+            else if (line.substr(0, 2) == "--" || line.substr(0, 2) == "~~" || line.substr(0, 2) == "__" || line.substr(0, 2) == "==")
             {
-                output << "\\hrule\n";
+                output << "\\hrule{}\n";
                 continue;
             }
 
             // # ## ### #### headings
             // \section{} \subsection{} \subsubsection{} etc
-            if (line[0] == '#')
+            else if (line[0] == '#')
             {
                 output << "\\";
                 int i;
@@ -205,7 +211,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // \begin{enumerate}
             // \end{enumerate}
             // MUST start with 1, a, or A
-            if (line[0] == '1' || line[0] == 'a' || line[0] == 'A')
+            else if (line[0] == '1' || line[0] == 'a' || line[0] == 'A')
             {
                 output << "\\begin{enumerate}\n";
 
@@ -233,7 +239,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // - List
             // \begin{itemize}
             // \end{itemize}
-            if (listChars.find(line[0]) != string::npos)
+            else if (listChars.find(line[0]) != string::npos)
             {
                 output << "\n\\begin{itemize}\n";
 
@@ -259,7 +265,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             \usepackage{hyperref}
             \href{link.com}{text}
             */
-            if (line[0] == '[')
+            else if (line[0] == '[')
             {
                 string title, link;
 
@@ -295,7 +301,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
             %https://www.overleaf.com/learn/latex/Inserting_Images
             */
-            if (line[0] == '!')
+            else if (line[0] == '!')
             {
                 string alt, path, options;
 
@@ -326,6 +332,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                        << "\\caption {" << alt << "}\n"
                        << "\\end {figure}\n";
 
+                continue;
+            }
+
+            else if (line[0] == '%')
+            {
                 continue;
             }
 
@@ -388,16 +399,21 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     output << line[i];
                 }
             }
+
+            output << '\n';
         }
     }
 
-    output << latexFooter;
+    for (auto l : latexFooter)
+    {
+        output << l << '\n';
+    }
 
     input.close();
     output.close();
 
     // Clear build folder
-    smartSys("rm -rf " + buildSpace, log);
+    smartSys(rm + buildSpace, log);
 
     return;
 }
@@ -483,9 +499,17 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     // Add actual code if wanted
     if (optionsMap.count("echo") == 0 || optionsMap["echo"] == "true")
     {
-        Stream << startCode << '\n'
-               << Contents
-               << endCode << '\n';
+        for (auto l : startCode)
+        {
+            Stream << l << '\n';
+        }
+
+        Stream << Contents;
+
+        for (auto l : endCode)
+        {
+            Stream << l << '\n';
+        }
     }
 
     if (optionsMap.count("run") != 0 && optionsMap["run"] == "false")
@@ -498,7 +522,7 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     string tempfile = buildSpace + name + "_out_" + to_string(time(NULL)) + ".txt";
 
     // Send our chunk contents to a file
-    smartSys("mkdir -p " + buildSpace, log);
+    smartSys(mkdir + buildSpace, log);
 
     if (doLog)
     {
@@ -511,6 +535,7 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     output.close();
 
     // Compile and send output to our temp file
+    // Already system-independent, so long as filenames are formatted right
     smartSys(builders[name].commandPath + " " + srcfile + " > " + tempfile, log);
 
     // Load output temp file into string
@@ -522,7 +547,11 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     ifstream input(tempfile);
     assert(input.is_open());
 
-    Stream << startOutput << '\n';
+    for (auto l : startOutput)
+    {
+        Stream << l << '\n';
+    }
+
     while (!input.eof())
     {
         getline(input, line);
@@ -531,7 +560,11 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
             Stream << ">> " << line << '\n';
         }
     }
-    Stream << endOutput << '\n';
+
+    for (auto l : endOutput)
+    {
+        Stream << l << '\n';
+    }
 
     input.close();
 
