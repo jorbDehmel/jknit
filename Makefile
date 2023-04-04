@@ -3,8 +3,8 @@ OBJECTS := $(SOURCES:.cpp=.o)
 EXE := main.out
 
 CC := clang++
-LFLAGS := `sdl2-config --libs`
-CFLAGS := -Wall -Werror -pedantic -g `sdl2-config --cflags`
+LFLAGS :=
+CFLAGS := -Wall -Werror -pedantic -g
 
 all: $(SOURCES) $(EXE)
 

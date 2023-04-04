@@ -121,9 +121,82 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             output << endMath << '\n';
         }
 
-        // .md macro scanning
+        // Regular LaTeX
         else
         {
+            /*
+            \usepackage[most]{tcolorbox}
+
+            \newtcolorbox{myquote}{colback=yellow!20!white,colframe=yellow!75!black,grow to right by=-10mm,grow to left by=-10mm,
+                boxrule=0pt,boxsep=0pt,breakable} \makeatletter
+
+            \newcommand{\blockquote}[1]{  \begin{myquote}  #1  \end{myquote}  }
+
+            %via https://tex.stackexchange.com/questions/310818/blockquotes-in-latex
+            */
+
+            // .md macro scanning
+
+            // **bold**
+            // \textbf{}
+
+            // `code`
+            // \verb||
+
+            // *italicized*
+            // \emph{}
+
+            // > blockquote
+            // \blockquote{}
+
+            // # ## ### #### headings
+            // \section{} \subsection{} \subsubsection{} etc
+
+            // 1. Ordered
+            // 2. List
+            // \begin{enumerate}
+            // \end{enumerate}
+
+            // - Unordered
+            // - List
+            // \begin{itemize}
+            // \end{itemize}
+
+            // --- horizontal line
+            // \hrule
+            if (line.substr(0, 2) == "--")
+            {
+                output << "\\hrule\n";
+                continue;
+            }
+
+            // Links [title](https://www.example.com)
+            /*
+            \usepackage{hyperref}
+            \href{link.com}{text}
+            */
+            if (line[0] == '[')
+            {
+                //
+                continue;
+            }
+
+            // Image ![alt text](image.jpg){options}
+            /*
+            \begin{figure}[h]
+                \centering
+                \includegraphics[width=0.25\textwidth]{name.img}
+                \caption{alt text}
+            \end{figure}
+
+            %https://www.overleaf.com/learn/latex/Inserting_Images
+            */
+            if (line[0] == '!')
+            {
+                //
+                continue;
+            }
+
             output << line << '\n';
         }
     }
@@ -250,7 +323,10 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     while (!input.eof())
     {
         getline(input, line);
-        Stream << ">>> " << line << '\n';
+        if (line != "")
+        {
+            Stream << ">> " << line << '\n';
+        }
     }
     Stream << endOutput << '\n';
 

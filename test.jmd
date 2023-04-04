@@ -4,6 +4,7 @@
 ```
 
 \title{JKnit}
+\author{Jordan Dehmel}
 
 \maketitle{}
 
@@ -11,22 +12,25 @@ Hi there! This is a test
 of the jknit
 system!
 
+----------
+
 $$
-    math
+\begin{aligned}
+    1 + 1 &= 2 \\
+    2 + 1 &= 3 \\
+\end{aligned}
 $$
 
-hi this should not be math
-
-Some python code and its output:
+This should not be math. Some python code and its output:
 
 ```{python}
 print('hello, world!')
 ```
 
-Some octave code and its output:
+Some Octave code and its output:
 
 ```{octave}
-0
+0 + 5 + 12 + -100
 ```
 
-The above code is code, probably. Inline math $test$.
+The above code is code, probably. Inline math: $1 + 5 + 6 = 12$.

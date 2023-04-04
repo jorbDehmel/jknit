@@ -15,7 +15,7 @@ languages. A line of a .jks file reads like this:
 
 > 'name' 'path/to/executable' '.file_extension' 'command line args go here'
 
-This is loaded by the program.
+This is loaded by the program. This can also go in a {settings} chunk.
 
 ### .jmd Files
 

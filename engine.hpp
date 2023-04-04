@@ -45,11 +45,11 @@ public:
 
     void toStream(ostream &Stream) const;
 
-    string latexHeader = "\\documentclass[12pt]{amsart}\n\\usepackage[margin=0.5in]{geometry}\n\\geometry{letterpaper}\n\\begin{document}";
+    string latexHeader = "\\documentclass[12pt]{amsart}\n\\usepackage[margin=0.5in]{geometry}\n\\usepackage{graphicx}\n\\geometry{letterpaper}\n\\begin{document}";
     string latexFooter = "\\end{document}";
 
-    string startCode = "\\begin{verbatim}", endCode = "\\end{verbatim}";
-    string startOutput = "\\begin{verbatim}", endOutput = "\\end{verbatim}";
+    string startCode = "\\begin{verbatim}\n", endCode = "\n\\end{verbatim}";
+    string startOutput = "\\begin{verbatim}", endOutput = "\n\\end{verbatim}";
     string startMath = "\\[", endMath = "\\]";
 
 protected:
