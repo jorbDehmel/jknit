@@ -298,7 +298,7 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     }
 
     // Construct appropriate temp file name
-    string srcfile = buildSpace + name + "_src_" + to_string(time(NULL)) + builders[name].ext;
+    string srcfile = buildSpace + name + "_src_" + to_string(time(NULL)) + ".txt";
     string tempfile = buildSpace + name + "_out_" + to_string(time(NULL)) + ".txt";
 
     // Send our chunk contents to a file
@@ -345,18 +345,6 @@ void Engine::setPath(const string &Name, const string &Path)
     return;
 }
 
-void Engine::setOptions(const string &Name, const string &Options)
-{
-    builders[Name].options = Options;
-    return;
-}
-
-void Engine::appendOptions(const string &Name, const string &Options)
-{
-    builders[Name].options += Options;
-    return;
-}
-
 bool Engine::hasPath(const string &What) const
 {
     return builders.count(What) != 0;
@@ -382,7 +370,7 @@ string strip(const string &What)
     }
 
     string out(What);
-    while (out[0] == '\'' || out[0] == '"' || out[0] == ' ' || out[0] == ':')
+    while (out[0] == '\'' || out[0] == '"' || out[0] == ' ' || out[0] == ':' || out[0] == '=')
     {
         out.erase(0, 1);
 
@@ -392,7 +380,7 @@ string strip(const string &What)
         }
     }
 
-    while (out.back() == '\'' || out.back() == '"' || out.back() == ' ' || out.back() == ':')
+    while (out.back() == '\'' || out.back() == '"' || out.back() == ' ' || out.back() == ':' || out.back() == '=')
     {
         out.erase(out.size() - 1, 1);
 
@@ -413,12 +401,12 @@ void Engine::fromString(const string &From)
     // "loader name here": "path here" ".ext" "options here"
 
     stringstream fromStream(From);
-    string name, path, ext, options;
+    string name, path;
 
     while (!fromStream.eof())
     {
-        name = path = ext = options = "";
-        fromStream >> name >> path >> ext >> options;
+        name = path = "";
+        fromStream >> name >> path;
 
         if (name == "" || path == "")
         {
@@ -427,14 +415,16 @@ void Engine::fromString(const string &From)
 
         name = strip(name);
         path = strip(path);
-        ext = strip(ext);
-        options = strip(options);
+
+        if (path == "")
+        {
+            fromStream >> path;
+            path = strip(path);
+        }
 
         // Add to list of loaders
         builder toAdd;
         toAdd.commandPath = path;
-        toAdd.ext = ext;
-        toAdd.options = options;
         builders[name] = toAdd;
 
         cout << "Loaded builder '" << name << "' with path '" << path << "'.\n";

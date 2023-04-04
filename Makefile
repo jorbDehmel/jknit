@@ -15,4 +15,4 @@ $(EXE): $(OBJECTS)
 	$(CC) $(LFLAGS) $(OBJECTS) -o $@
 
 clean:
-	rm -rf $(OBJECTS) $(EXE)
+	rm -rf $(OBJECTS) $(EXE) *.pdf *.aux *.log *.tex

@@ -14,8 +14,6 @@ using namespace std;
 struct builder
 {
     string commandPath;
-    string options;
-    string ext;
 };
 
 extern string buildSpace;

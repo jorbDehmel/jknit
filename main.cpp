@@ -7,6 +7,7 @@ GPLv3 held by author
 */
 
 #include <iostream>
+#include <chrono>
 #include "engine.hpp"
 using namespace std;
 
@@ -20,10 +21,25 @@ int main(const int argc, const char *argv[])
         return 1;
     }
 
-    cout << "Compiling from " << argv[1] << " to " << argv[2] << '\n';
+    cout << tags::green_bold
+         << "Compiling from " << argv[1] << " to " << argv[2] << '\n'
+         << tags::reset;
+
+    auto start = chrono::high_resolution_clock::now();
 
     Engine e;
     e.processFile(argv[1], argv[2]);
+
+    auto end = chrono::high_resolution_clock::now();
+    auto elapsed = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+
+    cout << tags::green_bold
+         << "Done.\n"
+         << elapsed << " ns\n"
+         << elapsed / 1'000'000. << " ms\n"
+         << elapsed / 1'000'000'000. << " s\n"
+         << tags::reset;
+
     smartSys(string("pdflatex ") + argv[2]);
 
     return 0;

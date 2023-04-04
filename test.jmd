@@ -1,6 +1,6 @@
 ```{settings}
-'python' '/usr/bin/python' '.py' ''
-'octave' '/usr/bin/octave-cli' '.txt' ''
+python = /usr/bin/python
+octave = /usr/bin/octave-cli
 ```
 
 \title{JKnit}
