@@ -31,7 +31,7 @@ public:
 
     void processFile(const string &InputFilepath, const string &OutputFilepath);
 
-    string processChunk(const string Header, const string &Contents);
+    void processChunk(const string Header, const string &Contents, ostream &Stream);
 
     void setPath(const string &Name, const string &Path);
 
@@ -45,8 +45,12 @@ public:
 
     void toStream(ostream &Stream) const;
 
-    string latexHeader = "\\documentclass[12pt]{amsart}\n\\usepackage[margin=0.5in]{geometry}\n\\geometry{letterpaper}\n\\begin{document}\n";
-    string latexFooter = "\\end{document}\n";
+    string latexHeader = "\\documentclass[12pt]{amsart}\n\\usepackage[margin=0.5in]{geometry}\n\\geometry{letterpaper}\n\\begin{document}";
+    string latexFooter = "\\end{document}";
+
+    string startCode = "\\begin{verbatim}", endCode = "\\end{verbatim}";
+    string startOutput = "\\begin{verbatim}", endOutput = "\\end{verbatim}";
+    string startMath = "\\[", endMath = "\\]";
 
 protected:
     map<string, builder> builders;

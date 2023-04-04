@@ -86,16 +86,20 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 }
             } while (line.size() < 3 || line.substr(0, 3) != "```");
 
+            if (header == "settings")
+            {
+                fromString(contents);
+                continue;
+            }
+
             // Run replacement
-            output << "\\begin{verbatim}\n"
-                   << processChunk(header, contents)
-                   << "\\end{verbatim}\n";
+            processChunk(header, contents, output);
         }
 
         // Math chunk
         else if (line.substr(0, 2) == "$$")
         {
-            output << "\\[\n";
+            output << startMath << '\n';
 
             // Get contents (raw latex)
             do
@@ -114,7 +118,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 }
             } while (line.size() < 2 || line.substr(0, 2) != "$$");
 
-            output << "\\]\n";
+            output << endMath << '\n';
         }
 
         // .md macro scanning
@@ -129,14 +133,58 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
     input.close();
     output.close();
 
-    return;
-}
-
-string Engine::processChunk(const string Header, const string &Contents)
-{
     // Clear build folder
     smartSys("rm -rf " + buildSpace);
 
+    return;
+}
+
+map<string, string> parseOptions(const string &What)
+{
+    map<string, string> out;
+
+    stringstream stream(What);
+    string symbol;
+    while (!stream.eof())
+    {
+        stream >> symbol;
+
+        string name, value;
+        int i = 0;
+        while (i < symbol.size())
+        {
+            if (symbol[i] == ' ')
+            {
+                i++;
+                continue;
+            }
+            else if (symbol[i] == '=')
+            {
+                i++;
+                break;
+            }
+            else
+            {
+                name += symbol[i];
+            }
+
+            i++;
+        }
+        while (symbol[i] == ' ')
+        {
+            i++;
+        }
+
+        value = symbol.substr(i);
+
+        out[name] = value;
+    }
+
+    return out;
+}
+
+void Engine::processChunk(const string Header, const string &Contents, ostream &Stream)
+{
     // Parse header to select the correct builder
     string name, options;
     int i;
@@ -156,8 +204,24 @@ string Engine::processChunk(const string Header, const string &Contents)
     if (!hasPath(name))
     {
         cout << "Error: No path is defined for '" << name << "'\n";
-        throw runtime_error("Error");
-        return "";
+        throw runtime_error("Error: Missing path");
+        return;
+    }
+
+    // Parse options
+    map<string, string> optionsMap = parseOptions(options);
+
+    // Add actual code if wanted
+    if (optionsMap.count("echo") == 0 || optionsMap["echo"] == "true")
+    {
+        Stream << startCode << '\n'
+               << Contents
+               << endCode << '\n';
+    }
+
+    if (optionsMap.count("run") != 0 && optionsMap["run"] == "false")
+    {
+        return;
     }
 
     // Construct appropriate temp file name
@@ -174,24 +238,27 @@ string Engine::processChunk(const string Header, const string &Contents)
     output.close();
 
     // Compile and send output to our temp file
-    smartSys(builders[name].commandPath + " " + builders[name].options + " " + srcfile + " > " + tempfile);
+    smartSys(builders[name].commandPath + " " + srcfile + " > " + tempfile);
 
     // Load output temp file into string
     cout << "Loading output from file '" << tempfile << "'\n";
-    string out, line;
+    string line;
     ifstream input(tempfile);
     assert(input.is_open());
+
+    Stream << startOutput << '\n';
     while (!input.eof())
     {
         getline(input, line);
-        out += line + '\n';
+        Stream << ">>> " << line << '\n';
     }
+    Stream << endOutput << '\n';
+
     input.close();
 
     cout << "Done!\n";
 
-    // Return loaded text
-    return out;
+    return;
 }
 
 void Engine::setPath(const string &Name, const string &Path)

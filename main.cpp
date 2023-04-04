@@ -12,14 +12,11 @@ using namespace std;
 
 int main(const int argc, const char *argv[])
 {
-    ifstream settings("jknit.jk");
-    assert(settings.is_open());
-    Engine e(settings);
-    settings.close();
+    Engine e;
 
-    cout << "Loaded.\n";
+    e.processFile("test.jmd", "test.tex");
 
-    e.processFile("test.pyd", "test.tex");
+    smartSys("pdflatex test.tex");
 
     return 0;
 }

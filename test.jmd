@@ -1,0 +1,32 @@
+```{settings}
+'python' '/usr/bin/python' '.py' ''
+'octave' '/usr/bin/octave-cli' '.txt' ''
+```
+
+\title{JKnit}
+
+\maketitle{}
+
+Hi there! This is a test
+of the jknit
+system!
+
+$$
+    math
+$$
+
+hi this should not be math
+
+Some python code and its output:
+
+```{python}
+print('hello, world!')
+```
+
+Some octave code and its output:
+
+```{octave}
+0
+```
+
+The above code is code, probably. Inline math $test$.
