@@ -33,6 +33,7 @@ print('Hello, world!')
 This end isn't code either.
 
 The code will appear in the compiled document, as well as its output.
+Most basic markdown syntax will work.
 
 ### License
 

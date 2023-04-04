@@ -19,14 +19,13 @@ struct builder
 
 extern string buildSpace;
 
-void smartSys(const string &Command);
+void smartSys(const string &Command, ostream &Stream = cout);
 
 class Engine
 {
 public:
-    Engine(){};
-    Engine(const string &From);
-    Engine(istream &From);
+    Engine(const bool &DoLog = false);
+    ~Engine();
 
     void processFile(const string &InputFilepath, const string &OutputFilepath);
 
@@ -58,6 +57,9 @@ public:
     string startCode = "\\begin{verbatim}\n", endCode = "\n\\end{verbatim}";
     string startOutput = "\\begin{verbatim}", endOutput = "\n\\end{verbatim}";
     string startMath = "\\[", endMath = "\\]";
+
+    bool doLog = false;
+    ofstream log;
 
 protected:
     map<string, builder> builders;

@@ -27,7 +27,7 @@ int main(const int argc, const char *argv[])
 
     auto start = chrono::high_resolution_clock::now();
 
-    Engine e;
+    Engine e(true);
     e.processFile(argv[1], argv[2]);
 
     auto end = chrono::high_resolution_clock::now();

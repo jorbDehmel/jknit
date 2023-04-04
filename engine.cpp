@@ -2,36 +2,51 @@
 
 string buildSpace = "jknit/";
 
-void smartSys(const string &Command)
+void smartSys(const string &Command, ostream &Stream)
 {
-    cout << "Calling command `" << Command << "`\n";
+    Stream << "Calling command `" << Command << "`\n";
     int result = system(Command.c_str());
     if (result != 0)
     {
-        cout << tags::red_bold
-             << "Command exited with code " << result << '\n'
-             << tags::reset;
+        Stream << tags::red_bold
+               << "Command exited with code " << result << '\n'
+               << tags::reset;
     }
     return;
 }
 
-Engine::Engine(const string &From)
+Engine::Engine(const bool &DoLog)
 {
-    fromString(From);
-    return;
-}
+    doLog = DoLog;
 
-Engine::Engine(istream &From)
-{
-    string toLoad, line;
-    while (!From.eof())
+    if (doLog)
     {
-        getline(From, line);
-        toLoad += line + '\n';
+        time_t curTime = time(NULL);
+        string logPath = "jknit_" + to_string(curTime) + ".log";
+
+        cout << "Logging to '" << logPath << "'\n";
+
+        log.open(logPath);
+        if (!log.is_open())
+        {
+            cout << "Failed to open log!\n";
+            doLog = false;
+        }
+        else
+        {
+            log << "Time/date: " << ctime(&curTime) << "\n\n";
+        }
     }
 
-    fromString(toLoad);
+    return;
+}
 
+Engine::~Engine()
+{
+    if (doLog || log.is_open())
+    {
+        log.close();
+    }
     return;
 }
 
@@ -71,12 +86,24 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // Get header
             if (line.size() <= 5)
             {
-                cout << "ERROR: Invalid code chunk header\n";
+                cout << tags::red_bold
+                     << "Error: Invalid code chunk header\n"
+                     << tags::reset;
+
+                if (doLog)
+                {
+                    log << "Error: Invalid code chunk header\n";
+                }
+
                 continue;
             }
 
             string header = line.substr(4, line.size() - 5);
-            cout << "Got header '" << header << "'\n";
+
+            if (doLog)
+            {
+                log << "Got header '" << header << "'\n";
+            }
 
             // Get contents
             string contents;
@@ -188,8 +215,6 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 }
                 do
                 {
-                    cout << "ENUMERATED LIST: " << line << '\n';
-
                     output << "\\item " << line << "\n";
 
                     getline(input, line);
@@ -214,8 +239,6 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                 while (line.size() > 0 && listChars.find(line[0]) != string::npos)
                 {
-                    cout << "ITEMIZED LIST: " << line << '\n';
-
                     // Strip beginning
                     while (line.size() > 0 && listChars.find(line[0]) != string::npos)
                     {
@@ -374,7 +397,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
     output.close();
 
     // Clear build folder
-    smartSys("rm -rf " + buildSpace);
+    smartSys("rm -rf " + buildSpace, log);
 
     return;
 }
@@ -438,12 +461,19 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
         options = Header.substr(i + 1);
     }
 
-    cout << "Parsed chunk header. Name: '" << name << "' options: '" << options << "'\n";
+    if (doLog)
+    {
+        log << "Parsed chunk header. Name: '" << name << "' options: '" << options << "'\n";
+    }
 
     // Safety check
     if (!hasPath(name))
     {
-        cout << "Processing pathless name '" << name << "' (using name as command)\n";
+        if (doLog)
+        {
+            log << "Processing pathless name '" << name << "' (using name as command)\n";
+        }
+
         builders[name] = builder{name};
     }
 
@@ -468,8 +498,12 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     string tempfile = buildSpace + name + "_out_" + to_string(time(NULL)) + ".txt";
 
     // Send our chunk contents to a file
-    smartSys("mkdir -p " + buildSpace);
-    cout << "Saving chunk source code to file '" << srcfile << "'\n";
+    smartSys("mkdir -p " + buildSpace, log);
+
+    if (doLog)
+    {
+        log << "Saving chunk source code to file '" << srcfile << "'\n";
+    }
 
     ofstream output(srcfile);
     assert(output.is_open());
@@ -477,10 +511,13 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     output.close();
 
     // Compile and send output to our temp file
-    smartSys(builders[name].commandPath + " " + srcfile + " > " + tempfile);
+    smartSys(builders[name].commandPath + " " + srcfile + " > " + tempfile, log);
 
     // Load output temp file into string
-    cout << "Loading output from file '" << tempfile << "'\n";
+    if (doLog)
+    {
+        log << "Loading output from file '" << tempfile << "'\n";
+    }
     string line;
     ifstream input(tempfile);
     assert(input.is_open());
@@ -498,7 +535,10 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
 
     input.close();
 
-    cout << "Done!\n";
+    if (doLog)
+    {
+        log << "Done!\n";
+    }
 
     return;
 }
@@ -593,8 +633,11 @@ void Engine::fromString(const string &From)
         toAdd.commandPath = path;
         builders[name] = toAdd;
 
-        cout << "Loaded builder '" << name << "' with path '" << path << "'.\n";
-        cout << "Builder set size: " << builders.size() << '\n';
+        if (doLog)
+        {
+            log << "Loaded builder '" << name << "' with path '" << path << "'.\n";
+            log << "Builder set size: " << builders.size() << '\n';
+        }
 
         fromStream.ignore(128, '\n');
     }
