@@ -8,6 +8,7 @@
 #include <set>
 #include <fstream>
 #include <cassert>
+#include <vector>
 #include "tags.hpp"
 using namespace std;
 
@@ -43,7 +44,15 @@ public:
 
     void toStream(ostream &Stream) const;
 
-    string latexHeader = "\\documentclass[12pt]{amsart}\n\\usepackage[margin=0.5in]{geometry}\n\\usepackage{graphicx}\n\\geometry{letterpaper}\n\\begin{document}";
+    vector<string> latexHeader = {
+        "\\documentclass[12pt]{amsart}",
+        "\\usepackage[margin=0.5in]{geometry}",
+        "\\usepackage{csquotes}",
+        "\\usepackage{graphicx}",
+        "\\usepackage{hyperref}",
+        "\\geometry{letterpaper}",
+        "\\begin{document}"};
+
     string latexFooter = "\\end{document}";
 
     string startCode = "\\begin{verbatim}\n", endCode = "\n\\end{verbatim}";

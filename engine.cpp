@@ -45,7 +45,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
     ofstream output(OutputFilepath);
     assert(output.is_open());
 
-    output << latexHeader;
+    for (auto line : latexHeader)
+    {
+        output << line << '\n';
+    }
 
     string line;
     while (!input.eof())
@@ -124,6 +127,9 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         // Regular LaTeX
         else
         {
+            // For list parsing
+            string listChars = "-:;., )";
+
             /*
             \usepackage[most]{tcolorbox}
 
@@ -135,38 +141,93 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             %via https://tex.stackexchange.com/questions/310818/blockquotes-in-latex
             */
 
-            // .md macro scanning
-
-            // **bold**
-            // \textbf{}
-
-            // `code`
-            // \verb||
-
-            // *italicized*
-            // \emph{}
-
             // > blockquote
             // \blockquote{}
+            if (line[0] == '>')
+            {
+                output << "\\begin{displayquote}\n"
+                       << line.substr(1)
+                       << "\n\\end{displayquote}\n";
+                continue;
+            }
+
+            // --- horizontal line
+            // \hrule
+            if (line.substr(0, 2) == "--" || line.substr(0, 2) == "~~" || line.substr(0, 2) == "__" || line.substr(0, 2) == "==")
+            {
+                output << "\\hrule\n";
+                continue;
+            }
 
             // # ## ### #### headings
             // \section{} \subsection{} \subsubsection{} etc
+            if (line[0] == '#')
+            {
+                output << "\\";
+                int i;
+                for (i = 0; i < line.size() && line[i] == '#'; i++)
+                {
+                    output << "sub";
+                }
+                output << "section{" << line.substr(i) << "}\n";
+                continue;
+            }
 
             // 1. Ordered
             // 2. List
             // \begin{enumerate}
             // \end{enumerate}
+            // MUST start with 1, a, or A
+            if (line[0] == '1' || line[0] == 'a' || line[0] == 'A')
+            {
+                output << "\\begin{enumerate}\n";
+
+                while (line.size() > 0 && listChars.find(line[0]) != string::npos)
+                {
+                    line.erase(0, 1);
+                }
+                do
+                {
+                    cout << "ENUMERATED LIST: " << line << '\n';
+
+                    output << "\\item " << line << "\n";
+
+                    getline(input, line);
+                    while (line.size() > 0 && listChars.find(line[0]) != string::npos)
+                    {
+                        line.erase(0, 1);
+                    }
+                } while (line != "");
+
+                output << "\\end{enumerate}\n";
+
+                continue;
+            }
 
             // - Unordered
             // - List
             // \begin{itemize}
             // \end{itemize}
-
-            // --- horizontal line
-            // \hrule
-            if (line.substr(0, 2) == "--")
+            if (listChars.find(line[0]) != string::npos)
             {
-                output << "\\hrule\n";
+                output << "\n\\begin{itemize}\n";
+
+                while (line.size() > 0 && listChars.find(line[0]) != string::npos)
+                {
+                    cout << "ITEMIZED LIST: " << line << '\n';
+
+                    // Strip beginning
+                    while (line.size() > 0 && listChars.find(line[0]) != string::npos)
+                    {
+                        line.erase(0, 1);
+                    }
+
+                    output << "\\item " << line << '\n';
+
+                    getline(input, line);
+                }
+
+                output << "\\end{itemize}\n";
                 continue;
             }
 
@@ -177,7 +238,27 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             */
             if (line[0] == '[')
             {
-                //
+                string title, link;
+
+                // Scan until end of title
+                int i = 1;
+                while (i < line.size() && line[i] != ']')
+                {
+                    title += line[i];
+                    i++;
+                }
+
+                // Scan until end of link
+                i += 2;
+                while (i < line.size() && line[i] != ')')
+                {
+                    link += line[i];
+                    i++;
+                }
+
+                // Write latex
+                output << "\\href{" << link << "}{" << title << "}\n";
+
                 continue;
             }
 
@@ -193,11 +274,97 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             */
             if (line[0] == '!')
             {
-                //
+                string alt, path, options;
+
+                // Parse caption, path and options
+                int i = 2;
+                while (i < line.size() && line[i] != ']')
+                {
+                    alt += line[i];
+                    i++;
+                }
+                i += 2;
+                while (i < line.size() && line[i] != ')')
+                {
+                    path += line[i];
+                    i++;
+                }
+                i += 2;
+                while (i < line.size() && line[i] != '}')
+                {
+                    options += line[i];
+                    i++;
+                }
+
+                // Convert to latex
+                output << "\\begin{figure}[h]\n"
+                       << "\\centering\n"
+                       << "\\includegraphics[" << options << "]{" << path << "}\n"
+                       << "\\caption {" << alt << "}\n"
+                       << "\\end {figure}\n";
+
                 continue;
             }
 
-            output << line << '\n';
+            // Iterate through full text
+            for (int i = 0; i < line.size(); i++)
+            {
+                // `code`
+                // \verb||
+                if (line[i] == '`')
+                {
+                    output << "\\verb|";
+
+                    i++;
+                    while (line[i] != '`')
+                    {
+                        output << line[i];
+                        i++;
+                    }
+                    output << "|";
+                }
+
+                // *italicized*
+                // \emph{}
+                else if (line[i] == '*')
+                {
+                    i++;
+
+                    // **bold**
+                    // \textbf{}
+                    if (line[i] == '*')
+                    {
+                        output << "\\textbf{";
+
+                        i++;
+                        while (line.substr(i, 2) != "**")
+                        {
+                            output << line[i];
+                            i++;
+                        }
+                        i++;
+
+                        output << "}";
+                    }
+                    else
+                    {
+                        output << "\\emph{";
+
+                        while (line[i] != '*')
+                        {
+                            output << line[i];
+                            i++;
+                        }
+
+                        output << "}";
+                    }
+                }
+
+                else
+                {
+                    output << line[i];
+                }
+            }
         }
     }
 
@@ -276,9 +443,8 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     // Safety check
     if (!hasPath(name))
     {
-        cout << "Error: No path is defined for '" << name << "'\n";
-        throw runtime_error("Error: Missing path");
-        return;
+        cout << "Processing pathless name '" << name << "' (using name as command)\n";
+        builders[name] = builder{name};
     }
 
     // Parse options
