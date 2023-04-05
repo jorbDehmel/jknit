@@ -1,8 +1,3 @@
-```{settings}
-python = /usr/bin/python
-octave = /usr/bin/octave-cli
-```
-
 \title{JKnit}
 \author{Jordan Dehmel}
 \maketitle{}

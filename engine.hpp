@@ -8,6 +8,7 @@
 #include <fstream>
 #include <cassert>
 #include <vector>
+#include <chrono>
 #include "tags.hpp"
 using namespace std;
 
@@ -31,6 +32,7 @@ struct builder
 
 extern string buildSpace;
 
+extern unsigned long long int systemWaitMS;
 void smartSys(const string &Command, ostream &Stream = cout);
 
 class Engine
@@ -57,7 +59,7 @@ public:
 
     vector<string> latexHeader = {
         "\\documentclass[12pt]{amsart}",
-        "\\usepackage[margin=0.5in]{geometry}",
+        "\\usepackage[margin=1in]{geometry}",
         "\\usepackage{csquotes}",
         "\\usepackage{graphicx}",
         "\\usepackage{hyperref}",
@@ -65,6 +67,7 @@ public:
         "\\usepackage{xcolor}",
         "\\usepackage{color}",
         "\\usepackage{tcolorbox}",
+        "\\sffamily",
         "\\begin{document}"};
 
     vector<string> latexFooter = {
@@ -89,6 +92,9 @@ public:
 
     vector<string> endMath = {
         "\\]"};
+
+    vector<string> startHeader = {
+        "\\ffamily"};
 
     bool doLog = false;
     ofstream log;

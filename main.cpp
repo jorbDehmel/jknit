@@ -114,7 +114,7 @@ int main(const int argc, const char *argv[])
      {
           cout << tags::green_bold
                << "Compiling...\n"
-               << tags::reset;
+               << tags::reset << flush;
      }
 
      if (doTimer && !quiet)
@@ -125,9 +125,12 @@ int main(const int argc, const char *argv[])
           e.processFile(inputPath, outputPath);
 
           auto end = chrono::high_resolution_clock::now();
-          int elapsed = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+          unsigned long long int elapsed = chrono::duration_cast<chrono::milliseconds>(end - start).count();
           cout << tags::violet_bold
                << "Elapsed ms: " << elapsed << '\n'
+               << "Ms waiting for code chunk output: " << systemWaitMS << '\n'
+               << "JKnit-attributable ms: " << elapsed - systemWaitMS << '\n'
+               << "Percent code-chunk-attributable: " << 100 * (double)systemWaitMS / elapsed << "%\n"
                << tags::reset;
      }
      else

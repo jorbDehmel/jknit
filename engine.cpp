@@ -2,15 +2,23 @@
 
 string buildSpace = "jknit/";
 
+unsigned long long int systemWaitMS = 0;
+
 void smartSys(const string &Command, ostream &Stream)
 {
     Stream << "Calling command `" << Command << "`\n";
+
+    auto start = chrono::high_resolution_clock::now();
     int result = system(Command.c_str());
+    auto end = chrono::high_resolution_clock::now();
+    unsigned long long int ns = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+
+    Stream << "Command took " << ns << " ns (" << ns / 1'000'000 << " ms)\n";
+    systemWaitMS += ns / 1'000'000;
+
     if (result != 0)
     {
-        Stream << tags::red_bold
-               << "Command exited with code " << result << '\n'
-               << tags::reset;
+        Stream << "ERROR: Command exited with code " << result << '\n';
     }
     return;
 }
@@ -43,7 +51,7 @@ Engine::Engine(const bool &DoLog)
 
 Engine::~Engine()
 {
-    if (doLog || log.is_open())
+    if (log.is_open())
     {
         log.close();
     }
@@ -71,6 +79,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         getline(input, line);
         if (line == "")
         {
+            // This newline makes for prettier .tex docs
+            output << '\n';
             continue;
         }
 
@@ -196,13 +206,44 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // \section{} \subsection{} \subsubsection{} etc
             else if (line[0] == '#')
             {
-                output << "\\";
-                int i;
-                for (i = 0; i < line.size() && line[i] == '#'; i++)
+                // # => \section{}
+                // ## => \subsection{}
+                // ### => \subsubsection{}
+                // #### => \paragraph{}
+                // #####+ => \subparagraph{}
+
+                int numHashes = 0;
+                while (line[numHashes] == '#')
                 {
-                    output << "sub";
+                    numHashes++;
                 }
-                output << "section{" << line.substr(i) << "}\n";
+
+                switch (numHashes)
+                {
+                case 1:
+                    output << "\\section{";
+                    break;
+                case 2:
+                    output << "\\subsection{";
+                    break;
+                case 3:
+                    output << "\\subsubsection{";
+                    break;
+                case 4:
+                    output << "\\paragraph{";
+                    break;
+                default:
+                    output << "\\subparagraph{";
+                    break;
+                };
+
+                for (auto l : startHeader)
+                {
+                    output << l << ' ';
+                }
+
+                output << line.substr(numHashes) << "}\\hfill\\\n";
+
                 continue;
             }
 
@@ -321,7 +362,15 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 i += 2;
                 while (i < line.size() && line[i] != '}')
                 {
-                    options += line[i];
+                    // Avoid issues with commenting, event if it doesn't *technically* work
+                    if (line[i] == '%')
+                    {
+                        options += "\\textwidth ";
+                    }
+                    else
+                    {
+                        options += line[i];
+                    }
                     i++;
                 }
 

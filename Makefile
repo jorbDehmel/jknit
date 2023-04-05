@@ -14,5 +14,9 @@ all: $(SOURCES) $(EXE)
 $(EXE): $(OBJECTS)
 	$(CC) $(LFLAGS) $(OBJECTS) -o $@
 
+remake:
+	$(MAKE) clean
+	$(MAKE)
+
 clean:
 	rm -rf $(OBJECTS) $(EXE) *.pdf *.aux *.log *.tex

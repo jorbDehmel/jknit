@@ -1,5 +1,6 @@
 jknit/
 .vscode/
+ex/
 
 *.o
 *.out

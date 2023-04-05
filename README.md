@@ -8,6 +8,10 @@ knitting tool. It is purely FOSS forever, and aims to intuitive, easy and fast.
 It compiles intermediary languages into .tex files. This allows running
 code within good looking, feature-rich documents.
 
+JKnit can only translate .jmd-like files to .tex, but .pdf files are very easy to
+generate from .tex. For linux, use `pdflatex`. For windows, you can easily
+find an online converter.
+
 ### .jks Files and Loading Settings
 
 .jks (JKnit Settings) files hold the interpreter paths of JKnit's
@@ -19,10 +23,10 @@ This is loaded by the program. This can also go in a {settings} chunk.
 
 ### .jmd Files
 
-.jmd files are mostly LaTeX, with chunks of code throughout. A code chunk
-is denoted as follows.
+.jmd files are mostly LaTeX, with chunks of code throughout. .md notation
+is also recognized. A code chunk is denoted as follows.
 
-Things out here are not code.
+Things out here are \*\*not code\*\*.
 
 \```{name}
 
@@ -30,7 +34,7 @@ print('Hello, world!')
 
 \```
 
-This end isn't code either.
+This end isn't \*code\* either.
 
 The code will appear in the compiled document, as well as its output.
 Most basic markdown syntax will work.
