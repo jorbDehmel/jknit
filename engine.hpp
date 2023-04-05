@@ -94,7 +94,7 @@ public:
         "\\]"};
 
     vector<string> startHeader = {
-        "\\ffamily"};
+        "\\sffamily \\bf"};
 
     bool doLog = false;
     ofstream log;

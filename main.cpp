@@ -113,7 +113,7 @@ int main(const int argc, const char *argv[])
      if (!quiet)
      {
           cout << tags::green_bold
-               << "Compiling...\n"
+               << "Compiling from '" << inputPath << "' to '" << outputPath << "'...\n"
                << tags::reset << flush;
      }
 

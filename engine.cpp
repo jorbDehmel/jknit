@@ -171,7 +171,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         else
         {
             // For list parsing
-            string listChars = "-:;., )";
+            string listChars = "-:;., )]";
 
             /*
             \usepackage[most]{tcolorbox}
@@ -198,7 +198,18 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // \hrule
             else if (line.substr(0, 2) == "--" || line.substr(0, 2) == "~~" || line.substr(0, 2) == "__" || line.substr(0, 2) == "==")
             {
-                output << "\\hrule{}\n";
+                // Jump over if rmd
+                if (line == "---")
+                {
+                    do
+                    {
+                        getline(input, line);
+                    } while (line != "---");
+                }
+                else
+                {
+                    output << "\\hrule{}\n";
+                }
                 continue;
             }
 
@@ -221,19 +232,19 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 switch (numHashes)
                 {
                 case 1:
-                    output << "\\section{";
+                    output << "\\section*{";
                     break;
                 case 2:
-                    output << "\\subsection{";
+                    output << "\\subsection*{";
                     break;
                 case 3:
-                    output << "\\subsubsection{";
+                    output << "\\subsubsection*{";
                     break;
                 case 4:
-                    output << "\\paragraph{";
+                    output << "\\paragraph*{";
                     break;
                 default:
-                    output << "\\subparagraph{";
+                    output << "\\subparagraph*{";
                     break;
                 };
 
@@ -242,7 +253,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     output << l << ' ';
                 }
 
-                output << line.substr(numHashes) << "}\\hfill\\\n";
+                output << line.substr(numHashes) << "}\\hfill\\\\\n";
 
                 continue;
             }
@@ -252,20 +263,22 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // \begin{enumerate}
             // \end{enumerate}
             // MUST start with 1, a, or A
-            else if (line[0] == '1' || line[0] == 'a' || line[0] == 'A')
+            else if ((line[0] == '1' || line[0] == 'a' || line[0] == 'A') && listChars.find(line[1]) != string::npos)
             {
                 output << "\\begin{enumerate}\n";
 
-                while (line.size() > 0 && listChars.find(line[0]) != string::npos)
+                // Erase until first space
+                while (line.size() > 0 && line[0] != ' ')
                 {
                     line.erase(0, 1);
                 }
+
                 do
                 {
                     output << "\\item " << line << "\n";
 
                     getline(input, line);
-                    while (line.size() > 0 && listChars.find(line[0]) != string::npos)
+                    while (line.size() > 0 && line[0] != ' ')
                     {
                         line.erase(0, 1);
                     }
@@ -362,12 +375,30 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 i += 2;
                 while (i < line.size() && line[i] != '}')
                 {
-                    // Avoid issues with commenting, event if it doesn't *technically* work
-                    if (line[i] == '%')
+                    // Percentage parsing
+                    if (line[i] >= '0' && line[i] <= '9')
                     {
-                        options += "\\textwidth ";
+                        string num = "00";
+                        while (line[i] >= '0' && line[i] <= '9')
+                        {
+                            num += line[i];
+                            i++;
+                        }
+
+                        if (line[i] == '%')
+                        {
+                            num = num.substr(0, num.size() - 2) + "." + num.substr(num.size() - 2);
+                            options += num + "\\textwidth ";
+                            i++;
+                        }
+                        else
+                        {
+                            options += num;
+                        }
                     }
-                    else
+
+                    // Avoid issues with commenting
+                    if (line[i] != '%')
                     {
                         options += line[i];
                     }
