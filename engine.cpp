@@ -118,6 +118,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         // Code chunk
         if (line.substr(0, 3) == "```")
         {
+            bool lone = line.find("*") != string::npos;
+
             // Get header
             if (line.size() <= 5)
             {
@@ -134,6 +136,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
 
             string header = line.substr(4, line.size() - 5);
+            while (header.back() == '}' || header.back() == '*')
+            {
+                header.pop_back();
+            }
 
             if (doLog)
             {
@@ -158,7 +164,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
 
             string name;
-            for (int i = 0; i < header.size() && header[i] != ' '; i++)
+            for (int i = 0; i < header.size() && header[i] != ' ' && header[i] != '}'; i++)
             {
                 name += header[i];
             }
@@ -174,7 +180,24 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
 
             // Run replacement
-            if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > curChunkByLang[name] && chunkOutputs[name][curChunkByLang[name]] != "")
+            if (lone)
+            {
+                if (doLog)
+                {
+                    log << "Lone star chunk! Compiling now.\n";
+                }
+
+                for (auto l : startOutput)
+                {
+                    output << l << '\n';
+                }
+                processChunk(header, contents, output);
+                for (auto l : endOutput)
+                {
+                    output << l << '\n';
+                }
+            }
+            else if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > curChunkByLang[name] && chunkOutputs[name][curChunkByLang[name]] != "")
             {
                 for (auto l : startOutput)
                 {
@@ -816,7 +839,14 @@ void Engine::buildAllChunks(const string &FileContents)
         // If line starts with ```
         if (line.size() > 3 && line.substr(0, 3) == "```")
         {
+            bool lone = line.find("*") != string::npos;
+
             string header = line.substr(4, line.size() - 5);
+            while (header.back() == '}' || header.back() == '*')
+            {
+                header.pop_back();
+            }
+
             string contents;
             string name;
 
@@ -850,6 +880,17 @@ void Engine::buildAllChunks(const string &FileContents)
                 fromString(contents);
                 continue;
             }
+
+            // Nullification character
+            else if (lone)
+            {
+                if (doLog)
+                {
+                    log << "Lone star chunk! Kicking compilation to parse-time.\n";
+                }
+                continue;
+            }
+
             else if (builders.count(name) != 0 && builders[name].printChunkBreak != "")
             {
                 contents += builders[name].printChunkBreak + "\n\n";

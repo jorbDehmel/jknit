@@ -77,7 +77,7 @@ to add support for any (interpreted) language. Simply include the
 following code chunk at the top of your document.
 
 \```{settings}
-name command printChunkBreak
+name command printChunkBreak extension
 \```
 
 "name" is what you will put inside the curly brackets of future code
@@ -87,14 +87,29 @@ chunks in order to call the given command.
 to the command line. This is **very important!** This is what will be used
 to tell the chunks apart.
 
+The "extension" is the file extension associated with that language.
+
 For instance, the following code will add support for the cling C++
-interpretter.
+interpreter.
 
 \```{settings}
-cling cling cout<<"CHUNK_BREAK\n";
+cling cling cout<<"CHUNK_BREAK\n"; cpp
 \```
 
 Note: Currently, the command must contain no spaces.
+
+### The Lone Star Operator '\*'
+
+Adding '\*' anywhere in your header command will cause a code chunk to
+run without any others. For example,
+
+\```{python}*
+a = "Hello!"
+\```
+
+\```*{python}
+\# A will not be defined in this chunk!
+\```
 
 #### Compiled Languages
 
@@ -115,14 +130,19 @@ during installation (to save space). You can use these as below.
 For C++ code via clang:
 
 \```{settings}
-clang ~/PATH/TO/DRIVERS/clang-driver.py cout<<"CHUNK_BREAK\n";
+clang ~/PATH/TO/DRIVERS/clang-driver.py cout<<"CHUNK_BREAK\n"; cpp
 \```
 
 For Rust code via rustc:
 
 \```{settings}
-rust ~/PATH/TO/DRIVERS/rustc-driver.py !println("CHUNK_BREAK");
+rust ~/PATH/TO/DRIVERS/rustc-driver.py !println("CHUNK_BREAK"); rs
 \```
+
+Since a useful compiled chunk will include a main function and only one
+main function can be compiled, it is mostly useful to use these with the
+'\*' lone star operator, which makes a chunk run disconnected from any
+other.
 
 #### Code-Generated Images
 
