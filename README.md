@@ -136,13 +136,14 @@ clang ~/PATH/TO/DRIVERS/clang-driver.py cout<<"CHUNK_BREAK\n"; cpp
 For Rust code via rustc:
 
 \```{settings}
-rust ~/PATH/TO/DRIVERS/rustc-driver.py !println("CHUNK_BREAK"); rs
+rust ~/PATH/TO/DRIVERS/rustc-driver.py println!("CHUNK_BREAK"); rs
 \```
 
 Since a useful compiled chunk will include a main function and only one
 main function can be compiled, it is mostly useful to use these with the
 '\*' lone star operator, which makes a chunk run disconnected from any
-other.
+other. This will cause jknit not to insert any instances of the chunk-break
+print line, which will usually cause compilation failures in such languages.
 
 #### Code-Generated Images
 

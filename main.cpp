@@ -174,7 +174,7 @@ int main(const int argc, const char *argv[])
      {
           e.log.close();
           cout << tags::red_bold
-               << "A fatal error occured.\n"
+               << "A fatal error ocurred.\n"
                << tags::reset;
           return 4;
      }
