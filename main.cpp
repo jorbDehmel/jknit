@@ -110,6 +110,9 @@ int main(const int argc, const char *argv[])
 
      Engine e(doLog);
 
+     string base = "python python3 print('CHUNK_BREAK\\n')\n";
+     e.fromString(base);
+
      if (!quiet)
      {
           cout << tags::green_bold
@@ -117,26 +120,37 @@ int main(const int argc, const char *argv[])
                << tags::reset << flush;
      }
 
-     if (doTimer && !quiet)
+     try
      {
-          // Timed
-          auto start = chrono::high_resolution_clock::now();
+          if (doTimer && !quiet)
+          {
+               // Timed
+               auto start = chrono::high_resolution_clock::now();
 
-          e.processFile(inputPath, outputPath);
+               e.processFile(inputPath, outputPath);
 
-          auto end = chrono::high_resolution_clock::now();
-          unsigned long long int elapsed = chrono::duration_cast<chrono::milliseconds>(end - start).count();
-          cout << tags::violet_bold
-               << "Elapsed ms: " << elapsed << '\n'
-               << "Ms waiting for code chunk output: " << systemWaitMS << '\n'
-               << "JKnit-attributable ms: " << elapsed - systemWaitMS << '\n'
-               << "Percent code-chunk-attributable: " << 100 * (double)systemWaitMS / elapsed << "%\n"
-               << tags::reset;
+               auto end = chrono::high_resolution_clock::now();
+               unsigned long long int elapsed = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+               cout << tags::violet_bold
+                    << "Elapsed ms: " << elapsed << '\n'
+                    << "Ms waiting for code chunk output: " << systemWaitMS << '\n'
+                    << "JKnit-attributable ms: " << elapsed - systemWaitMS << '\n'
+                    << "Percent code-chunk-attributable: " << 100 * (double)systemWaitMS / elapsed << "%\n"
+                    << tags::reset;
+          }
+          else
+          {
+               // Untimed
+               e.processFile(inputPath, outputPath);
+          }
      }
-     else
+     catch (...)
      {
-          // Untimed
-          e.processFile(inputPath, outputPath);
+          e.log.close();
+          cout << tags::red_bold
+               << "A fatal error occured.\n"
+               << tags::reset;
+          return 4;
      }
 
      if (!quiet)

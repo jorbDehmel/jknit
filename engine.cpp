@@ -1,9 +1,10 @@
 #include "engine.hpp"
 
+#define DEBUG
+
 string buildSpace = "jknit/";
 
 unsigned long long int systemWaitMS = 0;
-
 void smartSys(const string &Command, ostream &Stream)
 {
     Stream << "Calling command `" << Command << "`\n";
@@ -62,9 +63,18 @@ Engine::~Engine()
 // Output: .tex file
 void Engine::processFile(const string &InputFilepath, const string &OutputFilepath)
 {
+#ifdef DEBUG
+    smartSys(rm + buildSpace, log);
+#endif
+
+    if (doLog)
+    {
+        log << "Opening '" << InputFilepath << "' and \'" << OutputFilepath << "'\n";
+    }
+
     // Open files
-    ifstream input(InputFilepath);
-    assert(input.is_open());
+    ifstream inputFile(InputFilepath);
+    assert(inputFile.is_open());
     ofstream output(OutputFilepath);
     assert(output.is_open());
 
@@ -73,10 +83,23 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         output << line << '\n';
     }
 
+    // Do code pass
     string line;
+    string all;
+    while (!inputFile.eof())
+    {
+        getline(inputFile, line);
+        all += line + '\n';
+    }
+    inputFile.close();
+
+    buildAllChunks(all);
+
+    stringstream input(all);
     while (!input.eof())
     {
         getline(input, line);
+
         if (line == "")
         {
             // This newline makes for prettier .tex docs
@@ -132,8 +155,44 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 continue;
             }
 
+            string name;
+            for (int i = 0; i < header.size() && header[i] != ' '; i++)
+            {
+                name += header[i];
+            }
+
+            for (auto l : startCode)
+            {
+                output << l << '\n';
+            }
+            output << contents << '\n';
+            for (auto l : endCode)
+            {
+                output << l << '\n';
+            }
+
+            for (auto l : startOutput)
+            {
+                output << l << '\n';
+            }
+
             // Run replacement
-            processChunk(header, contents, output);
+            if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > curChunkByLang[name])
+            {
+                output << chunkOutputs[name][curChunkByLang[name]] << '\n';
+            }
+            else
+            {
+                log << "ERROR: No accompanying chunk!\n";
+            }
+
+            for (auto l : endOutput)
+            {
+                output << l << '\n';
+            }
+
+            curChunkByLang[name]++;
+            // processChunk(header, contents, output);
         }
 
         // Math chunk
@@ -167,7 +226,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
         }
 
-        // Regular LaTeX
+        // Regular LaTeX or markdown
         else
         {
             // For list parsing
@@ -489,57 +548,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         output << l << '\n';
     }
 
-    input.close();
     output.close();
 
+#ifndef DEBUG
     // Clear build folder
     smartSys(rm + buildSpace, log);
+#endif
 
     return;
-}
-
-map<string, string> parseOptions(const string &What)
-{
-    map<string, string> out;
-
-    stringstream stream(What);
-    string symbol;
-    while (!stream.eof())
-    {
-        stream >> symbol;
-
-        string name, value;
-        int i = 0;
-        while (i < symbol.size())
-        {
-            if (symbol[i] == ' ')
-            {
-                i++;
-                continue;
-            }
-            else if (symbol[i] == '=')
-            {
-                i++;
-                break;
-            }
-            else
-            {
-                name += symbol[i];
-            }
-
-            i++;
-        }
-        while (symbol[i] == ' ')
-        {
-            i++;
-        }
-
-        value = symbol.substr(i);
-
-        out[name] = value;
-    }
-
-    return out;
 }
 
 void Engine::processChunk(const string Header, const string &Contents, ostream &Stream)
@@ -563,38 +579,17 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     }
 
     // Safety check
-    if (!hasPath(name))
+    if (builders.count(name) == 0 || builders[name].commandPath == "")
     {
         if (doLog)
         {
             log << "Processing pathless name '" << name << "' (using name as command)\n";
         }
 
-        builders[name] = builder{name};
-    }
-
-    // Parse options
-    map<string, string> optionsMap = parseOptions(options);
-
-    // Add actual code if wanted
-    if (optionsMap.count("echo") == 0 || optionsMap["echo"] == "true")
-    {
-        for (auto l : startCode)
-        {
-            Stream << l << '\n';
-        }
-
-        Stream << Contents;
-
-        for (auto l : endCode)
-        {
-            Stream << l << '\n';
-        }
-    }
-
-    if (optionsMap.count("run") != 0 && optionsMap["run"] == "false")
-    {
-        return;
+        builder toAdd;
+        toAdd.commandPath = name;
+        toAdd.printChunkBreak = "";
+        builders[name] = toAdd;
     }
 
     // Construct appropriate temp file name
@@ -627,11 +622,6 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     ifstream input(tempfile);
     assert(input.is_open());
 
-    for (auto l : startOutput)
-    {
-        Stream << l << '\n';
-    }
-
     while (!input.eof())
     {
         getline(input, line);
@@ -639,11 +629,6 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
         {
             Stream << ">> " << line << '\n';
         }
-    }
-
-    for (auto l : endOutput)
-    {
-        Stream << l << '\n';
     }
 
     input.close();
@@ -720,35 +705,31 @@ void Engine::fromString(const string &From)
     // "loader name here": "path here" ".ext" "options here"
 
     stringstream fromStream(From);
-    string name, path;
+    string name, path, printCall;
 
     while (!fromStream.eof())
     {
-        name = path = "";
-        fromStream >> name >> path;
+        name = path = printCall = "";
+        fromStream >> name >> path >> printCall;
 
-        if (name == "" || path == "")
+        if (name == "" || path == "" || printCall == "")
         {
             break;
         }
 
         name = strip(name);
         path = strip(path);
-
-        if (path == "")
-        {
-            fromStream >> path;
-            path = strip(path);
-        }
+        printCall = strip(printCall);
 
         // Add to list of loaders
         builder toAdd;
+        toAdd.printChunkBreak = printCall;
         toAdd.commandPath = path;
         builders[name] = toAdd;
 
         if (doLog)
         {
-            log << "Loaded builder '" << name << "' with path '" << path << "'.\n";
+            log << "Loaded builder '" << name << "' with path '" << path << "' and chunk break print call '" << printCall << "'\n";
             log << "Builder set size: " << builders.size() << '\n';
         }
 
@@ -761,5 +742,174 @@ void Engine::fromString(const string &From)
 void Engine::toStream(ostream &Stream) const
 {
     Stream << toString();
+    return;
+}
+
+void Engine::buildAllChunks(const string &FileContents)
+{
+    // code[name] = pair<string, string>(header, contents);
+    map<string, pair<string, string>> code;
+    stringstream input(FileContents);
+
+    const string stripChars = " \t";
+
+    // Scan chunks, collate
+    //      Iterate over lines
+    string line;
+    while (!input.eof())
+    {
+        getline(input, line);
+
+        // Strip line
+        while (!line.empty() && stripChars.find(line[0]) != string::npos)
+        {
+            line.erase(0, 1);
+        }
+
+        // If line starts with ```
+        if (line.size() > 3 && line.substr(0, 3) == "```")
+        {
+            string header = line.substr(4, line.size() - 5);
+            string contents;
+            string name;
+
+            int i;
+            for (i = 0; i < header.size() && header[i] != ',' && header[i] != '}'; i++)
+            {
+                name += header[i];
+            }
+
+            // Collect contents
+            do
+            {
+                getline(input, line);
+                string toAdd = line;
+
+                // Strip for scanning
+                while (!line.empty() && stripChars.find(line[0]) != string::npos)
+                {
+                    line.erase(0, 1);
+                }
+
+                // Add if this is not a terminal line
+                if (line.size() < 3 || line.substr(0, 3) != "```")
+                {
+                    contents += toAdd + '\n';
+                }
+            } while (line.size() < 3 || line.substr(0, 3) != "```");
+
+            if (header == "settings")
+            {
+                fromString(contents);
+                continue;
+            }
+            else if (builders.count(name) != 0 && builders[name].printChunkBreak != "")
+            {
+                contents += builders[name].printChunkBreak + "\n\n";
+            }
+            else
+            {
+                cout << "WARNING: Print is not known for language '" << name << "'\n";
+                contents += "CHUNK_PARSE_ERROR\n";
+            }
+
+            // Append to code of similar type
+            if (code.count(name) == 0)
+            {
+                code[name] = pair<string, string>(header, contents);
+            }
+            else
+            {
+                code[name].second += contents;
+            }
+        }
+    }
+
+    if (doLog)
+    {
+        log << "Getting code output...\n";
+    }
+
+    // Get outputs for each type of code
+    map<string, string> outputs;
+    for (auto p : code)
+    {
+        stringstream chunk;
+
+        // Read the output of the chunk into the chunk string stream
+        processChunk(p.second.first, p.second.second, chunk);
+
+        // Log the output in outputs
+        outputs[p.first] = chunk.str();
+    }
+
+    if (doLog)
+    {
+        log << "Splitting outputs\n";
+    }
+
+    // Split along chunk-split printings for each output type
+    for (auto output : outputs)
+    {
+        // output.first = name
+        // output.second = output
+        // Parse output by lines which contain "CHUNK_BREAK"
+        stringstream chunk(outputs[output.first]);
+
+        if (doLog)
+        {
+            log << "FULL OUTPUT:\n"
+                << chunk.str() << '\n';
+        }
+
+        string currentChunk, line;
+        do
+        {
+            getline(chunk, line);
+
+            if (doLog)
+            {
+                log << "LINE:\n"
+                    << line << '\n';
+            }
+
+            if (line.find("CHUNK_BREAK") == string::npos)
+            {
+                currentChunk += line + '\n';
+            }
+            else
+            {
+                chunkOutputs[output.first].push_back(currentChunk);
+
+                if (doLog)
+                {
+                    log << "CHUNK:\n"
+                        << currentChunk << '\n'
+                        << "END CHUNK\n";
+                }
+
+                currentChunk.clear();
+            }
+        } while (!chunk.eof());
+        chunkOutputs[output.first].push_back(currentChunk);
+        currentChunk.clear();
+
+        if (doLog)
+        {
+            log << "CHUNK:\n"
+                << currentChunk << '\n'
+                << "END CHUNK\n";
+
+            log << "File type '" << output.first << "' has " << chunkOutputs[output.first].size() << " output chunks.\n";
+        }
+
+        curChunkByLang[output.first] = 0;
+    }
+
+    if (doLog)
+    {
+        log << "Done.\n";
+    }
+
     return;
 }

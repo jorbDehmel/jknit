@@ -19,4 +19,4 @@ remake:
 	$(MAKE)
 
 clean:
-	rm -rf $(OBJECTS) $(EXE) *.pdf *.aux *.log *.tex
+	rm -rf $(OBJECTS) $(EXE) *.pdf *.aux *.log *.tex *.out

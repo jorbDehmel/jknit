@@ -28,6 +28,7 @@ const string mkdir = "mkdir -p ";
 struct builder
 {
     string commandPath;
+    string printChunkBreak;
 };
 
 extern string buildSpace;
@@ -82,10 +83,12 @@ public:
         "\\end{tcolorbox}\n"};
 
     vector<string> startOutput = {
+        "\\begin{tcolorbox}[colback=white, boxrule=1pt, colframe=gray]",
         "\\begin{verbatim}"};
 
     vector<string> endOutput = {
-        "\n\\end{verbatim}"};
+        "\n\\end{verbatim}",
+        "\\end{tcolorbox}\n"};
 
     vector<string> startMath = {
         "\\["};
@@ -101,6 +104,14 @@ public:
 
 protected:
     map<string, builder> builders;
+
+    // Scans for code chunks, collates them by builder, and compiles.
+    // Splits by inserting a builder's printChunkBreak AFTER each chunk runs
+    void buildAllChunks(const string &FileContents);
+
+    // Maps a language to its code chunk outputs in order
+    map<string, vector<string>> chunkOutputs;
+    map<string, int> curChunkByLang;
 };
 
 #endif
