@@ -124,8 +124,8 @@ int main(const int argc, const char *argv[])
 
      Engine e(doLog);
 
-     e.fromString("python python3 print('CHUNK_BREAK')\n");
-     e.fromString("octave octave-cli disp('CHUNK_BREAK')\n");
+     e.fromString("python python3 print('CHUNK_BREAK') py\n");
+     e.fromString("octave octave-cli disp('CHUNK_BREAK') txt\n");
 
      if (!quiet)
      {

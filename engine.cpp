@@ -582,7 +582,7 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     }
 
     // Construct appropriate temp file name
-    string srcfile = buildSpace + name + "_src_" + to_string(time(NULL)) + ".txt";
+    string srcfile = buildSpace + name + "_src_" + to_string(time(NULL)) + "." + builders[name].extension;
     string tempfile = buildSpace + name + "_out_" + to_string(time(NULL)) + ".txt";
 
     // Send our chunk contents to a file
@@ -694,26 +694,34 @@ void Engine::fromString(const string &From)
     // "loader name here": "path here" ".ext" "options here"
 
     stringstream fromStream(From);
-    string name, path, printCall;
+    string name, path, printCall, extension;
 
     while (!fromStream.eof())
     {
-        name = path = printCall = "";
-        fromStream >> name >> path >> printCall;
+        name = path = printCall = extension = "";
+        fromStream >> name >> path >> printCall >> extension;
 
         if (name == "" || path == "" || printCall == "")
         {
             break;
         }
 
+        if (extension == "")
+        {
+            extension = "txt";
+        }
+
         name = strip(name);
         path = strip(path);
         printCall = strip(printCall);
+        extension = strip(extension);
 
         // Add to list of loaders
         builder toAdd;
         toAdd.printChunkBreak = printCall;
         toAdd.commandPath = path;
+        toAdd.extension = extension;
+
         builders[name] = toAdd;
 
         if (doLog)

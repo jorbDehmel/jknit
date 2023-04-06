@@ -29,6 +29,7 @@ struct builder
 {
     string commandPath;
     string printChunkBreak;
+    string extension = ".txt";
 };
 
 extern string buildSpace;

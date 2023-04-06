@@ -114,14 +114,14 @@ during installation (to save space). You can use these as below.
 
 For C++ code via clang:
 
-\```{clang ~/PATH/TO/DRIVERS/clang-driver.py cout<<"CHUNK_BREAK\n";}
-// Code goes here
+\```{settings}
+clang ~/PATH/TO/DRIVERS/clang-driver.py cout<<"CHUNK_BREAK\n";
 \```
 
 For Rust code via rustc:
 
-\```{rust ~/PATH/TO/DRIVERS/rustc-driver.py !println("CHUNK_BREAK");}
-// Code goes here
+\```{settings}
+rust ~/PATH/TO/DRIVERS/rustc-driver.py !println("CHUNK_BREAK");
 \```
 
 #### Code-Generated Images
