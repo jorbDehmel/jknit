@@ -14,6 +14,10 @@ install: $(EXE)
 uninstall:
 	sudo rm -f /usr/bin/jknit
 
+reinstall:
+	$(MAKE) clean
+	$(MAKE) install
+
 .cpp.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 

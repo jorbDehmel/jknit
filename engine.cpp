@@ -232,7 +232,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         else
         {
             // For list parsing
-            string listChars = "-:;., )]";
+            string listChars = "-:;.,)]";
 
             // > blockquote
             // \blockquote{}
@@ -303,7 +303,15 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     output << l << ' ';
                 }
 
-                output << line.substr(numHashes) << "}\\hfill\\\\\n";
+                for (auto c : line.substr(numHashes))
+                {
+                    if (c == '&')
+                    {
+                        output << "\\";
+                    }
+                    output << c;
+                }
+                output << "}\n";
 
                 continue;
             }
@@ -377,6 +385,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 int i = 1;
                 while (i < line.size() && line[i] != ']')
                 {
+                    if (line[i] == '&')
+                    {
+                        title += "\\";
+                    }
                     title += line[i];
                     i++;
                 }
@@ -385,6 +397,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 i += 2;
                 while (i < line.size() && line[i] != ')')
                 {
+                    if (line[i] == '&')
+                    {
+                        link += "\\";
+                    }
                     link += line[i];
                     i++;
                 }
@@ -411,12 +427,21 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 int i = 2;
                 while (i < line.size() && line[i] != ']')
                 {
+                    if (line[i] == '&')
+                    {
+                        alt += "\\";
+                    }
                     alt += line[i];
                     i++;
                 }
                 i += 2;
                 while (i < line.size() && line[i] != ')')
                 {
+                    if (line[i] == '&')
+                    {
+                        path += "\\";
+                    }
+
                     path += line[i];
                     i++;
                 }
@@ -427,13 +452,13 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     if (line[i] >= '0' && line[i] <= '9')
                     {
                         string num = "00";
-                        while (line[i] >= '0' && line[i] <= '9')
+                        while (i < line.size() && line[i] >= '0' && line[i] <= '9')
                         {
                             num += line[i];
                             i++;
                         }
 
-                        if (line[i] == '%')
+                        if (i < line.size() && line[i] == '%')
                         {
                             num = num.substr(0, num.size() - 2) + "." + num.substr(num.size() - 2);
                             options += num + "\\textwidth ";
@@ -446,7 +471,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     }
 
                     // Avoid issues with commenting
-                    if (line[i] != '%')
+                    if (i < line.size() && line[i] != '%' && line[i] != '}')
                     {
                         options += line[i];
                     }
@@ -471,15 +496,32 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // Iterate through full text
             for (int i = 0; i < line.size(); i++)
             {
+                // Inline math literal: Skip
+                if (line[i] == '$')
+                {
+                    do
+                    {
+                        i++;
+                    } while (i < line.size() && line[i] != '$');
+                }
+                else if (line[i] == '&')
+                {
+                    output << "\\&";
+                }
+
                 // `code`
                 // \verb||
-                if (line[i] == '`')
+                else if (line[i] == '`')
                 {
                     output << "\\verb|";
 
                     i++;
-                    while (line[i] != '`')
+                    while (i < line.size() && line[i] != '`')
                     {
+                        if (line[i] == '&')
+                        {
+                            output << "\\";
+                        }
                         output << line[i];
                         i++;
                     }
@@ -488,19 +530,23 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                 // *italicized*
                 // \emph{}
-                else if (line[i] == '*')
+                else if (i < line.size() && line[i] == '*')
                 {
                     i++;
 
                     // **bold**
                     // \textbf{}
-                    if (line[i] == '*')
+                    if (i < line.size() && line[i] == '*')
                     {
                         output << "\\textbf{";
 
                         i++;
                         while (line.substr(i, 2) != "**")
                         {
+                            if (line[i] == '&')
+                            {
+                                output << "\\";
+                            }
                             output << line[i];
                             i++;
                         }
@@ -512,8 +558,12 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     {
                         output << "\\emph{";
 
-                        while (line[i] != '*')
+                        while (i < line.size() && line[i] != '*')
                         {
+                            if (line[i] == '&')
+                            {
+                                output << "\\";
+                            }
                             output << line[i];
                             i++;
                         }

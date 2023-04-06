@@ -70,6 +70,8 @@ public:
         "\\usepackage{color}",
         "\\usepackage{tcolorbox}",
         "\\sffamily",
+        "\\usepackage{amsmath}",
+        "\\usepackage{amssymb}",
         "\\begin{document}"};
 
     vector<string> latexFooter = {
