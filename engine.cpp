@@ -234,17 +234,6 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // For list parsing
             string listChars = "-:;., )]";
 
-            /*
-            \usepackage[most]{tcolorbox}
-
-            \newtcolorbox{myquote}{colback=yellow!20!white,colframe=yellow!75!black,grow to right by=-10mm,grow to left by=-10mm,
-                boxrule=0pt,boxsep=0pt,breakable} \makeatletter
-
-            \newcommand{\blockquote}[1]{  \begin{myquote}  #1  \end{myquote}  }
-
-            %via https://tex.stackexchange.com/questions/310818/blockquotes-in-latex
-            */
-
             // > blockquote
             // \blockquote{}
             if (line[0] == '>')
@@ -413,8 +402,6 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 \includegraphics[width=0.25\textwidth]{name.img}
                 \caption{alt text}
             \end{figure}
-
-            %https://www.overleaf.com/learn/latex/Inserting_Images
             */
             else if (line[0] == '!')
             {
