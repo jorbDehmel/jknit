@@ -108,6 +108,22 @@ write a supplemental script that does the following.
  2. Compile the file
  3. Run the executable and echo its output
 
+Several such "compilation drivers" are included in the compilation-drivers
+directory. Make sure to save these files, as they are not copied anywhere
+during installation (to save space). You can use these as below.
+
+For C++ code via clang:
+
+\```{clang ~/PATH/TO/DRIVERS/clang-driver.py cout<<"CHUNK_BREAK\n";}
+// Code goes here
+\```
+
+For Rust code via rustc:
+
+\```{rust ~/PATH/TO/DRIVERS/rustc-driver.py !println("CHUNK_BREAK");}
+// Code goes here
+\```
+
 #### Code-Generated Images
 
 JKnit will not automatically detect when a code chunk generates an image
