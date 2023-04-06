@@ -1,5 +1,6 @@
 SOURCES := engine.cpp main.cpp
 OBJECTS := $(SOURCES:.cpp=.o)
+HEADERS := engine.hpp
 EXE := jknit.out
 
 CC := clang++
@@ -21,7 +22,7 @@ reinstall:
 .cpp.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(EXE): $(OBJECTS)
+$(EXE): $(OBJECTS) $(HEADERS)
 	$(CC) $(LFLAGS) $(OBJECTS) -o $@
 
 remake:

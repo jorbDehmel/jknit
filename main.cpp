@@ -110,7 +110,19 @@ int main(const int argc, const char *argv[])
           }
           else
           {
-               inputPath = argv[i];
+               if (inputPath == "")
+               {
+                    inputPath = argv[i];
+               }
+               else
+               {
+                    cout << tags::yellow_bold
+                         << "Warning: Interpreting second filename arg as output file\n"
+                         << "(Please use -o notation in the future)\n"
+                         << tags::reset;
+
+                    outputPath = argv[i];
+               }
           }
      }
 
