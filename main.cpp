@@ -11,6 +11,8 @@ GPLv3 held by author
 #include <iostream>
 using namespace std;
 
+#define VERSION "0.0.1"
+
 // A better CLI for jknit
 int main(const int argc, const char *argv[])
 {
@@ -66,6 +68,15 @@ int main(const int argc, const char *argv[])
                               << "-n called: Aborting.\n"
                               << tags::reset;
                          return 0;
+                    case 'V':
+                    case 'v':
+                         // Version
+                         cout << tags::green_bold
+                              << VERSION << '\n'
+                              << "GPLv3, jdehmel@outlook.com\n"
+                              << "2023 - present\n"
+                              << tags::reset;
+                         break;
                     case 'H':
                     case 'h':
                          // Help
@@ -73,7 +84,9 @@ int main(const int argc, const char *argv[])
                               << "JKnit is a lightweight, versatile tool for\n"
                               << "compiling markdown documents with embedded\n"
                               << "(running) code to LaTeX. It aims to be easy\n"
-                              << "to use with any embedded language.\n\n"
+                              << "to use with any embedded language. JKnit\n"
+                              << "can compile most .rmd files with minimal\n"
+                              << "additions.\n"
                               << "Flags and their meaning:\n"
                               << " -o \t Set output file to the next argument\n"
                               << " -l \t Enable log\n"
@@ -89,6 +102,7 @@ int main(const int argc, const char *argv[])
                     default:
                          cout << tags::yellow_bold
                               << "Unrecognized option '" << argv[cur][j] << "'\n"
+                              << "Note: Use -h for a list of all commands.\n"
                               << tags::reset;
                          break;
                     };
@@ -110,8 +124,8 @@ int main(const int argc, const char *argv[])
 
      Engine e(doLog);
 
-     string base = "python python3 print('CHUNK_BREAK\\n')\n";
-     e.fromString(base);
+     e.fromString("python python3 print('CHUNK_BREAK')\n");
+     e.fromString("octave octave-cli disp('CHUNK_BREAK')\n");
 
      if (!quiet)
      {

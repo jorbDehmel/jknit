@@ -1,6 +1,8 @@
 #include "engine.hpp"
 
-#define DEBUG
+// If defined, clears the jknit folder at the beginning
+// Otherwise, clears it at the end of running
+// #define DEBUG
 
 string buildSpace = "jknit/";
 
@@ -171,24 +173,24 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 output << l << '\n';
             }
 
-            for (auto l : startOutput)
-            {
-                output << l << '\n';
-            }
-
             // Run replacement
-            if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > curChunkByLang[name])
+            if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > curChunkByLang[name] && chunkOutputs[name][curChunkByLang[name]] != "")
             {
-                output << chunkOutputs[name][curChunkByLang[name]] << '\n';
+                for (auto l : startOutput)
+                {
+                    output << l << '\n';
+                }
+
+                output << chunkOutputs[name][curChunkByLang[name]];
+
+                for (auto l : endOutput)
+                {
+                    output << l << '\n';
+                }
             }
             else
             {
                 log << "ERROR: No accompanying chunk!\n";
-            }
-
-            for (auto l : endOutput)
-            {
-                output << l << '\n';
             }
 
             curChunkByLang[name]++;

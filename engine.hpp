@@ -87,7 +87,7 @@ public:
         "\\begin{verbatim}"};
 
     vector<string> endOutput = {
-        "\n\\end{verbatim}",
+        "\\end{verbatim}",
         "\\end{tcolorbox}\n"};
 
     vector<string> startMath = {

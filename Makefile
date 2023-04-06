@@ -1,12 +1,18 @@
 SOURCES := engine.cpp main.cpp
 OBJECTS := $(SOURCES:.cpp=.o)
-EXE := main.out
+EXE := jknit.out
 
 CC := clang++
 LFLAGS :=
 CFLAGS := -Wall -Werror -pedantic -g
 
 all: $(SOURCES) $(EXE)
+
+install: $(EXE)
+	sudo cp ./jknit.out /usr/bin/jknit
+
+uninstall:
+	sudo rm -f /usr/bin/jknit
 
 .cpp.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
