@@ -119,6 +119,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         if (line.substr(0, 3) == "```")
         {
             bool lone = line.find("*") != string::npos;
+            bool doOutput = line.find("^") == string::npos;
 
             // Get header
             if (line.size() <= 5)
@@ -180,7 +181,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
 
             // Run replacement
-            if (lone)
+            if (!doOutput)
+            {
+                if (doLog)
+                {
+                    log << "Chunk marked as having no output (^). Skipping.\n";
+                }
+            }
+            else if (lone)
             {
                 if (doLog)
                 {
@@ -210,14 +218,13 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 {
                     output << l << '\n';
                 }
+
+                curChunkByLang[name]++;
             }
             else
             {
                 log << "ERROR: No accompanying chunk!\n";
             }
-
-            curChunkByLang[name]++;
-            // processChunk(header, contents, output);
         }
 
         // Math chunk
@@ -840,9 +847,10 @@ void Engine::buildAllChunks(const string &FileContents)
         if (line.size() > 3 && line.substr(0, 3) == "```")
         {
             bool lone = line.find("*") != string::npos;
+            bool doBreakLine = line.find("^") == string::npos;
 
             string header = line.substr(4, line.size() - 5);
-            while (header.back() == '}' || header.back() == '*')
+            while (header.back() == '}' || header.back() == '*' || header.back() == '^')
             {
                 header.pop_back();
             }
@@ -891,14 +899,21 @@ void Engine::buildAllChunks(const string &FileContents)
                 continue;
             }
 
-            else if (builders.count(name) != 0 && builders[name].printChunkBreak != "")
+            else if (doBreakLine && builders.count(name) != 0 && builders[name].printChunkBreak != "")
             {
                 contents += builders[name].printChunkBreak + "\n\n";
             }
-            else
+            else if (doBreakLine)
             {
                 cout << "WARNING: Print is not known for language '" << name << "'\n";
                 contents += "CHUNK_PARSE_ERROR\n";
+            }
+            else
+            {
+                if (doLog)
+                {
+                    log << "Chunk is marked as outputless (^ operator)\n";
+                }
             }
 
             // Append to code of similar type

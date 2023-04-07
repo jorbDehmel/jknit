@@ -98,7 +98,7 @@ cling cling cout<<"CHUNK_BREAK\n"; cpp
 
 Note: Currently, the command must contain no spaces.
 
-### The Lone Star Operator '\*'
+### The Lone Operator '\*'
 
 Adding '\*' anywhere in your header command will cause a code chunk to
 run without any others. For example,
@@ -110,6 +110,37 @@ a = "Hello!"
 \```*{python}
 \# A will not be defined in this chunk!
 \```
+
+If code chunk linking does not make sense for a language, you can include
+the * operator in the language name itself as below.
+
+\```{settings}
+clang* clang++ ; cpp
+\```
+
+\```{clang}
+// Error: "Clang" is not defined
+\```
+
+\```{clang*}
+// This will compile, but never link to any other clang* chunks.
+\```
+
+### The Silent Operator '^'
+
+If a code chunk produces no output, it is useful to mark is as such
+using the ^ operator. For example,
+
+\```{python}^
+a = "Hello!"
+\```
+
+\```{python}
+print(a)
+\```
+
+This code will effectively be run along with the next non-silent chunk.
+Using "\*^" would have no effect that using "\*" would not.
 
 #### Compiled Languages
 
@@ -141,7 +172,7 @@ rust ~/PATH/TO/DRIVERS/rustc-driver.py println!("CHUNK_BREAK"); rs
 
 Since a useful compiled chunk will include a main function and only one
 main function can be compiled, it is mostly useful to use these with the
-'\*' lone star operator, which makes a chunk run disconnected from any
+'\*' lone operator, which makes a chunk run disconnected from any
 other. This will cause jknit not to insert any instances of the chunk-break
 print line, which will usually cause compilation failures in such languages.
 
