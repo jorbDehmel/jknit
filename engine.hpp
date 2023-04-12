@@ -68,17 +68,17 @@ public:
         "\\geometry{letterpaper}",
         "\\usepackage{xcolor}",
         "\\usepackage{color}",
-        "\\usepackage{tcolorbox}",
-        "\\sffamily",
+        "\\usepackage[breakable]{tcolorbox}",
         "\\usepackage{amsmath}",
         "\\usepackage{amssymb}",
-        "\\begin{document}"};
+        "\\begin{document}",
+        "\\sffamily"};
 
     vector<string> latexFooter = {
         "\\end{document}"};
 
     vector<string> startCode = {
-        "\\begin{tcolorbox}[colback=lightgray, boxrule=0pt]",
+        "\\begin{tcolorbox}[colback=lightgray, boxrule=0pt, breakable]",
         "\\begin{verbatim}\n"};
 
     vector<string> endCode = {
@@ -86,7 +86,7 @@ public:
         "\\end{tcolorbox}\n"};
 
     vector<string> startOutput = {
-        "\\begin{tcolorbox}[colback=white, boxrule=1pt, colframe=gray]",
+        "\\begin{tcolorbox}[colback=white, boxrule=1pt, colframe=gray, breakable]",
         "\\begin{verbatim}"};
 
     vector<string> endOutput = {
@@ -100,7 +100,7 @@ public:
         "\\]"};
 
     vector<string> startHeader = {
-        "\\sffamily \\bf"};
+        "\\bf"};
 
     bool doLog = false;
     ofstream log;

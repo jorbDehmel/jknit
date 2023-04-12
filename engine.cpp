@@ -230,6 +230,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         // Math chunk
         else if (line.substr(0, 2) == "$$")
         {
+            if (doLog)
+            {
+                log << "Math:\n";
+            }
+
             for (auto l : startMath)
             {
                 output << l << '\n';
@@ -248,6 +253,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                 if (line.size() < 2 || line.substr(0, 2) != "$$")
                 {
+                    if (doLog)
+                    {
+                        log << line << '\n';
+                    }
+
                     output << line << '\n';
                 }
             } while (line.size() < 2 || line.substr(0, 2) != "$$");
@@ -255,6 +265,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             for (auto l : endMath)
             {
                 output << l << '\n';
+            }
+
+            if (doLog)
+            {
+                log << "End math.\n";
             }
         }
 
@@ -303,6 +318,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 // #### => \paragraph{}
                 // #####+ => \subparagraph{}
 
+                output << "\\bigskip{}\n";
+
                 int numHashes = 0;
                 while (line[numHashes] == '#')
                 {
@@ -333,6 +350,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     output << l << ' ';
                 }
 
+                output << "\\sffamily{";
+
                 for (auto c : line.substr(numHashes))
                 {
                     if (c == '&')
@@ -341,7 +360,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     }
                     output << c;
                 }
-                output << "}\n";
+                output << "}}\n~\\\n";
 
                 continue;
             }
