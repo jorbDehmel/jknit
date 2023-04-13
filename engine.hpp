@@ -1,3 +1,11 @@
+/*
+Jordan "Jorb" Dehmel
+jdehmel@outlook.com
+github.com/jorbDehmel
+2023 - present
+GPLv3 held by author
+*/
+
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
 
@@ -9,6 +17,7 @@
 #include <cassert>
 #include <vector>
 #include <chrono>
+
 #include "tags.hpp"
 using namespace std;
 
@@ -19,10 +28,12 @@ using namespace std;
 // Windows because it just has to be different
 const string rm = "rmdir /s /q ";
 const string mkdir = "md ";
+const string buildSpace = "jknit\\";
 #else
 // UNIX-based OSes
 const string rm = "rm -rf ";
 const string mkdir = "mkdir -p ";
+const string buildSpace = "jknit/";
 #endif
 
 struct builder
@@ -31,8 +42,6 @@ struct builder
     string printChunkBreak;
     string extension = ".txt";
 };
-
-extern string buildSpace;
 
 extern unsigned long long int systemWaitMS;
 void smartSys(const string &Command, ostream &Stream = cout);
@@ -101,6 +110,8 @@ public:
 
     vector<string> startHeader = {
         "\\bf"};
+
+    vector<string> endHeader;
 
     bool doLog = false;
     ofstream log;

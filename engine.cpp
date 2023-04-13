@@ -1,10 +1,16 @@
+/*
+Jordan "Jorb" Dehmel
+jdehmel@outlook.com
+github.com/jorbDehmel
+2023 - present
+GPLv3 held by author
+*/
+
 #include "engine.hpp"
 
 // If defined, clears the jknit folder at the beginning
 // Otherwise, clears it at the end of running
 // #define DEBUG
-
-string buildSpace = "jknit/";
 
 unsigned long long int systemWaitMS = 0;
 void smartSys(const string &Command, ostream &Stream)
@@ -373,6 +379,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 }
                 output << "}}\n~\\\n";
 
+                for (auto l : endHeader)
+                {
+                    output << l << ' ';
+                }
+
                 continue;
             }
 
@@ -451,6 +462,12 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     }
                     title += line[i];
                     i++;
+                }
+
+                if (line[i + 1] != '(')
+                {
+                    output << line << '\n';
+                    continue;
                 }
 
                 // Scan until end of link
@@ -809,7 +826,24 @@ void Engine::fromString(const string &From)
     while (!fromStream.eof())
     {
         name = path = printCall = extension = "";
-        fromStream >> name >> path >> printCall >> extension;
+        fromStream >> name >> path;
+
+        // This one is special since it may contain spaces
+        fromStream >> printCall;
+        if (printCall[0] == '\'' || printCall[0] == '"')
+        {
+            string word;
+            while (printCall.back() != printCall.front())
+            {
+                fromStream >> word;
+                printCall += ' ' + word;
+            }
+
+            printCall.erase(0, 1);
+            printCall.pop_back();
+        }
+
+        fromStream >> extension;
 
         if (name == "" || path == "" || printCall == "")
         {

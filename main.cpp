@@ -11,7 +11,7 @@ GPLv3 held by author
 #include <iostream>
 using namespace std;
 
-#define VERSION "0.0.2"
+#define VERSION "0.0.3"
 
 // A better CLI for jknit
 int main(const int argc, const char *argv[])
@@ -141,6 +141,7 @@ int main(const int argc, const char *argv[])
      // Interpretted languages
      e.fromString("python python3 print('CHUNK_BREAK') py\n");
      e.fromString("octave octave-cli disp('CHUNK_BREAK') txt\n");
+     e.fromString("bash /usr/bin/sh 'echo CHUNK_BREAK' sh");
 
      // Compiled loner languages
      e.fromString("clang++* /usr/include/compilation-drivers/clang-driver.py ; cpp");
