@@ -106,7 +106,7 @@ public:
         "\\["};
 
     vector<string> endMath = {
-        "\\]"};
+        "\\]~\\\\"};
 
     vector<string> startHeader = {
         "\\bf"};

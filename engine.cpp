@@ -377,12 +377,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     }
                     output << c;
                 }
-                output << "}}\n~\\\n";
+                output << "}}~\n";
 
                 for (auto l : endHeader)
                 {
                     output << l << ' ';
                 }
+
+                output << "\\bigskip{}\n";
 
                 continue;
             }
