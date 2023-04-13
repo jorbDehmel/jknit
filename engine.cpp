@@ -171,14 +171,17 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 name += header[i];
             }
 
-            for (auto l : startCode)
+            if (!skip)
             {
-                output << l << '\n';
-            }
-            output << contents << '\n';
-            for (auto l : endCode)
-            {
-                output << l << '\n';
+                for (auto l : startCode)
+                {
+                    output << l << '\n';
+                }
+                output << contents << '\n';
+                for (auto l : endCode)
+                {
+                    output << l << '\n';
+                }
             }
 
             // Run replacement
