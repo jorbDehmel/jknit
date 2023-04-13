@@ -466,7 +466,15 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                 if (line[i + 1] != '(')
                 {
-                    output << line << '\n';
+                    for (auto c : line)
+                    {
+                        if (c == '&')
+                        {
+                            output << "\\";
+                        }
+                        output << c;
+                    }
+                    output << '\n';
                     continue;
                 }
 
@@ -578,8 +586,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 {
                     do
                     {
+                        output << line[i];
                         i++;
                     } while (i < line.size() && line[i] != '$');
+                    output << "$";
                 }
                 else if (line[i] == '&')
                 {
