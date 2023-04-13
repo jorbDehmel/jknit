@@ -11,9 +11,11 @@ all: $(SOURCES) $(EXE)
 
 install: $(EXE)
 	sudo cp ./jknit.out /usr/bin/jknit
+	sudo cp -r compilation-drivers /usr/include
 
 uninstall:
 	sudo rm -f /usr/bin/jknit
+	sudo rm -rf /usr/include/compilation-drivers
 
 reinstall:
 	$(MAKE) clean

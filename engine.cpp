@@ -120,6 +120,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         {
             bool lone = line.find("*") != string::npos;
             bool doOutput = line.find("^") == string::npos;
+            bool skip = line.find("~") != string::npos;
 
             // Get header
             if (line.size() <= 5)
@@ -186,6 +187,13 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 if (doLog)
                 {
                     log << "Chunk marked as having no output (^). Skipping.\n";
+                }
+            }
+            else if (skip)
+            {
+                if (doLog)
+                {
+                    log << "Skipping chunk.\n";
                 }
             }
             else if (lone)
@@ -867,6 +875,7 @@ void Engine::buildAllChunks(const string &FileContents)
         {
             bool lone = line.find("*") != string::npos;
             bool doBreakLine = line.find("^") == string::npos;
+            bool skip = line.find("~") != string::npos;
 
             string header = line.substr(4, line.size() - 5);
             while (header.back() == '}' || header.back() == '*' || header.back() == '^')
@@ -914,6 +923,14 @@ void Engine::buildAllChunks(const string &FileContents)
                 if (doLog)
                 {
                     log << "Lone star chunk! Kicking compilation to parse-time.\n";
+                }
+                continue;
+            }
+            else if (skip)
+            {
+                if (doLog)
+                {
+                    log << "Skipping chunk.\n";
                 }
                 continue;
             }

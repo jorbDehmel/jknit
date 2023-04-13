@@ -12,6 +12,18 @@ JKnit can only translate .jmd-like (.rmd, .md) files to .tex, but .pdf files
 are very easy to generate from .tex. For linux, use `pdflatex`. For windows,
 you can easily find an online converter.
 
+JKnit works with the following languages by default.
+Format: Language - command
+
+Interpreted languages:
+- Python3 - python
+- Octave - octave
+
+Compiled (non-knit) languages:
+- C++ - clang++*
+- C++ - gcc*
+- Rust - rust*
+
 #### Headers
 > \# Biggest Header
 > \## Slightly Smaller Header

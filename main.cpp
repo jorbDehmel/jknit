@@ -11,7 +11,7 @@ GPLv3 held by author
 #include <iostream>
 using namespace std;
 
-#define VERSION "0.0.1"
+#define VERSION "0.0.2"
 
 // A better CLI for jknit
 int main(const int argc, const char *argv[])
@@ -86,16 +86,18 @@ int main(const int argc, const char *argv[])
                               << "(running) code to LaTeX. It aims to be easy\n"
                               << "to use with any embedded language. JKnit\n"
                               << "can compile most .rmd files with minimal\n"
-                              << "additions.\n"
+                              << "additions.\n\n"
                               << "Flags and their meaning:\n"
                               << " -o \t Set output file to the next argument\n"
                               << " -l \t Enable log\n"
                               << " -t \t Enable timer\n"
                               << " -q \t Quiet (no printing)\n"
                               << " -n \t No compile (halt before running)\n"
+                              << " -v \t Show version\n"
                               << " -h \t Show help (this)\n\n"
                               << "Jorb Dehmel, 2023, jdehmel@outlook.com\n"
                               << "FOSS, Protected by GPLv3\n"
+                              << VERSION << '\n'
                               << tags::reset;
 
                          break;
@@ -136,8 +138,14 @@ int main(const int argc, const char *argv[])
 
      Engine e(doLog);
 
+     // Interpretted languages
      e.fromString("python python3 print('CHUNK_BREAK') py\n");
      e.fromString("octave octave-cli disp('CHUNK_BREAK') txt\n");
+
+     // Compiled loner languages
+     e.fromString("clang++* /usr/include/compilation-drivers/clang-driver.py ; cpp");
+     e.fromString("gcc* /usr/include/compilation-drivers/gcc-driver.py ; cpp");
+     e.fromString("rust* /usr/include/compilation-drivers/rustc-drivers.py ; rs");
 
      if (!quiet)
      {
