@@ -10,7 +10,7 @@ GPLv3 held by author
 
 // If defined, clears the jknit folder at the beginning
 // Otherwise, clears it at the end of running
-#define DEBUG
+// #define DEBUG
 
 unsigned long long int systemWaitMS = 0;
 void smartSys(const string &Command, ostream &Stream)
