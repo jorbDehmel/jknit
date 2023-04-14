@@ -2,6 +2,7 @@ jknit/
 .vscode/
 ex/
 tests/
+__pycache__/
 
 *.o
 *.out
