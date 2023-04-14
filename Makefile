@@ -12,9 +12,11 @@ all: $(SOURCES) $(EXE)
 install: $(EXE)
 	sudo cp ./jknit.out /usr/bin/jknit
 	sudo cp -r compilation-drivers /usr/include
+	chmod +x gui.py
+	sudo cp gui.py /usr/bin/jknit-gui
 
 uninstall:
-	sudo rm -f /usr/bin/jknit
+	sudo rm -f /usr/bin/jknit /usr/bin/jknit-gui
 	sudo rm -rf /usr/include/compilation-drivers
 
 reinstall:
