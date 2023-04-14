@@ -40,7 +40,7 @@ struct builder
 {
     string commandPath;
     string printChunkBreak;
-    string extension = ".txt";
+    string extension = "txt";
 };
 
 extern unsigned long long int systemWaitMS;
@@ -67,6 +67,8 @@ public:
     void fromString(const string &From);
 
     void toStream(ostream &Stream) const;
+    
+    const string specialCharacters = "%$_~#&^";
 
     vector<string> latexHeader = {
         "\\documentclass[12pt]{amsart}",
@@ -91,7 +93,7 @@ public:
         "\\begin{verbatim}\n"};
 
     vector<string> endCode = {
-        "\n\\end{verbatim}",
+        "\\end{verbatim}",
         "\\end{tcolorbox}\n"};
 
     vector<string> startOutput = {

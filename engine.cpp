@@ -103,6 +103,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
     buildAllChunks(all);
 
+    bool prevWasHeader = false;
     stringstream input(all);
     while (!input.eof())
     {
@@ -124,6 +125,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         // Code chunk
         if (line.substr(0, 3) == "```")
         {
+            prevWasHeader = false;
+
             bool lone = line.find("*") != string::npos;
             bool doOutput = line.find("^") == string::npos;
             bool skip = line.find("~") != string::npos;
@@ -144,7 +147,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
 
             string header = line.substr(4, line.size() - 5);
-            while (header.back() == '}' || header.back() == '*')
+            while (header.back() == '}')
             {
                 header.pop_back();
             }
@@ -183,7 +186,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 {
                     output << l << '\n';
                 }
-                output << contents << '\n';
+                output << contents;
                 for (auto l : endCode)
                 {
                     output << l << '\n';
@@ -247,6 +250,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         // Math chunk
         else if (line.substr(0, 2) == "$$")
         {
+            prevWasHeader = false;
+
             if (doLog)
             {
                 log << "Math:\n";
@@ -300,6 +305,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // \blockquote{}
             if (line[0] == '>')
             {
+                prevWasHeader = false;
                 output << "\\begin{displayquote}\n"
                        << line.substr(1)
                        << "\n\\end{displayquote}\n";
@@ -310,6 +316,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // \hrule
             else if (line.substr(0, 2) == "--" || line.substr(0, 2) == "~~" || line.substr(0, 2) == "__" || line.substr(0, 2) == "==")
             {
+                prevWasHeader = false;
+
                 // Jump over if rmd
                 if (line == "---")
                 {
@@ -335,7 +343,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 // #### => \paragraph{}
                 // #####+ => \subparagraph{}
 
-                output << "\\bigskip{}\n";
+                if (!prevWasHeader)
+                {
+                    output << "\\bigskip{}\n";
+                }
 
                 int numHashes = 0;
                 while (line[numHashes] == '#')
@@ -371,11 +382,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                 for (auto c : line.substr(numHashes))
                 {
-                    if (c == '&')
+                    if (specialCharacters.find(c) != string::npos)
                     {
-                        output << "\\";
+                        output << "\\verb|" << c << "|";
                     }
-                    output << c;
+                    else
+                    {
+                        output << c;
+                    }
                 }
                 output << "}}~\n";
 
@@ -386,6 +400,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                 output << "\\bigskip{}\n";
 
+                prevWasHeader = true;
                 continue;
             }
 
@@ -396,6 +411,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // MUST start with 1, a, or A
             else if ((line[0] == '1' || line[0] == 'a' || line[0] == 'A') && listChars.find(line[1]) != string::npos)
             {
+                prevWasHeader = false;
                 output << "\\begin{enumerate}\n";
 
                 // Erase until first space
@@ -426,6 +442,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // \end{itemize}
             else if (listChars.find(line[0]) != string::npos)
             {
+                prevWasHeader = false;
                 output << "\n\\begin{itemize}\n";
 
                 while (line.size() > 0 && listChars.find(line[0]) != string::npos)
@@ -452,17 +469,21 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             */
             else if (line[0] == '[')
             {
+                prevWasHeader = false;
                 string title, link;
 
                 // Scan until end of title
                 int i = 1;
                 while (i < line.size() && line[i] != ']')
                 {
-                    if (line[i] == '&')
+                    if (specialCharacters.find(line[i]) != string::npos)
                     {
-                        title += "\\";
+                        title += string("\\verb|") + line[i] + "|";
                     }
-                    title += line[i];
+                    else
+                    {
+                        title += line[i];
+                    }
                     i++;
                 }
 
@@ -470,11 +491,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 {
                     for (auto c : line)
                     {
-                        if (c == '&')
+                        if (specialCharacters.find(c) != string::npos)
                         {
-                            output << "\\";
+                            output << "\\verb|" << c << "|";
                         }
-                        output << c;
+                        else
+                        {
+                            output << c;
+                        }
                     }
                     output << '\n';
                     continue;
@@ -484,11 +508,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 i += 2;
                 while (i < line.size() && line[i] != ')')
                 {
-                    if (line[i] == '&')
+                    if (specialCharacters.find(line[i]) != string::npos)
                     {
-                        link += "\\";
+                        line += string("\\verb|") + line[i] + "|";
                     }
-                    link += line[i];
+                    else
+                    {
+                        link += line[i];
+                    }
                     i++;
                 }
 
@@ -508,28 +535,34 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             */
             else if (line[0] == '!')
             {
+                prevWasHeader = false;
                 string alt, path, options;
 
                 // Parse caption, path and options
                 int i = 2;
                 while (i < line.size() && line[i] != ']')
                 {
-                    if (line[i] == '&')
+                    if (specialCharacters.find(line[i]) != string::npos)
                     {
-                        alt += "\\";
+                        alt += string("\\verb|") + line[i] + "|";
                     }
-                    alt += line[i];
+                    else
+                    {
+                        alt += line[i];
+                    }
                     i++;
                 }
                 i += 2;
                 while (i < line.size() && line[i] != ')')
                 {
-                    if (line[i] == '&')
+                    if (specialCharacters.find(line[i]) != string::npos)
                     {
-                        path += "\\";
+                        path += string("\\verb|") + line[i] + "|";
                     }
-
-                    path += line[i];
+                    else
+                    {
+                        path += line[i];
+                    }
                     i++;
                 }
                 i += 2;
@@ -583,6 +616,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // Iterate through full text
             for (int i = 0; i < line.size(); i++)
             {
+                prevWasHeader = false;
+
                 // Inline math literal: Skip
                 if (line[i] == '$')
                 {
@@ -593,9 +628,9 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     } while (i < line.size() && line[i] != '$');
                     output << "$";
                 }
-                else if (line[i] == '&')
+                else if (specialCharacters.find(line[i]) != string::npos)
                 {
-                    output << "\\&";
+                    output << "\\verb|" << line[i] << "|";
                 }
 
                 // `code`
@@ -607,10 +642,6 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     i++;
                     while (i < line.size() && line[i] != '`')
                     {
-                        if (line[i] == '&')
-                        {
-                            output << "\\";
-                        }
                         output << line[i];
                         i++;
                     }
@@ -632,11 +663,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                         i++;
                         while (line.substr(i, 2) != "**")
                         {
-                            if (line[i] == '&')
+                            if (specialCharacters.find(line[i]) != string::npos)
                             {
-                                output << "\\";
+                                output << "\\verb|" << line[i] << "|";
                             }
-                            output << line[i];
+                            else
+                            {
+                                output << line[i];
+                            }
                             i++;
                         }
                         i++;
@@ -649,11 +683,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                         while (i < line.size() && line[i] != '*')
                         {
-                            if (line[i] == '&')
+                            if (specialCharacters.find(line[i]) != string::npos)
                             {
-                                output << "\\";
+                                output << "\\verb|" << line[i] << "|";
                             }
-                            output << line[i];
+                            else
+                            {
+                                output << line[i];
+                            }
                             i++;
                         }
 
@@ -723,6 +760,24 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     // Construct appropriate temp file name
     string srcfile = buildSpace + name + "_src_" + to_string(time(NULL)) + "." + builders[name].extension;
     string tempfile = buildSpace + name + "_out_" + to_string(time(NULL)) + ".txt";
+
+    const string illegalNameCharacters = "*^~`";
+    for (int i = 0; i < srcfile.size(); i++)
+    {
+        if (illegalNameCharacters.find(srcfile[i]) != string::npos)
+        {
+            srcfile.erase(i, 1);
+            i--;
+        }
+    }
+    for (int i = 0; i < tempfile.size(); i++)
+    {
+        if (illegalNameCharacters.find(tempfile[i]) != string::npos)
+        {
+            tempfile.erase(i, 1);
+            i--;
+        }
+    }
 
     // Send our chunk contents to a file
     smartSys(mkdir + buildSpace, log);
@@ -1079,6 +1134,17 @@ void Engine::buildAllChunks(const string &FileContents)
                 currentChunk.clear();
             }
         } while (!chunk.eof());
+
+        // Strip newlines
+        while (!currentChunk.empty() && currentChunk.front() == '\n')
+        {
+            currentChunk.erase(0, 1);
+        }
+        while (!currentChunk.empty() && currentChunk.back() == '\n')
+        {
+            currentChunk.pop_back();
+        }
+
         chunkOutputs[output.first].push_back(currentChunk);
         currentChunk.clear();
 
