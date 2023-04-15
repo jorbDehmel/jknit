@@ -24,7 +24,7 @@ int main(const int argc, const char *argv[])
 
      for (int i = 1; i < argc; i++)
      {
-          if (argv[i][0] == '-')
+          if (argv[i][0] == '-' || argv[i][0] == '/')
           {
                int cur = i;
 
@@ -133,6 +133,7 @@ int main(const int argc, const char *argv[])
           cout << tags::red_bold
                << "Please specify an input path.\n"
                << tags::reset;
+          
           return 1;
      }
 
@@ -143,6 +144,26 @@ int main(const int argc, const char *argv[])
      cout << tags::red_bold
           << "Warning: Windows is not fully supported! You may have to manually enter paths.\n"
           << tags::reset;
+
+     cout << "Converted filepath from " << inputPath << " to ";
+     for (unsigned int i = 0; i < inputPath.size(); i++)
+     {
+          if (inputPath[i] == '/')
+          {
+               inputPath[i] = '\\';
+          }
+     }
+     cout << inputPath << '\n';
+
+     cout << "Converted filepath from " << outputPath << " to ";
+     for (unsigned int i = 0; i < outputPath.size(); i++)
+     {
+          if (outputPath[i] == '/')
+          {
+               outputPath[i] = '\\';
+          }
+     }
+     cout << outputPath << '\n';
 #else
      // Interpretted languages
      e.fromString("python python3 print('CHUNK_BREAK') py\n");

@@ -1,7 +1,9 @@
 # Build for windows from Linux using mingw64
+# NOTE: Does not save compilation drivers anywhere!
+# If you want the full experience, use linux or WSL
 
 SOURCES := ../engine.cpp ../main.cpp
-OBJECTS := $(SOURCES:.cpp=.o)
+OBJECTS := engine.o main.o
 HEADERS := ../engine.hpp
 
 #EXE := jknit.out
@@ -14,22 +16,11 @@ CFLAGS := -Wall -pedantic -g #-Werror
 
 all: $(SOURCES) $(EXE)
 
-install: $(EXE)
-	sudo cp ./jknit.out /usr/bin/jknit
-	sudo cp -r compilation-drivers /usr/include
-	chmod +x gui.py
-	sudo cp gui.py /usr/bin/jknit-gui
+engine.o:	../engine.cpp
+	$(CC) -c $(CFLAGS) ../engine.cpp -o engine.o
 
-uninstall:
-	sudo rm -f /usr/bin/jknit /usr/bin/jknit-gui
-	sudo rm -rf /usr/include/compilation-drivers
-
-reinstall:
-	$(MAKE) clean
-	$(MAKE) install
-
-.cpp.o:
-	$(CC) $(CFLAGS) -c -o $@ $<
+main.o:	../main.cpp
+	$(CC) -c $(CFLAGS) ../main.cpp -o main.o
 
 $(EXE): $(OBJECTS) $(HEADERS)
 	$(CC) $(LFLAGS) $(OBJECTS) -o $@
@@ -39,4 +30,4 @@ remake:
 	$(MAKE)
 
 clean:
-	rm -rf $(OBJECTS) $(EXE) *.pdf *.aux *.log *.tex *.out
+	rm -rf $(OBJECTS) $(EXE) *.pdf *.aux *.log *.tex *.exe *.o

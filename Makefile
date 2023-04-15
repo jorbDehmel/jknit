@@ -37,4 +37,4 @@ remake:
 	$(MAKE)
 
 clean:
-	rm -rf $(OBJECTS) $(EXE) *.pdf *.aux *.log *.tex *.out
+	rm -rf *.pdf *.aux *.log *.tex *.out *.o

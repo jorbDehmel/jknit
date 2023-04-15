@@ -184,7 +184,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
 
             string name;
-            for (int i = 0; i < header.size() && header[i] != ' ' && header[i] != '}'; i++)
+            for (unsigned int i = 0; i < header.size() && header[i] != ' ' && header[i] != '}'; i++)
             {
                 name += header[i];
             }
@@ -234,7 +234,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     output << l << '\n';
                 }
             }
-            else if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > curChunkByLang[name] && chunkOutputs[name][curChunkByLang[name]] != "")
+            else if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > (unsigned int)curChunkByLang[name] && chunkOutputs[name][curChunkByLang[name]] != "")
             {
                 for (auto l : startOutput)
                 {
@@ -482,7 +482,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 string title, link;
 
                 // Scan until end of title
-                int i = 1;
+                unsigned int i = 1;
                 while (i < line.size() && line[i] != ']')
                 {
                     if (specialCharacters.find(line[i]) != string::npos)
@@ -548,7 +548,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 string alt, path, options;
 
                 // Parse caption, path and options
-                int i = 2;
+                unsigned int i = 2;
                 while (i < line.size() && line[i] != ']')
                 {
                     if (specialCharacters.find(line[i]) != string::npos)
@@ -623,7 +623,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
 
             // Iterate through full text
-            for (int i = 0; i < line.size(); i++)
+            for (unsigned int i = 0; i < line.size(); i++)
             {
                 prevWasHeader = false;
 
@@ -750,7 +750,7 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
 {
     // Parse header to select the correct builder
     string name, options;
-    int i;
+    unsigned int i;
     for (i = 0; i < Header.size() && Header[i] != ' '; i++)
     {
         name += Header[i];
@@ -785,7 +785,7 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     string tempfile = buildSpace + name + "_out_" + to_string(time(NULL)) + ".txt";
 
     const string illegalNameCharacters = "*^~`";
-    for (int i = 0; i < srcfile.size(); i++)
+    for (unsigned int i = 0; i < srcfile.size(); i++)
     {
         if (illegalNameCharacters.find(srcfile[i]) != string::npos)
         {
@@ -793,7 +793,7 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
             i--;
         }
     }
-    for (int i = 0; i < tempfile.size(); i++)
+    for (unsigned int i = 0; i < tempfile.size(); i++)
     {
         if (illegalNameCharacters.find(tempfile[i]) != string::npos)
         {
@@ -1025,7 +1025,7 @@ void Engine::buildAllChunks(const string &FileContents)
             string contents;
             string name;
 
-            int i;
+            unsigned int i;
             for (i = 0; i < header.size() && header[i] != ',' && header[i] != '}'; i++)
             {
                 name += header[i];
