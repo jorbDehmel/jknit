@@ -14,7 +14,6 @@ GPLv3 held by author
 #include <sstream>
 #include <iostream>
 #include <fstream>
-#include <cassert>
 #include <vector>
 #include <chrono>
 

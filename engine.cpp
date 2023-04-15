@@ -82,9 +82,18 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
     // Open files
     ifstream inputFile(InputFilepath);
-    assert(inputFile.is_open());
+
+    if (!inputFile.is_open())
+    {
+        throw runtime_error("Could not open input file. Ensure it exists.");
+    }
+
     ofstream output(OutputFilepath);
-    assert(output.is_open());
+
+    if (!output.is_open())
+    {
+        throw runtime_error("Could not open output file. Ensure it is within an existing folder.");
+    }
 
     for (auto line : latexHeader)
     {
@@ -117,13 +126,13 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         }
 
         // Strip leading whitespace
-        while (line[0] == ' ' || line[0] == '\t' || line[0] == '\n')
+        while (!line.empty() && (line[0] == ' ' || line[0] == '\t' || line[0] == '\n'))
         {
             line = line.erase(0, 1);
         }
 
         // Code chunk
-        if (line.substr(0, 3) == "```")
+        if (line.size() > 3 && line.substr(0, 3) == "```")
         {
             prevWasHeader = false;
 
@@ -147,7 +156,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
 
             string header = line.substr(4, line.size() - 5);
-            while (header.back() == '}')
+            while (!header.empty() && header.back() == '}')
             {
                 header.pop_back();
             }
@@ -166,7 +175,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 {
                     contents += line + '\n';
                 }
-            } while (line.size() < 3 || line.substr(0, 3) != "```");
+            } while (!input.eof() && (line.size() < 3 || line.substr(0, 3) != "```"));
 
             if (header == "settings")
             {
@@ -248,7 +257,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         }
 
         // Math chunk
-        else if (line.substr(0, 2) == "$$")
+        else if (line.size() >= 2 && line.substr(0, 2) == "$$")
         {
             prevWasHeader = false;
 
@@ -268,7 +277,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 getline(input, line);
 
                 // Strip leading whitespace
-                while (line[0] == ' ' || line[0] == '\t' || line[0] == '\n')
+                while (!line.empty() && (line[0] == ' ' || line[0] == '\t' || line[0] == '\n'))
                 {
                     line = line.erase(0, 1);
                 }
@@ -282,7 +291,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                     output << line << '\n';
                 }
-            } while (line.size() < 2 || line.substr(0, 2) != "$$");
+            } while (!input.eof() && (line.size() < 2 || line.substr(0, 2) != "$$"));
 
             for (auto l : endMath)
             {
@@ -429,7 +438,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     {
                         line.erase(0, 1);
                     }
-                } while (line != "");
+                } while (!input.eof() && line != "");
 
                 output << "\\end{enumerate}\n";
 
@@ -618,8 +627,20 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             {
                 prevWasHeader = false;
 
-                // Inline math literal: Skip
-                if (line[i] == '$')
+                // Escape character
+                if (line[i] == '\\')
+                {
+                    // If * or `, don't print backslash literals
+                    if (i + 1 < line.size() && line[i + 1] != '`' && line[i + 1] != '*')
+                    {
+                        output << '\\';
+                    }
+                    i++;
+                    output << line[i];
+                }
+
+                // Inline math literal
+                else if (line[i] == '$')
                 {
                     do
                     {
@@ -628,6 +649,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     } while (i < line.size() && line[i] != '$');
                     output << "$";
                 }
+
+                // Latex reserved characters
                 else if (specialCharacters.find(line[i]) != string::npos)
                 {
                     output << "\\verb|" << line[i] << "|";
@@ -788,7 +811,12 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     }
 
     ofstream output(srcfile);
-    assert(output.is_open());
+
+    if (!output.is_open())
+    {
+        throw runtime_error("Failed to open file for code output saving.");
+    }
+    
     output << Contents;
     output.close();
 
@@ -803,7 +831,11 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     }
     string line;
     ifstream input(tempfile);
-    assert(input.is_open());
+
+    if (!input.is_open())
+    {
+        throw runtime_error("Could not load code chunk output.");
+    }
 
     while (!input.eof())
     {
@@ -882,7 +914,10 @@ string strip(const string &What)
 
 void Engine::fromString(const string &From)
 {
-    assert(!From.empty());
+    if (From.empty())
+    {
+        throw runtime_error("Cannot load settings from an empty string.");
+    }
 
     // Parse loaders
     // "loader name here": "path here" ".ext" "options here"

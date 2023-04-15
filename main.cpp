@@ -180,11 +180,19 @@ int main(const int argc, const char *argv[])
                e.processFile(inputPath, outputPath);
           }
      }
+     catch (const runtime_error &error)
+     {
+          e.log.close();
+          cout << tags::red_bold
+               << "Error: " << error.what()
+               << tags::reset;
+          return 4;
+     }
      catch (...)
      {
           e.log.close();
           cout << tags::red_bold
-               << "A fatal error ocurred.\n"
+               << "An unknown fatal error ocurred.\n"
                << tags::reset;
           return 4;
      }

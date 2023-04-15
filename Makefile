@@ -4,8 +4,9 @@ HEADERS := engine.hpp
 EXE := jknit.out
 
 CC := clang++
-LFLAGS :=
-CFLAGS := -Wall -Werror -pedantic -g
+#CC := x86_64-w64-mingw32-g++
+LFLAGS := --static
+CFLAGS := -Wall -pedantic -g #-Werror
 
 all: $(SOURCES) $(EXE)
 
