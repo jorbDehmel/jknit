@@ -9,6 +9,46 @@ MIT licence via mit-license.org held by author
 #ifndef COLORTAGS_H
 #define COLORTAGS_H
 
+#if (defined(_WIN32) || defined(_WIN64))
+// As of now, windows is not supported
+namespace tags
+{
+    const char reset[] = "";
+
+    const char red[] = "";
+    const char yellow[] = "";
+    const char green[] = "";
+    const char blue[] = "";
+    const char violet[] = "";
+
+    const char red_thin[] = "";
+    const char yellow_thin[] = "";
+    const char green_thin[] = "";
+    const char blue_thin[] = "";
+    const char violet_thin[] = "";
+
+    const char red_bold[] = "";
+    const char yellow_bold[] = "";
+    const char green_bold[] = "";
+    const char blue_bold[] = "";
+    const char violet_bold[] = "";
+
+    const char italics[] = "";
+    const char bold[] = "";
+    const char underscore[] = "";
+    const char strikeout[] = "";
+
+    const char bf_black[] = "";
+    const char bf_white[] = "";
+    const char bf_red[] = "";
+    const char bf_yellow[] = "";
+    const char bf_green[] = "";
+    const char bf_blue[] = "";
+    const char bf_violet[] = "";
+
+    const char charfill[] = "";
+}
+#else
 namespace tags
 {
     const char reset[] = "\033[0;0m";
@@ -46,5 +86,6 @@ namespace tags
 
     const char charfill[] = "\033[2;8m";
 }
+#endif
 
 #endif

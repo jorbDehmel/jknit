@@ -10,13 +10,14 @@ class JknitGUI:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title('JKnit GUI')
+        self.root.geometry('300x500')
 
         self.input = ''
         self.output = ''
 
-        self.doTimer = False
-        self.doLog = False
-        self.doPDF = False
+        self.doTimer = bool
+        self.doLog = bool
+        self.doPDF = bool
 
         self._start_page()
         return
@@ -25,8 +26,8 @@ class JknitGUI:
         # Setup
         self._clear()
 
-        tk.Label(text='\nJKnit Graphical User Interface').grid()
-        tk.Label(text='Jordan Dehmel, 2023-present, GPLv3\n').grid(sticky=tk.W)
+        tk.Label(text='\nJKnit Graphical User Interface').grid(padx=8)
+        tk.Label(text='Jordan Dehmel, 2023-present, GPLv3\n').grid(padx=8)
 
         # Options checkboxes
         tk.Label(text='Options:').grid()
@@ -103,6 +104,8 @@ class JknitGUI:
         tk.Label(self.root, text='Knitting...').grid(sticky=tk.W)
         tk.Button(self.root, text='Cancel', command=self.root.destroy).grid()
 
+        self.root.update()
+
         command = 'jknit ' + self.input + ' -o ' + self.output
         
         if self.doLog:
@@ -145,11 +148,24 @@ class JknitGUI:
     def _help_page(self):
         self._clear()
 
-        tk.Label(self.root, text='JKnit is a lightweight, flexible open-source').grid(sticky=tk.W)
-        tk.Label(self.root, text='mathematical and computational document knitter. It').grid(sticky=tk.W)
-        tk.Label(self.root, text='translates .jmd files (see README.md for tips) into').grid(sticky=tk.W)
-        tk.Label(self.root, text='LaTeX (.tex) files. These .jmd files can have embedded').grid(sticky=tk.W)
-        tk.Label(self.root, text='running code.').grid(sticky=tk.W)
+        lines: list[str] = ['JKnit is a lightweight, flexible',
+                            'open-source mathematical and',
+                            'computational document knitter. It',
+                            'translates .jmd files (see README.md',
+                            'for tips) into LaTeX (.tex) files.',
+                            'These .jmd files can have embedded',
+                            'running code. You must select an input',
+                            'and an output file. "Do Log" creates',
+                            'a JKnit log for debugging, "Do Timer"',
+                            'times some substeps of the process and',
+                            'logs them. "Do PDF" converts the',
+                            'output .tex file to a .pdf after',
+                            'knitting.\n',
+                            'See github.com/jorbDehmel/jknit for',
+                            'more info.']
+
+        for line in lines:
+            tk.Label(self.root, text=line).grid(sticky=tk.W, pady=3)
 
         tk.Button(self.root, text='Back', command=self._start_page).grid()
 

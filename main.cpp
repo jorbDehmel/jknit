@@ -138,6 +138,12 @@ int main(const int argc, const char *argv[])
 
      Engine e(doLog);
 
+#if (defined(_WIN32) || defined(_WIN64))
+     // No guarentees that the tags will work
+     cout << tags::red_bold
+          << "Warning: Windows is not fully supported! You may have to manually enter paths.\n"
+          << tags::reset;
+#else
      // Interpretted languages
      e.fromString("python python3 print('CHUNK_BREAK') py\n");
      e.fromString("octave octave-cli disp('CHUNK_BREAK') txt\n");
@@ -148,6 +154,7 @@ int main(const int argc, const char *argv[])
      e.fromString("clang++* /usr/include/compilation-drivers/clang-driver.py ; cpp");
      e.fromString("gcc* /usr/include/compilation-drivers/gcc-driver.py ; cpp");
      e.fromString("rust* /usr/include/compilation-drivers/rustc-driver.py ; rs");
+#endif
 
      if (!quiet)
      {
