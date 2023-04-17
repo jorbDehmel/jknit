@@ -102,8 +102,6 @@ class JknitGUI:
         self._clear()
 
         tk.Label(self.root, text='Knitting...').grid(sticky=tk.W)
-        tk.Button(self.root, text='Cancel', command=self.root.destroy).grid()
-
         self.root.update()
 
         command = 'jknit ' + self.input + ' -o ' + self.output
