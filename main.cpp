@@ -149,8 +149,12 @@ int main(const int argc, const char *argv[])
           cout << tags::red_bold
                << "Please specify an input path.\n"
                << tags::reset;
-          
+
+#if (defined(_WIN32) || defined(_WIN64))
+          cin >> inputPath;
+#else
           return 1;
+#endif
      }
 
      Engine e(doLog);
