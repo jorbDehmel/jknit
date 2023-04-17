@@ -22,6 +22,8 @@ int main(const int argc, const char *argv[])
      bool doTimer = false;
      bool quiet = false;
 
+     vector<string> fromFiles;
+
      for (int i = 1; i < argc; i++)
      {
           if (argv[i][0] == '-')
@@ -36,15 +38,15 @@ int main(const int argc, const char *argv[])
                     case 'O':
                     case 'o':
                          // Set output file, skip next option
-                         if (cur + 1 >= argc)
+                         if (i + 1 >= argc)
                          {
                               cout << tags::red_bold
                                    << "Error: -o must be followed by a filepath.\n"
                                    << tags::reset;
                               return 2;
                          }
-                         outputPath = argv[cur + 1];
-                         i = cur + 1;
+                         i++;
+                         outputPath = argv[i];
                          break;
                     case 'L':
                     case 'l':
@@ -77,6 +79,19 @@ int main(const int argc, const char *argv[])
                               << "2023 - present\n"
                               << tags::reset;
                          break;
+                    case 'F':
+                    case 'f':
+                         // From next file
+                         if (i + 1 >= argc)
+                         {
+                              cout << tags::red_bold
+                                   << "Error: -f must be followed by a filepath.\n"
+                                   << tags::reset;
+                              return 2;
+                         }
+                         i++;
+                         fromFiles.push_back(argv[i]);
+                         break;
                     case 'H':
                     case 'h':
                          // Help
@@ -94,6 +109,7 @@ int main(const int argc, const char *argv[])
                               << " -q \t Quiet (no printing)\n"
                               << " -n \t No compile (halt before running)\n"
                               << " -v \t Show version\n"
+                              << " -f \t From file (load settings)\n"
                               << " -h \t Show help (this)\n\n"
                               << "Jorb Dehmel, 2023, jdehmel@outlook.com\n"
                               << "FOSS, Protected by GPLv3\n"
@@ -176,6 +192,29 @@ int main(const int argc, const char *argv[])
      e.fromString("gcc* /usr/include/compilation-drivers/gcc-driver.py ; cpp");
      e.fromString("rust* /usr/include/compilation-drivers/rustc-driver.py ; rs");
 #endif
+
+     for (auto from : fromFiles)
+     {
+          // Load to string
+          ifstream file(from);
+          if (!file.is_open())
+          {
+               cout << tags::red_bold
+                    << "Error: Could not open settings file '" << from << "'. Skipping.\n"
+                    << tags::reset;
+               continue;
+          }
+
+          string contents, line;
+          while (getline(file, line))
+          {
+               contents += line + '\n';
+          }
+          file.close();
+
+          // Load engine from this string
+          e.fromString(contents);
+     }
 
      if (!quiet)
      {

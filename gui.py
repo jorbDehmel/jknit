@@ -104,7 +104,12 @@ class JknitGUI:
         tk.Label(self.root, text='Knitting...').grid(sticky=tk.W)
         self.root.update()
 
-        command = 'jknit ' + self.input + ' -o ' + self.output
+        if os.name == 'nt':
+            command = 'jknit.exe '
+        else:
+            command = 'jknit '
+        
+        command += self.input + ' -o ' + self.output
         
         if self.doLog:
             command += ' -l'
