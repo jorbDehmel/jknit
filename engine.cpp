@@ -928,9 +928,24 @@ void Engine::fromString(const string &From)
     while (!fromStream.eof())
     {
         name = path = printCall = extension = "";
-        fromStream >> name >> path;
+        fromStream >> name;
 
-        // This one is special since it may contain spaces
+        // Handle path
+        fromStream >> path;
+        if (path[0] == '\'' || path[0] == '"')
+        {
+            string word;
+            while (path.back() != path.front())
+            {
+                fromStream >> word;
+                path += ' ' + word;
+            }
+
+            path.erase(0, 1);
+            path.pop_back();
+        }
+
+        // Handle print call
         fromStream >> printCall;
         if (printCall[0] == '\'' || printCall[0] == '"')
         {

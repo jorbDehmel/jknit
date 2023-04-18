@@ -9,6 +9,7 @@ GPLv3 held by author
 #include "engine.hpp"
 #include <chrono>
 #include <iostream>
+#include <filesystem>
 using namespace std;
 
 #define VERSION "0.0.4"
@@ -184,6 +185,46 @@ int main(const int argc, const char *argv[])
           }
      }
      cout << outputPath << '\n';
+
+     // Detect and set octave path
+     try
+     {     
+          string path = "C:\\Program Files\\GNU Octave";
+          for (const auto &p : filesystem::directory_iterator(path))
+          {
+               path = p.path().string();
+               break;
+          }
+
+          path += "\\mingw64\\bin\\octave-cli.exe";
+          cout << path << '\n';
+     
+          e.fromString("octave " + path + " disp('CHUNK_BREAK'); txt");
+     }
+     catch (...)
+     {
+          cout << "Could not locate Octave. Please ensure it is installed.\n";
+     }
+
+     // Detect and set python path
+     try
+     {     
+          string path = "%%USERPATH%%\\AppData\\Local\\Programs\\Python\\";
+          for (const auto &p : filesystem::directory_iterator(path))
+          {
+               path = p.path().string();
+               break;
+          }
+
+          path += "\\python.exe";
+          cout << path << '\n';
+     
+          e.fromString("python " + path + " print('CHUNK_BREAK'); py");
+     }
+     catch (...)
+     {
+          cout << "Could not locate Python. Please ensure it is installed.\n";
+     }
 #else
      // Interpretted languages
      e.fromString("python python3 print('CHUNK_BREAK') py\n");

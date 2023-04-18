@@ -128,7 +128,7 @@ class JknitGUI:
         if self.doPDF:
             command = 'pdflatex ' + self.output
             
-            print('Running cmmand \'' + command + '\'')
+            print('Running command \'' + command + '\'')
             out = os.system(command)
 
             if out == 0:

@@ -5,7 +5,7 @@ HEADERS := engine.hpp
 EXE := jknit.out
 #EXE := jknit.exe./j
 
-CC := clang++
+CC := clang++ -std=c++20
 #CC := x86_64-w64-mingw32-g++ --static
 LFLAGS :=
 CFLAGS := -Wall -pedantic -g #-Werror
