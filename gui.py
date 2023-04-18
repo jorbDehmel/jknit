@@ -14,6 +14,9 @@ miktex_link: str = 'https://miktex.org/download'
 
 class JknitGUI:
     def __init__(self):
+        if os.name == 'nt':
+            self._windows_install()
+
         self.root = tk.Tk()
         self.root.title('JKnit GUI')
 
@@ -26,6 +29,19 @@ class JknitGUI:
 
         self._start_page()
         return
+
+    def _windows_install(self):
+        # Create directory structure
+        os.mkdir('C:\\Program Files\\jknit')
+        
+        # Copy stuff
+        os.system('copy gui.py "C:\\Program Files\\jknit"')
+        os.system('copy experimental\\jknit.exe "C:\\Program Files\\jknit"')
+        
+        # Append to path
+        os.system('echo %PATH% > C:\\path-backup.txt')
+        os.system('setx PATH="%PATH%;C:\\Program Files\\jknit"')
+
     
     def _start_page(self, message: str=''):
         # Setup

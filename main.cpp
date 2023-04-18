@@ -152,6 +152,7 @@ int main(const int argc, const char *argv[])
                << tags::reset;
 
 #if (defined(_WIN32) || defined(_WIN64))
+          // In linux, failure is ok; You're already there
           cin >> inputPath;
 #else
           return 1;
@@ -188,17 +189,29 @@ int main(const int argc, const char *argv[])
 
      // Detect and set octave path
      try
-     {     
-          string path = "C:\\Program Files\\GNU Octave";
-          for (const auto &p : filesystem::directory_iterator(path))
+     {
+          try
           {
-               path = p.path().string();
-               break;
+               string path = "C:\\Program Files\\GNU Octave";
+               for (const auto &p : filesystem::directory_iterator(path))
+               {
+                    path = p.path().string();
+                    break;
+               }
+          }
+          catch (...)
+          {
+               string path = "C:\\Octave";
+               for (const auto &p : filesystem::directory_iterator(path))
+               {
+                    path = p.path().string();
+                    break;
+               }
           }
 
           path += "\\mingw64\\bin\\octave-cli.exe";
           cout << path << '\n';
-     
+
           e.fromString("octave '" + path + "' disp('CHUNK_BREAK'); txt");
      }
      catch (...)
@@ -208,7 +221,7 @@ int main(const int argc, const char *argv[])
 
      // Detect and set python path
      try
-     {     
+     {
           string path = "%%USERPATH%%\\AppData\\Local\\Programs\\Python\\";
           for (const auto &p : filesystem::directory_iterator(path))
           {
@@ -218,7 +231,7 @@ int main(const int argc, const char *argv[])
 
           path += "\\python.exe";
           cout << path << '\n';
-     
+
           e.fromString("python '" + path + "' print('CHUNK_BREAK'); py");
      }
      catch (...)
@@ -226,6 +239,8 @@ int main(const int argc, const char *argv[])
           cout << "Could not locate Python. Please ensure it is installed.\n";
      }
 #else
+     // I hate windows so much, this is all so easy on linux
+
      // Interpretted languages
      e.fromString("python python3 print('CHUNK_BREAK') py\n");
      e.fromString("octave octave-cli disp('CHUNK_BREAK') txt\n");
