@@ -4,13 +4,18 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog as fd
 
+import webbrowser as wb
+
 import os
+
+python_link: str = 'https://www.python.org/downloads/'
+octave_link: str = 'https://octave.org/download'
+miktex_link: str = 'https://miktex.org/download'
 
 class JknitGUI:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title('JKnit GUI')
-        self.root.geometry('300x500')
 
         self.input = ''
         self.output = ''
@@ -27,7 +32,10 @@ class JknitGUI:
         self._clear()
 
         tk.Label(text='\nJKnit Graphical User Interface').grid(padx=8)
-        tk.Label(text='Jordan Dehmel, 2023-present, GPLv3\n').grid(padx=8)
+        tk.Label(text='Jordan Dehmel, 2023-present, GPLv3').grid(padx=8)
+
+        tk.Button(self.root, text='Install Directions', command=self._install_page).grid()
+        tk.Label(self.root, text='\n').grid()
 
         # Options checkboxes
         tk.Label(text='Options:').grid()
@@ -95,9 +103,6 @@ class JknitGUI:
         if self.input == '':
             self._start_page('ERROR: Please select an input file!')
             return
-        elif self.output == '':
-            self._start_page('ERROR: Please select an ouput file!')
-            return
 
         self._clear()
 
@@ -109,8 +114,10 @@ class JknitGUI:
         else:
             command = 'jknit '
         
-        command += self.input + ' -o ' + self.output
-        
+        command += self.input
+
+        if self.output != '':
+            command += ' -o ' + self.output
         if self.doLog:
             command += ' -l'
         if self.doTimer:
@@ -173,6 +180,22 @@ class JknitGUI:
         tk.Button(self.root, text='Back', command=self._start_page).grid()
 
         return
+
+    def _install_page(self):
+        self._clear()
+
+        tk.Label(self.root, text='\nPlease install all of the following\n').grid()
+
+        if os.name == 'nt':
+            tk.Button(self.root, text='Install Python', command=lambda:wb.open_new(python_link)).grid(sticky=tk.W)
+            tk.Button(self.root, text='Install Octave', command=lambda:wb.open_new(octave_link)).grid(sticky=tk.W)
+            tk.Button(self.root, text='Install MikTex', command=lambda:wb.open_new(miktex_link)).grid(sticky=tk.W)
+        else:
+            tk.Label(self.root, text='Use your package manager to get:').grid()
+            tk.Label(self.root, text='octave-cli python3 texlive-most').grid()
+
+        tk.Label(self.root, text='\n').grid(sticky=tk.W)
+        tk.Button(self.root, text='Back', command=self._start_page).grid()
 
 
 if __name__ == '__main__':

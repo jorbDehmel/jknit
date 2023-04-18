@@ -199,7 +199,7 @@ int main(const int argc, const char *argv[])
           path += "\\mingw64\\bin\\octave-cli.exe";
           cout << path << '\n';
      
-          e.fromString("octave " + path + " disp('CHUNK_BREAK'); txt");
+          e.fromString("octave '" + path + "' disp('CHUNK_BREAK'); txt");
      }
      catch (...)
      {
@@ -219,7 +219,7 @@ int main(const int argc, const char *argv[])
           path += "\\python.exe";
           cout << path << '\n';
      
-          e.fromString("python " + path + " print('CHUNK_BREAK'); py");
+          e.fromString("python '" + path + "' print('CHUNK_BREAK'); py");
      }
      catch (...)
      {
