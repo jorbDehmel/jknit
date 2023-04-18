@@ -3,7 +3,7 @@ OBJECTS := $(SOURCES:.cpp=.o)
 HEADERS := engine.hpp
 
 EXE := jknit.out
-#EXE := jknit.exe./j
+#EXE := jknit.exe
 
 CC := clang++ -std=c++20
 #CC := x86_64-w64-mingw32-g++ --static
