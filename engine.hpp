@@ -70,7 +70,7 @@ public:
     const string specialCharacters = "%$_~#&^";
 
     vector<string> latexHeader = {
-        "\\documentclass[12pt]{amsart}",
+        "\\documentclass[10pt]{amsart}",
         "\\usepackage[margin=1in]{geometry}",
         "\\usepackage{csquotes}",
         "\\usepackage{graphicx}",

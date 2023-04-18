@@ -170,7 +170,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             string contents;
             do
             {
-                getline(input, line);
+                getline(input, line, '\n');
                 if (line.size() < 3 || line.substr(0, 3) != "```")
                 {
                     contents += line + '\n';
