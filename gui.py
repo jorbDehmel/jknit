@@ -32,15 +32,16 @@ class JknitGUI:
 
     def _windows_install(self):
         # Create directory structure
-        os.mkdir('C:\\Program Files\\jknit')
+        if not os.path.exists('C:\\Program Files\\jknit'):
+            os.mkdir('C:\\Program Files\\jknit')
         
         # Copy stuff
-        os.system('copy gui.py "C:\\Program Files\\jknit"')
-        os.system('copy experimental\\jknit.exe "C:\\Program Files\\jknit"')
+        os.system('xcopy gui.py "C:\\Program Files\\jknit"')
+        os.system('xcopy experimental\\jknit.exe "C:\\Program Files\\jknit"')
         
         # Append to path
         os.system('echo %PATH% > C:\\path-backup.txt')
-        os.system('setx PATH="%PATH%;C:\\Program Files\\jknit"')
+        os.system('setx /M PATH "%PATH%;%ProgramFiles%\\jknit"')
 
     
     def _start_page(self, message: str=''):
