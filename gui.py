@@ -37,8 +37,12 @@ class JknitGUI:
             os.mkdir('C:\\Program Files\\jknit')
         
         # Copy stuff
-        os.system('xcopy gui.py "C:\\Program Files\\jknit"')
-        os.system('xcopy experimental\\jknit.exe "C:\\Program Files\\jknit"')
+        if not os.path.exists('C:\\Program Files\\jknit\\gui.py'):
+            os.system('xcopy gui.py "C:\\Program Files\\jknit"')
+        if not os.path.exists('C:\\Program Files\\jknit\\jknit.exe'):
+            os.system('xcopy experimental\\jknit.exe "C:\\Program Files\\jknit"')
+        if not os.path.exists('C:\\Program Files\\jknit\\compilation-drivers'):
+            os.system('xcopy compilation-drivers "C:\\Program Files\\jknit"')
         
         # Append to path
         os.system('echo %PATH% > C:\\path-backup.txt')
