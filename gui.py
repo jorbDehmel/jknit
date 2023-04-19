@@ -1,4 +1,5 @@
 #!/bin/python3
+# The above shebang makes this executable on UNIX systems
 
 import tkinter as tk
 from tkinter import ttk
