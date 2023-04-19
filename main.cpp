@@ -190,6 +190,7 @@ int main(const int argc, const char *argv[])
      // Detect and set octave path
      try
      {
+          string path;
           try
           {
                string path = "C:\\Program Files\\GNU Octave";

@@ -224,14 +224,20 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     log << "Lone star chunk! Compiling now.\n";
                 }
 
-                for (auto l : startOutput)
+                stringstream into;
+                processChunk(header, contents, into);
+
+                if (into.str() != "")
                 {
-                    output << l << '\n';
-                }
-                processChunk(header, contents, output);
-                for (auto l : endOutput)
-                {
-                    output << l << '\n';
+                    for (auto l : startOutput)
+                    {
+                        output << l << '\n';
+                    }
+                    output << into.str();
+                    for (auto l : endOutput)
+                    {
+                        output << l << '\n';
+                    }
                 }
             }
             else if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > (unsigned int)curChunkByLang[name] && chunkOutputs[name][curChunkByLang[name]] != "")
@@ -816,7 +822,7 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     {
         throw runtime_error("Failed to open file for code output saving.");
     }
-    
+
     output << Contents;
     output.close();
 
