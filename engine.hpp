@@ -66,7 +66,7 @@ public:
     void fromString(const string &From);
 
     void toStream(ostream &Stream) const;
-    
+
     const string specialCharacters = "%$_~#&^";
 
     vector<string> latexHeader = {
@@ -78,9 +78,29 @@ public:
         "\\geometry{letterpaper}",
         "\\usepackage{xcolor}",
         "\\usepackage{color}",
-        "\\usepackage[breakable]{tcolorbox}",
         "\\usepackage{amsmath}",
         "\\usepackage{amssymb}",
+        "\\usepackage[many]{tcolorbox}",
+        "\\tcbuselibrary{listings}",
+        "\\newtcblisting{code} {",
+        "    listing only,",
+        "    breakable,",
+        "    colback = lightgray,",
+        "    boxrule = 0pt,",
+        "    listing options = {",
+        "        basicstyle =\\ttfamily,",
+        "        breaklines = true,",
+        "        columns = fullflexible}}",
+        "\\newtcblisting{codeoutput} {",
+        "    listing only,",
+        "    breakable,",
+        "    colback = white,",
+        "    boxrule = 1pt,",
+        "    colframe = gray,",
+        "    listing options = {"
+        "        basicstyle =\\ttfamily,",
+        "        breaklines = true,",
+        "        columns = fullflexible}}",
         "\\begin{document}",
         "\\sffamily"};
 
@@ -88,20 +108,16 @@ public:
         "\\end{document}"};
 
     vector<string> startCode = {
-        "\\begin{tcolorbox}[colback=lightgray, boxrule=0pt, breakable]",
-        "\\begin{verbatim}\n"};
+        "\\begin{code}"};
 
     vector<string> endCode = {
-        "\\end{verbatim}",
-        "\\end{tcolorbox}\n"};
+        "\\end{code}\n"};
 
     vector<string> startOutput = {
-        "\\begin{tcolorbox}[colback=white, boxrule=1pt, colframe=gray, breakable]",
-        "\\begin{verbatim}"};
+        "\\begin{codeoutput}"};
 
     vector<string> endOutput = {
-        "\\end{verbatim}",
-        "\\end{tcolorbox}\n"};
+        "\\end{codeoutput}\n"};
 
     vector<string> startMath = {
         "\\["};

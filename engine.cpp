@@ -846,10 +846,7 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     while (!input.eof())
     {
         getline(input, line);
-        if (line != "")
-        {
-            Stream << ">> " << line << '\n';
-        }
+        Stream << ">> " << line << '\n';
     }
 
     input.close();
