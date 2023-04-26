@@ -12,6 +12,8 @@ GPLv3 held by author
 // Otherwise, clears it at the end of running
 // #define DEBUG
 
+bool debug = false, failWithCode = false;
+
 unsigned long long int systemWaitMS = 0;
 void smartSys(const string &Command, ostream &Stream)
 {
@@ -28,6 +30,11 @@ void smartSys(const string &Command, ostream &Stream)
     if (result != 0)
     {
         Stream << "ERROR: Command exited with code " << result << '\n';
+
+        if (failWithCode)
+        {
+            throw runtime_error("System command failed when 'failWithCode' flag was set.");
+        }
     }
     return;
 }
@@ -71,9 +78,10 @@ Engine::~Engine()
 // Output: .tex file
 void Engine::processFile(const string &InputFilepath, const string &OutputFilepath)
 {
-#ifdef DEBUG
-    smartSys(rm + buildSpace, log);
-#endif
+    if (debug)
+    {
+        smartSys(rm + buildSpace, log);
+    }
 
     if (doLog)
     {
@@ -744,10 +752,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
     output.close();
 
-#ifndef DEBUG
-    // Clear build folder
-    smartSys(rm + buildSpace, log);
-#endif
+    if (!debug)
+    {
+        // Clear build folder
+        smartSys(rm + buildSpace, log);
+    }
 
     return;
 }

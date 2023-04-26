@@ -12,7 +12,7 @@ GPLv3 held by author
 #include <filesystem>
 using namespace std;
 
-#define VERSION "0.0.4"
+#define VERSION "0.0.5"
 
 // A better CLI for jknit
 int main(const int argc, const char *argv[])
@@ -22,6 +22,9 @@ int main(const int argc, const char *argv[])
      bool doLog = false;
      bool doTimer = false;
      bool quiet = false;
+
+     debug = false;
+     failWithCode = false;
 
      vector<string> fromFiles;
 
@@ -93,6 +96,14 @@ int main(const int argc, const char *argv[])
                          i++;
                          fromFiles.push_back(argv[i]);
                          break;
+                    case 'D':
+                    case 'd':
+                         debug = true;
+                         break;
+                    case 'E':
+                    case 'e':
+                         failWithCode = true;
+                         break;
                     case 'H':
                     case 'h':
                          // Help
@@ -111,6 +122,8 @@ int main(const int argc, const char *argv[])
                               << " -n \t No compile (halt before running)\n"
                               << " -v \t Show version\n"
                               << " -f \t From file (load settings)\n"
+                              << " -d \t Debug mode\n"
+                              << " -e \t Fail on code error\n"
                               << " -h \t Show help (this)\n\n"
                               << "Jorb Dehmel, 2023, jdehmel@outlook.com\n"
                               << "FOSS, Protected by GPLv3\n"

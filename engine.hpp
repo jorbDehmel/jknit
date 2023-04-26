@@ -42,6 +42,8 @@ struct builder
     string extension = "txt";
 };
 
+extern bool debug, failWithCode;
+
 extern unsigned long long int systemWaitMS;
 void smartSys(const string &Command, ostream &Stream = cout);
 
