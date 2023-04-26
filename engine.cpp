@@ -406,7 +406,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                         output << c;
                     }
                 }
-                output << "}}~\n";
+                output << "}\\nopunct}~\n";
 
                 for (auto l : endHeader)
                 {
