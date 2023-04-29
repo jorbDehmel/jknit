@@ -77,6 +77,8 @@ public:
         "\\usepackage{csquotes}",
         "\\usepackage{graphicx}",
         "\\usepackage{hyperref}",
+        "\\usepackage{pdflscape}",
+        "\\usepackage{moresize}"
         "\\geometry{letterpaper}",
         "\\usepackage{xcolor}",
         "\\usepackage{color}",
@@ -103,6 +105,7 @@ public:
         "        basicstyle =\\ttfamily,",
         "        breaklines = true,",
         "        columns = fullflexible}}",
+        "\\newenvironment{pres}{\\begin{landscape}\\Huge}{\\end{landscape}}",
         "\\begin{document}",
         "\\sffamily"};
 
