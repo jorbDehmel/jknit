@@ -58,7 +58,9 @@ Engine::Engine(const bool &DoLog)
         }
         else
         {
-            log << "Time/date: " << ctime(&curTime) << "\n\n";
+            log << "------------------------------------------\n"
+                << "Time/date: " << ctime(&curTime)
+                << "------------------------------------------\n\n";
         }
     }
 
@@ -85,7 +87,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
     if (doLog)
     {
-        log << "Opening '" << InputFilepath << "' and \'" << OutputFilepath << "'\n";
+        log << "Compiling from '" << InputFilepath << "' to \'" << OutputFilepath << "'\n";
     }
 
     // Open files
@@ -109,6 +111,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
     }
 
     // Do code pass
+
+    if (log.is_open())
+    {
+        log << "\n------------------------------------------\n"
+            << "Code pass: Getting code output\n"
+            << "------------------------------------------\n\n";
+    }
+
     string line;
     string all;
     while (!inputFile.eof())
@@ -119,6 +129,13 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
     inputFile.close();
 
     buildAllChunks(all);
+
+    if (log.is_open())
+    {
+        log << "\n------------------------------------------\n"
+            << "Compilation pass: Knitting\n"
+            << "------------------------------------------\n\n";
+    }
 
     bool prevWasHeader = false;
     stringstream input(all);
@@ -275,11 +292,6 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         {
             prevWasHeader = false;
 
-            if (doLog)
-            {
-                log << "Math:\n";
-            }
-
             for (auto l : startMath)
             {
                 output << l << '\n';
@@ -298,11 +310,6 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                 if (line.size() < 2 || line.substr(0, 2) != "$$")
                 {
-                    if (doLog)
-                    {
-                        log << line << '\n';
-                    }
-
                     output << line << '\n';
                 }
             } while (!input.eof() && (line.size() < 2 || line.substr(0, 2) != "$$"));
@@ -310,11 +317,6 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             for (auto l : endMath)
             {
                 output << l << '\n';
-            }
-
-            if (doLog)
-            {
-                log << "End math.\n";
             }
         }
 
@@ -751,6 +753,13 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
     }
 
     output.close();
+
+    if (log.is_open())
+    {
+        log << "\n------------------------------------------\n"
+            << "Done.\n"
+            << "------------------------------------------\n";
+    }
 
     if (!debug)
     {
