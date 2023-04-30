@@ -106,6 +106,7 @@ public:
         "        breaklines = true,",
         "        columns = fullflexible}}",
         "\\newenvironment{pres}{\\begin{landscape}\\Huge}{\\end{landscape}}",
+        "\\newcommand{\\slide}{\\newpage{}}",
         "\\begin{document}",
         "\\sffamily"};
 

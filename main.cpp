@@ -12,7 +12,7 @@ GPLv3 held by author
 #include <filesystem>
 using namespace std;
 
-#define VERSION "0.0.7"
+#define VERSION "0.0.8"
 
 // A better CLI for jknit
 int main(const int argc, const char *argv[])
