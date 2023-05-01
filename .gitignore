@@ -3,6 +3,8 @@ jknit/
 ex/
 tests/
 __pycache__/
+src/
+pkg/
 
 *.o
 *.out
@@ -11,3 +13,5 @@ __pycache__/
 *.log
 *.pdf
 *.png
+*.zst
+*.tar
