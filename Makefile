@@ -37,4 +37,4 @@ remake:
 	$(MAKE)
 
 clean:
-	rm -rf *.pdf *.aux *.log *.tex *.out *.o
+	rm -rf *.pdf *.aux *.log *.tex *.out *.o *.zst *.tar pkg jknit src
