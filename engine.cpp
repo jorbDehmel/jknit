@@ -284,6 +284,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             else
             {
                 log << "ERROR: No accompanying chunk!\n";
+                curChunkByLang[name]++;
             }
         }
 
