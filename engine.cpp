@@ -216,6 +216,37 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
             if (!skip)
             {
+                // Special line
+                string lang;
+                lang += toupper(name[0]);
+                for (int i = 1; i < name.size(); i++)
+                {
+                    if (string("*~^`{}").find(name[i]) == string::npos)
+                    {
+                        lang += name[i];
+                    }
+                }
+
+                // If a recognized language
+                if (lstSupportedLangs.count(lang) != 0)
+                {
+                    output << "\\lstset{language=" << lang << "}\n";
+                }
+                else
+                {
+                    lang[0] = tolower(lang[0]);
+                    if (lstSupportedLangs.count(lang) != 0)
+                    {
+                        output << "\\lstset{language=" << lang << "}\n";
+                    }
+                    else
+                    {
+                        output << "\\lstset{language=C++}\n";
+                    }
+                }
+
+                // Otherwise, use C++ (it's a pretty good standard thru listings in latex)
+
                 for (auto l : startCode)
                 {
                     output << l << '\n';

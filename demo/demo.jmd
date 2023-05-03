@@ -14,6 +14,7 @@ This is never evaluated due to the ~
 ## Scope Sharing
 
 ```{octave}
+% This is a matrix
 A = [1, 2, 3; 4, 5, 6; 7, 8, 9]
 ```
 
@@ -83,9 +84,11 @@ their name.
 #include <iostream>
 using namespace std;
 
+// Comment comment comment
 int main()
 {
   cout << "Hello from C++!\n";
+  int a = 1 + 2 + 3 + 56;
   return 0;
 }
 ```
