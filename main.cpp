@@ -223,7 +223,7 @@ int main(const int argc, const char *argv[])
                }
           }
 
-          path += "\\mingw64\\bin\\octave-cli.exe";
+          path += "\\mingw64\\bin\\octave.exe";
           cout << path << '\n';
 
           e.fromString("octave '" + path + "' disp('CHUNK_BREAK'); txt");
@@ -257,7 +257,7 @@ int main(const int argc, const char *argv[])
 
      // Interpretted languages
      e.fromString("python python3 print('CHUNK_BREAK') py\n");
-     e.fromString("octave octave-cli disp('CHUNK_BREAK') txt\n");
+     e.fromString("octave octave disp('CHUNK_BREAK') txt\n");
      e.fromString("bash /usr/bin/sh 'echo CHUNK_BREAK' sh");
      e.fromString("js node 'console.log('CHUNK_BREAK');' js");
 
