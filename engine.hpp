@@ -117,7 +117,7 @@ public:
         "        basicstyle =\\ttfamily\\relsize{-1},",
         "        breaklines = true,",
         "        columns = fullflexible}}",
-        "\\newenvironment{pres}{\\begin{landscape}\\Huge}{\\end{landscape}}",
+        "\\newenvironment{pres}{\\begin{landscape}\\Huge\\pagestyle{empty}}{\\end{landscape}}",
         "\\newcommand{\\slide}{\\newpage{}}", "\\begin{document}", "\\sffamily"};
 
     vector<string> latexFooter = {

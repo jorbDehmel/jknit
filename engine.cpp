@@ -80,6 +80,9 @@ Engine::~Engine()
 // Output: .tex file
 void Engine::processFile(const string &InputFilepath, const string &OutputFilepath)
 {
+    // Pres mode
+    bool pres = (InputFilepath.find(".rpres") != string::npos) || (InputFilepath.find(".jpres") != string::npos);
+
     if (debug)
     {
         smartSys(rm + buildSpace, log);
@@ -108,6 +111,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
     for (auto line : latexHeader)
     {
         output << line << '\n';
+    }
+
+    if (pres)
+    {
+        output << "\\begin{pres}\n";
     }
 
     // Do code pass
@@ -139,8 +147,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
     bool prevWasHeader = false;
     stringstream input(all);
+    string prevLine;
     while (!input.eof())
     {
+        prevLine = line;
         getline(input, line);
 
         if (line == "")
@@ -375,7 +385,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             {
                 prevWasHeader = false;
 
-                // Jump over if rmd
+                // Jump over if rmd header thing
                 if (line == "---")
                 {
                     do
@@ -385,7 +395,69 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 }
                 else
                 {
-                    output << "\\hrule{}\n";
+                    // Pres handling
+                    if (pres)
+                    {
+                        if (prevLine != "")
+                        {
+                            // Erase previous line (it is header)
+                            output.seekp(output.tellp() - (streampos)prevLine.size() - 1);
+                        }
+
+                        output << "\\slide{}\n";
+
+                        output << "\\section*{";
+
+                        for (auto l : startHeader)
+                        {
+                            output << l << ' ';
+                        }
+
+                        output << "\\sffamily{";
+
+                        for (auto c : prevLine)
+                        {
+                            if (specialCharacters.find(c) != string::npos)
+                            {
+                                output << "\\verb|" << c << "|";
+                            }
+                            else
+                            {
+                                output << c;
+                            }
+                        }
+                        output << "}\\nopunct}~\n";
+
+                        for (auto l : endHeader)
+                        {
+                            output << l << ' ';
+                        }
+
+                        output << "\\bigskip{}\n";
+
+                        prevWasHeader = true;
+
+                        // Skip all the following non-empty lines (settings in rpres)
+                        do
+                        {
+                            prevLine = line;
+                            getline(input, line);
+                            while (line[0] == ' ' || line[0] == '\t' || line[0] == '\n')
+                            {
+                                line = line.substr(1);
+                            }
+                            while (line.back() == ' ' || line.back() == '\t' || line.back() == '\n')
+                            {
+                                line.pop_back();
+                            }
+                        } while (line != "");
+
+                        continue;
+                    }
+                    else
+                    {
+                        output << "\\hrule{}\n";
+                    }
                 }
                 continue;
             }
@@ -777,6 +849,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
             output << '\n';
         }
+    }
+
+    if (pres)
+    {
+        output << "\\end{pres}\n";
     }
 
     for (auto l : latexFooter)
