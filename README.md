@@ -24,6 +24,8 @@ Compiled (non-knit) languages:
 - C++ - gcc*
 - Rust - rust*
 
+.rpres support is planned for the future, but is currently shaky at best.
+
 ### Installation requirements
 
 These are actually just suggestions, but you will find that JKnit will have
