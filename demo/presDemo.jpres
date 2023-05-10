@@ -7,6 +7,7 @@ skip
 
 ## Jordan Dehmel
 
+Title
 ============================================
 
 ```{octave}
@@ -84,3 +85,11 @@ fn main() {
   println!("Hello from Rust!");
 }
 ```
+
+Presentation Features
+====================================================
+
+- You can try
+- To do bullet points
+- These look quite nice in .rpres
+- I am testing whether they look good with my `jknit` system

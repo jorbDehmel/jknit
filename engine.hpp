@@ -21,6 +21,8 @@ GPLv3 held by author
 #include "tags.hpp"
 using namespace std;
 
+#define VERSION "0.0.10"
+
 // For system independence
 // Luckily, output redirecting via > works as-is
 // on DOS cuz that's basically all this program is
@@ -87,6 +89,7 @@ public:
         "\\usepackage{amsmath}",
         "\\usepackage{amssymb}",
         "\\usepackage[many]{tcolorbox}",
+        "\\usepackage{afterpage}",
         "\\tcbuselibrary{listings}",
         "\\newtcblisting{code} {",
         "   listing only,",
@@ -118,7 +121,11 @@ public:
         "        breaklines = true,",
         "        columns = fullflexible}}",
         "\\newenvironment{pres}{\\begin{landscape}\\Huge\\pagestyle{empty}}{\\end{landscape}}",
-        "\\newcommand{\\slide}{\\newpage{}}", "\\begin{document}", "\\sffamily"};
+        "\\newcommand{\\titleslide}{\\pagecolor{titlebg}\\afterpage{\\nopagecolor}}",
+        "\\newcommand{\\slide}{\\newpage{}}",
+        "\\definecolor{titlebg} {RGB} {230, 255, 243} ",
+        "\\begin{document}",
+        "\\sffamily"};
 
     vector<string> latexFooter = {
         "\\end{document}"};
