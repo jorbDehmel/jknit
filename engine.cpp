@@ -78,10 +78,9 @@ Engine::~Engine()
 
 // Input: Compatable file
 // Output: .tex file
-void Engine::processFile(const string &InputFilepath, const string &OutputFilepath)
+void Engine::processFile(const string &InputFilepath, const string &OutputFilepath, const bool &PresMode)
 {
-    // Pres mode
-    bool pres = (InputFilepath.find(".rpres") != string::npos) || (InputFilepath.find(".jpres") != string::npos);
+    bool pres = PresMode;
 
     if (debug)
     {
@@ -520,18 +519,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 }
 
                 output << "\\sffamily{";
-
-                for (auto c : line.substr(numHashes))
-                {
-                    if (specialCharacters.find(c) != string::npos)
-                    {
-                        output << "\\verb|" << c << "|";
-                    }
-                    else
-                    {
-                        output << c;
-                    }
-                }
+                processMDLine(line.substr(numHashes), output);
                 output << "}\\nopunct}~\n";
 
                 for (auto l : endHeader)
@@ -545,11 +533,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 continue;
             }
 
-            // 1. Ordered
-            // 2. List
-            // \begin{enumerate}
-            // \end{enumerate}
-            // MUST start with 1, a, or A
+            // Ordered / enumerated list
             else if ((line[0] == '1' || line[0] == 'a' || line[0] == 'A') && listChars.find(line[1]) != string::npos)
             {
                 prevWasHeader = false;
@@ -563,7 +547,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                 do
                 {
-                    output << "\\item " << line << "\n";
+                    output << "\\item{";
+
+                    processMDLine(line, output);
+
+                    output << "}\n";
 
                     getline(input, line);
                     while (line.size() > 0 && line[0] != ' ')
@@ -577,10 +565,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 continue;
             }
 
-            // - Unordered
-            // - List
-            // \begin{itemize}
-            // \end{itemize}
+            // Unordered list
             else if (listChars.find(line[0]) != string::npos)
             {
                 prevWasHeader = false;
@@ -594,7 +579,12 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                         line.erase(0, 1);
                     }
 
-                    output << "\\item " << line << '\n';
+                    output << "\\item{";
+
+                    // Catch internal markdown syntax
+                    processMDLine(line, output);
+
+                    output << "}\n";
 
                     getline(input, line);
                 }
@@ -661,19 +651,17 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 }
 
                 // Write latex
-                output << "\\href{" << link << "}{" << title << "}\n";
+                output << "\\href{" << link << "}{";
+
+                // Catch any internal markdown syntax
+                processMDLine(title, output);
+
+                output << "}\n";
 
                 continue;
             }
 
-            // Image ![alt text](image.jpg){options}
-            /*
-            \begin{figure}[h]
-                \centering
-                \includegraphics[width=0.25\textwidth]{name.img}
-                \caption{alt text}
-            \end{figure}
-            */
+            // Handle markdown image syntax
             else if (line[0] == '!')
             {
                 prevWasHeader = false;
@@ -743,7 +731,12 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 output << "\\begin{figure}[h]\n"
                        << "\\centering\n"
                        << "\\includegraphics[" << options << "]{" << path << "}\n"
-                       << "\\caption {" << alt << "}\n"
+                       << "\\caption {";
+
+                // Catches any markdown syntax in captions
+                processMDLine(alt, output);
+
+                output << "}\n"
                        << "\\end {figure}\n";
 
                 continue;
@@ -754,112 +747,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 continue;
             }
 
-            // Iterate through full text
-            for (unsigned int i = 0; i < line.size(); i++)
+            else
             {
                 prevWasHeader = false;
-
-                // Escape character
-                if (line[i] == '\\')
-                {
-                    // If * or `, don't print backslash literals
-                    if (i + 1 < line.size() && line[i + 1] != '`' && line[i + 1] != '*')
-                    {
-                        output << '\\';
-                    }
-                    i++;
-                    output << line[i];
-                }
-
-                // Inline math literal
-                else if (line[i] == '$')
-                {
-                    do
-                    {
-                        output << line[i];
-                        i++;
-                    } while (i < line.size() && line[i] != '$');
-                    output << "$";
-                }
-
-                // Latex reserved characters
-                else if (specialCharacters.find(line[i]) != string::npos)
-                {
-                    output << "\\verb|" << line[i] << "|";
-                }
-
-                // `code`
-                // \verb||
-                else if (line[i] == '`')
-                {
-                    output << "\\verb|";
-
-                    i++;
-                    while (i < line.size() && line[i] != '`')
-                    {
-                        output << line[i];
-                        i++;
-                    }
-                    output << "|";
-                }
-
-                // *italicized*
-                // \emph{}
-                else if (i < line.size() && line[i] == '*')
-                {
-                    i++;
-
-                    // **bold**
-                    // \textbf{}
-                    if (i < line.size() && line[i] == '*')
-                    {
-                        output << "\\textbf{";
-
-                        i++;
-                        while (line.substr(i, 2) != "**")
-                        {
-                            if (specialCharacters.find(line[i]) != string::npos)
-                            {
-                                output << "\\verb|" << line[i] << "|";
-                            }
-                            else
-                            {
-                                output << line[i];
-                            }
-                            i++;
-                        }
-                        i++;
-
-                        output << "}";
-                    }
-                    else
-                    {
-                        output << "\\emph{";
-
-                        while (i < line.size() && line[i] != '*')
-                        {
-                            if (specialCharacters.find(line[i]) != string::npos)
-                            {
-                                output << "\\verb|" << line[i] << "|";
-                            }
-                            else
-                            {
-                                output << line[i];
-                            }
-                            i++;
-                        }
-
-                        output << "}";
-                    }
-                }
-
-                else
-                {
-                    output << line[i];
-                }
+                processMDLine(line, output);
             }
-
-            output << '\n';
         }
     }
 
@@ -1143,6 +1035,116 @@ void Engine::toStream(ostream &Stream) const
 {
     Stream << toString();
     return;
+}
+
+void Engine::processMDLine(const string &Line, ostream &output)
+{
+    string line = Line;
+
+    // Iterate through full text
+    for (unsigned int i = 0; i < line.size(); i++)
+    {
+        // Escape character
+        if (line[i] == '\\')
+        {
+            // If * or `, don't print backslash literals
+            if (i + 1 < line.size() && line[i + 1] != '`' && line[i + 1] != '*')
+            {
+                output << '\\';
+            }
+            i++;
+            output << line[i];
+        }
+
+        // Inline math literal
+        else if (line[i] == '$')
+        {
+            do
+            {
+                output << line[i];
+                i++;
+            } while (i < line.size() && line[i] != '$');
+            output << "$";
+        }
+
+        // Latex reserved characters
+        else if (specialCharacters.find(line[i]) != string::npos)
+        {
+            output << "\\verb|" << line[i] << "|";
+        }
+
+        // `code`
+        // \verb||
+        else if (line[i] == '`')
+        {
+            output << "\\verb|";
+
+            i++;
+            while (i < line.size() && line[i] != '`')
+            {
+                output << line[i];
+                i++;
+            }
+            output << "|";
+        }
+
+        // *italicized*
+        // \emph{}
+        else if (i < line.size() && line[i] == '*')
+        {
+            i++;
+
+            // **bold**
+            // \textbf{}
+            if (i < line.size() && line[i] == '*')
+            {
+                output << "\\textbf{";
+
+                i++;
+                while (line.substr(i, 2) != "**")
+                {
+                    if (specialCharacters.find(line[i]) != string::npos)
+                    {
+                        output << "\\verb|" << line[i] << "|";
+                    }
+                    else
+                    {
+                        output << line[i];
+                    }
+                    i++;
+                }
+                i++;
+
+                output << "}";
+            }
+            else
+            {
+                output << "\\emph{";
+
+                while (i < line.size() && line[i] != '*')
+                {
+                    if (specialCharacters.find(line[i]) != string::npos)
+                    {
+                        output << "\\verb|" << line[i] << "|";
+                    }
+                    else
+                    {
+                        output << line[i];
+                    }
+                    i++;
+                }
+
+                output << "}";
+            }
+        }
+
+        else
+        {
+            output << line[i];
+        }
+    }
+
+    output << '\n';
 }
 
 void Engine::buildAllChunks(const string &FileContents)

@@ -20,6 +20,7 @@ int main(const int argc, const char *argv[])
      bool doLog = false;
      bool doTimer = false;
      bool quiet = false;
+     bool pres = false;
 
      debug = false;
      failWithCode = false;
@@ -102,6 +103,10 @@ int main(const int argc, const char *argv[])
                     case 'e':
                          failWithCode = true;
                          break;
+                    case 'P':
+                    case 'p':
+                         pres = true;
+                         break;
                     case 'H':
                     case 'h':
                          // Help
@@ -122,6 +127,7 @@ int main(const int argc, const char *argv[])
                               << " -f \t From file (load settings)\n"
                               << " -d \t Debug mode\n"
                               << " -e \t Fail on code error\n"
+                              << " -p \t Force presentation mode\n"
                               << " -h \t Show help (this)\n\n"
                               << "Jorb Dehmel, 2023, jdehmel@outlook.com\n"
                               << "FOSS, Protected by GPLv3\n"
@@ -169,6 +175,9 @@ int main(const int argc, const char *argv[])
           return 1;
 #endif
      }
+
+     // Pres mode
+     pres = pres || (inputPath.find(".rpres") != string::npos) || (inputPath.find(".jpres") != string::npos);
 
      Engine e(doLog);
 
@@ -302,7 +311,7 @@ int main(const int argc, const char *argv[])
                // Timed
                auto start = chrono::high_resolution_clock::now();
 
-               e.processFile(inputPath, outputPath);
+               e.processFile(inputPath, outputPath, pres);
 
                auto end = chrono::high_resolution_clock::now();
                unsigned long long int elapsed = chrono::duration_cast<chrono::milliseconds>(end - start).count();
@@ -316,7 +325,7 @@ int main(const int argc, const char *argv[])
           else
           {
                // Untimed
-               e.processFile(inputPath, outputPath);
+               e.processFile(inputPath, outputPath, pres);
           }
      }
      catch (const runtime_error &error)

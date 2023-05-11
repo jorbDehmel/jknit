@@ -21,7 +21,7 @@ GPLv3 held by author
 #include "tags.hpp"
 using namespace std;
 
-#define VERSION "0.0.10"
+#define VERSION "0.0.11"
 
 // For system independence
 // Luckily, output redirecting via > works as-is
@@ -56,7 +56,7 @@ public:
     Engine(const bool &DoLog = false);
     ~Engine();
 
-    void processFile(const string &InputFilepath, const string &OutputFilepath);
+    void processFile(const string &InputFilepath, const string &OutputFilepath, const bool &PresMode);
 
     void processChunk(const string Header, const string &Contents, ostream &Stream);
 
@@ -71,6 +71,9 @@ public:
     void fromString(const string &From);
 
     void toStream(ostream &Stream) const;
+
+    // Turns a line from markdown into latex and inserts it into a stream
+    void processMDLine(const string &Line, ostream &Stream);
 
     const string specialCharacters = "%$_~#&^";
 

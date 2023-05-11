@@ -24,7 +24,9 @@ Compiled (non-knit) languages:
 - C++ - gcc*
 - Rust - rust*
 
-.rpres support is planned for the future, but is currently shaky at best.
+`.rpres` formatting is dubiously supported as of version $0.0.11$.
+You can activate this mode by changing a file's extension to `.rpres`
+or `.jpres` (preferred). All setting are ignored as of this version.
 
 ### Installation requirements
 
