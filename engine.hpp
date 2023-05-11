@@ -124,7 +124,7 @@ public:
         "        breaklines = true,",
         "        columns = fullflexible}}",
         "\\newenvironment{pres}{\\begin{landscape}\\Huge\\pagestyle{empty}}{\\end{landscape}}",
-        "\\newcommand{\\titleslide}{\\pagecolor{titlebg}\\afterpage{\\nopagecolor}}",
+        "\\newenvironment{titleslide}{\\pagecolor{titlebg}\\HUGE\\vspace*{0.2\\textheight}\\afterpage{\\nopagecolor}}{}",
         "\\newcommand{\\slide}{\\newpage{}}",
         "\\definecolor{titlebg} {RGB} {230, 255, 243} ",
         "\\begin{document}",

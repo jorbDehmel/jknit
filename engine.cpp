@@ -122,11 +122,12 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         output << line << '\n';
     }
 
+    int slideBreaksUntilEndTitleSlide = 2;
     if (pres)
     {
-        output << "\\begin{pres}\n"
-               << "\\titleslide{}\n"
-               << "\\pagestyle{empty}\n";
+        output << "\\pagestyle{empty}\n"
+               << "\\begin{pres}\n"
+               << "\\begin{titleslide}\n";
     }
 
     // Do code pass
@@ -415,7 +416,20 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                             output.seekp(output.tellp() - (streampos)prevLine.size() - 1);
                         }
 
-                        output << "\\slide{}\n";
+                        if (slideBreaksUntilEndTitleSlide != 2)
+                        {
+                            output << "\\slide{}\n";
+                        }
+
+                        // Mega janky solution
+                        if (slideBreaksUntilEndTitleSlide > 0)
+                        {
+                            slideBreaksUntilEndTitleSlide--;
+                            if (slideBreaksUntilEndTitleSlide == 0)
+                            {
+                                output << "\\end{titleslide}\n";
+                            }
+                        }
 
                         output << "\\section*{";
 
@@ -593,11 +607,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 continue;
             }
 
-            // Links [title](https://www.example.com)
-            /*
-            \usepackage{hyperref}
-            \href{link.com}{text}
-            */
+            // Links
             else if (line[0] == '[')
             {
                 prevWasHeader = false;
@@ -725,6 +735,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                         options += line[i];
                     }
                     i++;
+                }
+
+                if (options == "")
+                {
+                    options = "width=0.5\\textwidth";
                 }
 
                 // Convert to latex
