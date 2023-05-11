@@ -766,6 +766,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             {
                 prevWasHeader = false;
                 processMDLine(line, output);
+                output << '\n';
             }
         }
     }
@@ -1159,7 +1160,7 @@ void Engine::processMDLine(const string &Line, ostream &output)
         }
     }
 
-    output << '\n';
+    return;
 }
 
 void Engine::buildAllChunks(const string &FileContents)
