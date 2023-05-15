@@ -13,7 +13,7 @@ int main()
     }
     else
     {
-        return system("python3 ..\\gui.py");
+        return system("cd .. ; python3 gui.py");
     }
 #else
     cout << "This launcher is windows-only.\n";
