@@ -8,10 +8,6 @@ GPLv3 held by author
 
 #include "engine.hpp"
 
-// If defined, clears the jknit folder at the beginning
-// Otherwise, clears it at the end of running
-// #define DEBUG
-
 bool debug = false, failWithCode = false;
 
 unsigned long long int systemWaitMS = 0;
@@ -241,7 +237,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 // Special line
                 string lang;
                 lang += toupper(name[0]);
-                for (int i = 1; i < name.size(); i++)
+                for (unsigned int i = 1; i < name.size(); i++)
                 {
                     if (string("*~^`{}").find(name[i]) == string::npos)
                     {
@@ -1138,6 +1134,56 @@ void Engine::processMDLine(const string &Line, ostream &output)
                 output << "\\emph{";
 
                 while (i < line.size() && line[i] != '*')
+                {
+                    if (specialCharacters.find(line[i]) != string::npos)
+                    {
+                        output << "\\verb|" << line[i] << "|";
+                    }
+                    else
+                    {
+                        output << line[i];
+                    }
+                    i++;
+                }
+
+                output << "}";
+            }
+        }
+
+        // _italics_
+        // __bold__
+        else if (i < line.size() && line[i] == '_')
+        {
+            i++;
+
+            // **bold**
+            // \textbf{}
+            if (i < line.size() && line[i] == '_')
+            {
+                output << "\\textbf{";
+
+                i++;
+                while (line.substr(i, 2) != "__")
+                {
+                    if (specialCharacters.find(line[i]) != string::npos)
+                    {
+                        output << "\\verb|" << line[i] << "|";
+                    }
+                    else
+                    {
+                        output << line[i];
+                    }
+                    i++;
+                }
+                i++;
+
+                output << "}";
+            }
+            else
+            {
+                output << "\\emph{";
+
+                while (i < line.size() && line[i] != '_')
                 {
                     if (specialCharacters.find(line[i]) != string::npos)
                     {

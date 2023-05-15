@@ -94,3 +94,4 @@ Presentation Features
 - These look quite nice in .rpres
 - I am testing whether they look good with my `jknit` system
 - **bold face** and also *iteralicized* and `inline code` and $n + 5 = n + 123$ inline **math**
+- __alternative bold using underscores__ and _similar italics_

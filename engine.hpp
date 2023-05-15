@@ -21,7 +21,7 @@ GPLv3 held by author
 #include "tags.hpp"
 using namespace std;
 
-#define VERSION "0.0.11"
+#define VERSION "0.0.12"
 
 // For system independence
 // Luckily, output redirecting via > works as-is
@@ -75,7 +75,7 @@ public:
     // Turns a line from markdown into latex and inserts it into a stream
     void processMDLine(const string &Line, ostream &Stream);
 
-    const string specialCharacters = "%$_~#&^";
+    const string specialCharacters = "%$~#&^";
 
     vector<string> latexHeader = {
         "\\documentclass[10pt]{amsart}",
