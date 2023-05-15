@@ -27,6 +27,7 @@ class JknitGUI:
         self.doTimer = bool
         self.doLog = bool
         self.doPDF = bool
+        self.forcePres = bool
 
         self._start_page()
         return
@@ -76,8 +77,15 @@ class JknitGUI:
                     offvalue=False)
         self.logBox.grid(sticky=tk.W)
 
+        self.presBox = ttk.Checkbutton(self.root,
+                    text='Force Presentation Mode',
+                    variable=self.forcePres,
+                    onvalue=True,
+                    offvalue=False)
+        self.presBox.grid(sticky=tk.W)
+
         self.pdfBox = ttk.Checkbutton(self.root,
-                    text='Do PDF Conversion',
+                    text='Do PDF Conversion (Requires TeX)',
                     variable=self.doPDF,
                     onvalue=True,
                     offvalue=False)
@@ -144,6 +152,8 @@ class JknitGUI:
             command += ' -l'
         if self.doTimer:
             command += ' -t'
+        if self.forcePres:
+            command += ' -p'
         
         print('Running command \'' + command + '\'')
         out = os.system(command)
