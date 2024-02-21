@@ -55,8 +55,7 @@ Engine::Engine(const bool &DoLog)
         else
         {
             log << "------------------------------------------\n"
-                << "Time/date: " << ctime(&curTime)
-                << "------------------------------------------\n\n";
+                << "Time/date: " << ctime(&curTime) << "------------------------------------------\n\n";
         }
     }
 
@@ -186,9 +185,7 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             // Get header
             if (line.size() <= 5)
             {
-                cout << tags::red_bold
-                     << "Error: Invalid code chunk header\n"
-                     << tags::reset;
+                cout << tags::red_bold << "Error: Invalid code chunk header\n" << tags::reset;
 
                 if (doLog)
                 {
@@ -198,10 +195,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 continue;
             }
 
-            string header = line.substr(4, line.size() - 5);
-            while (!header.empty() && header.back() == '}')
+            string header = line.substr(3);
+            while (!header.empty() && header.front() == '{' && header.back() == '}')
             {
-                header.pop_back();
+                header = header.substr(1, header.size() - 2);
             }
 
             if (doLog)
@@ -314,7 +311,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     }
                 }
             }
-            else if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > (unsigned int)curChunkByLang[name] && chunkOutputs[name][curChunkByLang[name]] != "")
+            else if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > (unsigned int)curChunkByLang[name] &&
+                     chunkOutputs[name][curChunkByLang[name]] != "")
             {
                 for (auto l : startOutput)
                 {
@@ -381,15 +379,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             if (line[0] == '>')
             {
                 prevWasHeader = false;
-                output << "\\begin{displayquote}\n"
-                       << line.substr(1)
-                       << "\n\\end{displayquote}\n";
+                output << "\\begin{displayquote}\n" << line.substr(1) << "\n\\end{displayquote}\n";
                 continue;
             }
 
             // --- horizontal line
             // \hrule
-            else if (line.substr(0, 2) == "--" || line.substr(0, 2) == "~~" || line.substr(0, 2) == "__" || line.substr(0, 2) == "==")
+            else if (line.substr(0, 2) == "--" || line.substr(0, 2) == "~~" || line.substr(0, 2) == "__" ||
+                     line.substr(0, 2) == "==")
             {
                 prevWasHeader = false;
 
@@ -1033,7 +1030,8 @@ void Engine::fromString(const string &From)
 
         if (doLog)
         {
-            log << "Loaded builder '" << name << "' with path '" << path << "' and chunk break print call '" << printCall << "'\n";
+            log << "Loaded builder '" << name << "' with path '" << path << "' and chunk break print call '"
+                << printCall << "'\n";
             log << "Builder set size: " << builders.size() << '\n';
         }
 
@@ -1357,8 +1355,7 @@ void Engine::buildAllChunks(const string &FileContents)
 
         if (doLog)
         {
-            log << "FULL OUTPUT:\n"
-                << chunk.str() << '\n';
+            log << "FULL OUTPUT:\n" << chunk.str() << '\n';
         }
 
         string currentChunk, line;
@@ -1368,8 +1365,7 @@ void Engine::buildAllChunks(const string &FileContents)
 
             if (doLog)
             {
-                log << "LINE:\n"
-                    << line << '\n';
+                log << "LINE:\n" << line << '\n';
             }
 
             if (line.find("CHUNK_BREAK") == string::npos)
@@ -1382,9 +1378,7 @@ void Engine::buildAllChunks(const string &FileContents)
 
                 if (doLog)
                 {
-                    log << "CHUNK:\n"
-                        << currentChunk << '\n'
-                        << "END CHUNK\n";
+                    log << "CHUNK:\n" << currentChunk << '\n' << "END CHUNK\n";
                 }
 
                 currentChunk.clear();
@@ -1406,11 +1400,10 @@ void Engine::buildAllChunks(const string &FileContents)
 
         if (doLog)
         {
-            log << "CHUNK:\n"
-                << currentChunk << '\n'
-                << "END CHUNK\n";
+            log << "CHUNK:\n" << currentChunk << '\n' << "END CHUNK\n";
 
-            log << "File type '" << output.first << "' has " << chunkOutputs[output.first].size() << " output chunks.\n";
+            log << "File type '" << output.first << "' has " << chunkOutputs[output.first].size()
+                << " output chunks.\n";
         }
 
         curChunkByLang[output.first] = 0;
