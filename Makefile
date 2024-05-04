@@ -17,7 +17,8 @@ install: $(EXE)
 	sudo cp -r compilation-drivers /usr/include
 	sudo cp gui.py /usr/bin/jknit-gui
 
-	sudo chmod +x /usr/bin/jknit-gui /usr/include/compilation-drivers/*
+	sudo chmod +x /usr/bin/jknit-gui \
+		/usr/include/compilation-drivers/*
 
 uninstall:
 	sudo rm -f /usr/bin/jknit /usr/bin/jknit-gui
@@ -31,6 +32,7 @@ reinstall:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(EXE): $(OBJECTS) $(HEADERS)
+	clang-format -i *.cpp *.hpp
 	$(CC) $(LFLAGS) $(OBJECTS) -o $@
 
 remake:
@@ -38,4 +40,5 @@ remake:
 	$(MAKE)
 
 clean:
-	rm -rf *.pdf *.aux *.log *.tex *.out *.o *.zst *.tar *.listing pkg jknit src
+	rm -rf *.pdf *.aux *.log *.tex *.out *.o *.zst *.tar \
+		*.listing pkg jknit src

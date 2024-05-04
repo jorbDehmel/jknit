@@ -7,6 +7,10 @@ GPLv3 held by author
 */
 
 #include "engine.hpp"
+#include <chrono>
+#include <filesystem>
+#include <sstream>
+using namespace std;
 
 bool debug = false, failWithCode = false;
 
@@ -18,18 +22,23 @@ void smartSys(const string &Command, ostream &Stream)
     auto start = chrono::high_resolution_clock::now();
     int result = system(Command.c_str());
     auto end = chrono::high_resolution_clock::now();
-    unsigned long long int ns = chrono::duration_cast<chrono::nanoseconds>(end - start).count();
+    unsigned long long int ns =
+        chrono::duration_cast<chrono::nanoseconds>(end - start)
+            .count();
 
-    Stream << "Command took " << ns << " ns (" << ns / 1'000'000 << " ms)\n";
+    Stream << "Command took " << ns << " ns (" << ns / 1'000'000
+           << " ms)\n";
     systemWaitMS += ns / 1'000'000;
 
     if (result != 0)
     {
-        Stream << "ERROR: Command exited with code " << result << '\n';
+        Stream << "ERROR: Command exited with code " << result
+               << '\n';
 
         if (failWithCode)
         {
-            throw runtime_error("System command failed when 'failWithCode' flag was set.");
+            throw runtime_error("System command failed when "
+                                "'failWithCode' flag was set.");
         }
     }
     return;
@@ -54,8 +63,11 @@ Engine::Engine(const bool &DoLog)
         }
         else
         {
-            log << "------------------------------------------\n"
-                << "Time/date: " << ctime(&curTime) << "------------------------------------------\n\n";
+            log << "------------------------------------------"
+                   "\n"
+                << "Time/date: " << ctime(&curTime)
+                << "------------------------------------------"
+                   "\n\n";
         }
     }
 
@@ -73,18 +85,21 @@ Engine::~Engine()
 
 // Input: Compatable file
 // Output: .tex file
-void Engine::processFile(const string &InputFilepath, const string &OutputFilepath, const bool &PresMode)
+void Engine::processFile(const string &InputFilepath,
+                         const string &OutputFilepath,
+                         const bool &PresMode)
 {
     bool pres = PresMode;
 
     if (debug)
     {
-        smartSys(rm + buildSpace, log);
+        filesystem::remove_all(buildSpace);
     }
 
     if (doLog)
     {
-        log << "Compiling from '" << InputFilepath << "' to \'" << OutputFilepath << "'\n";
+        log << "Compiling from '" << InputFilepath << "' to \'"
+            << OutputFilepath << "'\n";
     }
 
     // Open files
@@ -92,14 +107,17 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
     if (!inputFile.is_open())
     {
-        throw runtime_error("Could not open input file. Ensure it exists.");
+        throw runtime_error(
+            "Could not open input file. Ensure it exists.");
     }
 
     ofstream output(OutputFilepath);
 
     if (!output.is_open())
     {
-        throw runtime_error("Could not open output file. Ensure it is within an existing folder.");
+        throw runtime_error(
+            "Could not open output file. Ensure it is within "
+            "an existing folder.");
     }
 
     // Insert attribution tag
@@ -168,7 +186,9 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
         }
 
         // Strip leading whitespace
-        while (!line.empty() && (line[0] == ' ' || line[0] == '\t' || line[0] == '\n'))
+        while (!line.empty() &&
+               (line[0] == ' ' || line[0] == '\t' ||
+                line[0] == '\n'))
         {
             line = line.erase(0, 1);
         }
@@ -183,20 +203,9 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             bool skip = line.find("~") != string::npos;
 
             // Get header
-            if (line.size() <= 5)
-            {
-                cout << tags::red_bold << "Error: Invalid code chunk header\n" << tags::reset;
-
-                if (doLog)
-                {
-                    log << "Error: Invalid code chunk header\n";
-                }
-
-                continue;
-            }
-
             string header = line.substr(3);
-            while (!header.empty() && header.front() == '{' && header.back() == '}')
+            while (!header.empty() && header.front() == '{' &&
+                   header.back() == '}')
             {
                 header = header.substr(1, header.size() - 2);
             }
@@ -211,11 +220,14 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             do
             {
                 getline(input, line, '\n');
-                if (line.size() < 3 || line.substr(0, 3) != "```")
+                if (line.size() < 3 ||
+                    line.substr(0, 3) != "```")
                 {
                     contents += line + '\n';
                 }
-            } while (!input.eof() && (line.size() < 3 || line.substr(0, 3) != "```"));
+            } while (!input.eof() &&
+                     (line.size() < 3 ||
+                      line.substr(0, 3) != "```"));
 
             if (header == "settings")
             {
@@ -224,7 +236,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
 
             string name;
-            for (unsigned int i = 0; i < header.size() && header[i] != ' ' && header[i] != '}'; i++)
+            for (unsigned int i = 0;
+                 i < header.size() && header[i] != ' ' &&
+                 header[i] != '}';
+                 i++)
             {
                 name += header[i];
             }
@@ -236,7 +251,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 lang += toupper(name[0]);
                 for (unsigned int i = 1; i < name.size(); i++)
                 {
-                    if (string("*~^`{}").find(name[i]) == string::npos)
+                    if (string("*~^`{}").find(name[i]) ==
+                        string::npos)
                     {
                         lang += name[i];
                     }
@@ -245,14 +261,16 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 // If a recognized language
                 if (lstSupportedLangs.count(lang) != 0)
                 {
-                    output << "\\lstset{language=" << lang << "}\n";
+                    output << "\\lstset{language=" << lang
+                           << "}\n";
                 }
                 else
                 {
                     lang[0] = tolower(lang[0]);
                     if (lstSupportedLangs.count(lang) != 0)
                     {
-                        output << "\\lstset{language=" << lang << "}\n";
+                        output << "\\lstset{language=" << lang
+                               << "}\n";
                     }
                     else
                     {
@@ -260,7 +278,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     }
                 }
 
-                // Otherwise, use C++ (it's a pretty good standard thru listings in latex)
+                // Otherwise, use C++ (it's a pretty good
+                // standard thru listings in latex)
 
                 for (auto l : startCode)
                 {
@@ -278,7 +297,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             {
                 if (doLog)
                 {
-                    log << "Chunk marked as having no output (^). Skipping.\n";
+                    log << "Chunk marked as having no output "
+                           "(^). Skipping.\n";
                 }
             }
             else if (skip)
@@ -311,15 +331,19 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     }
                 }
             }
-            else if (chunkOutputs.count(name) != 0 && chunkOutputs[name].size() > (unsigned int)curChunkByLang[name] &&
-                     chunkOutputs[name][curChunkByLang[name]] != "")
+            else if (chunkOutputs.count(name) != 0 &&
+                     chunkOutputs[name].size() >
+                         (unsigned int)curChunkByLang[name] &&
+                     chunkOutputs[name][curChunkByLang[name]] !=
+                         "")
             {
                 for (auto l : startOutput)
                 {
                     output << l << '\n';
                 }
 
-                output << chunkOutputs[name][curChunkByLang[name]];
+                output
+                    << chunkOutputs[name][curChunkByLang[name]];
 
                 for (auto l : endOutput)
                 {
@@ -351,16 +375,21 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 getline(input, line);
 
                 // Strip leading whitespace
-                while (!line.empty() && (line[0] == ' ' || line[0] == '\t' || line[0] == '\n'))
+                while (!line.empty() &&
+                       (line[0] == ' ' || line[0] == '\t' ||
+                        line[0] == '\n'))
                 {
                     line = line.erase(0, 1);
                 }
 
-                if (line.size() < 2 || line.substr(0, 2) != "$$")
+                if (line.size() < 2 ||
+                    line.substr(0, 2) != "$$")
                 {
                     output << line << '\n';
                 }
-            } while (!input.eof() && (line.size() < 2 || line.substr(0, 2) != "$$"));
+            } while (
+                !input.eof() &&
+                (line.size() < 2 || line.substr(0, 2) != "$$"));
 
             for (auto l : endMath)
             {
@@ -379,13 +408,17 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             if (line[0] == '>')
             {
                 prevWasHeader = false;
-                output << "\\begin{displayquote}\n" << line.substr(1) << "\n\\end{displayquote}\n";
+                output << "\\begin{displayquote}\n"
+                       << line.substr(1)
+                       << "\n\\end{displayquote}\n";
                 continue;
             }
 
             // --- horizontal line
             // \hrule
-            else if (line.substr(0, 2) == "--" || line.substr(0, 2) == "~~" || line.substr(0, 2) == "__" ||
+            else if (line.substr(0, 2) == "--" ||
+                     line.substr(0, 2) == "~~" ||
+                     line.substr(0, 2) == "__" ||
                      line.substr(0, 2) == "==")
             {
                 prevWasHeader = false;
@@ -405,8 +438,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     {
                         if (prevLine != "")
                         {
-                            // Erase previous line (it is header)
-                            output.seekp(output.tellp() - (streampos)prevLine.size() - 1);
+                            // Erase previous line (it is
+                            // header)
+                            output.seekp(
+                                output.tellp() -
+                                (streampos)prevLine.size() - 1);
                         }
 
                         if (slideBreaksUntilEndTitleSlide != 2)
@@ -418,7 +454,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                         if (slideBreaksUntilEndTitleSlide > 0)
                         {
                             slideBreaksUntilEndTitleSlide--;
-                            if (slideBreaksUntilEndTitleSlide == 0)
+                            if (slideBreaksUntilEndTitleSlide ==
+                                0)
                             {
                                 output << "\\end{titleslide}\n";
                             }
@@ -435,7 +472,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                         for (auto c : prevLine)
                         {
-                            if (specialCharacters.find(c) != string::npos)
+                            if (specialCharacters.find(c) !=
+                                string::npos)
                             {
                                 output << "\\verb|" << c << "|";
                             }
@@ -455,16 +493,21 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                         prevWasHeader = true;
 
-                        // Skip all the following non-empty lines (settings in rpres)
+                        // Skip all the following non-empty
+                        // lines (settings in rpres)
                         do
                         {
                             prevLine = line;
                             getline(input, line);
-                            while (line[0] == ' ' || line[0] == '\t' || line[0] == '\n')
+                            while (line[0] == ' ' ||
+                                   line[0] == '\t' ||
+                                   line[0] == '\n')
                             {
                                 line = line.substr(1);
                             }
-                            while (line.back() == ' ' || line.back() == '\t' || line.back() == '\n')
+                            while (line.back() == ' ' ||
+                                   line.back() == '\t' ||
+                                   line.back() == '\n')
                             {
                                 line.pop_back();
                             }
@@ -541,7 +584,9 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
             }
 
             // Ordered / enumerated list
-            else if ((line[0] == '1' || line[0] == 'a' || line[0] == 'A') && listChars.find(line[1]) != string::npos)
+            else if ((line[0] == '1' || line[0] == 'a' ||
+                      line[0] == 'A') &&
+                     listChars.find(line[1]) != string::npos)
             {
                 prevWasHeader = false;
                 output << "\\begin{enumerate}\n";
@@ -578,10 +623,13 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 prevWasHeader = false;
                 output << "\n\\begin{itemize}\n";
 
-                while (line.size() > 0 && listChars.find(line[0]) != string::npos)
+                while (line.size() > 0 &&
+                       listChars.find(line[0]) != string::npos)
                 {
                     // Strip beginning
-                    while (line.size() > 0 && listChars.find(line[0]) != string::npos)
+                    while (line.size() > 0 &&
+                           listChars.find(line[0]) !=
+                               string::npos)
                     {
                         line.erase(0, 1);
                     }
@@ -610,9 +658,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 unsigned int i = 1;
                 while (i < line.size() && line[i] != ']')
                 {
-                    if (specialCharacters.find(line[i]) != string::npos)
+                    if (specialCharacters.find(line[i]) !=
+                        string::npos)
                     {
-                        title += string("\\verb|") + line[i] + "|";
+                        title +=
+                            string("\\verb|") + line[i] + "|";
                     }
                     else
                     {
@@ -625,7 +675,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 {
                     for (auto c : line)
                     {
-                        if (specialCharacters.find(c) != string::npos)
+                        if (specialCharacters.find(c) !=
+                            string::npos)
                         {
                             output << "\\verb|" << c << "|";
                         }
@@ -642,9 +693,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 i += 2;
                 while (i < line.size() && line[i] != ')')
                 {
-                    if (specialCharacters.find(line[i]) != string::npos)
+                    if (specialCharacters.find(line[i]) !=
+                        string::npos)
                     {
-                        line += string("\\verb|") + line[i] + "|";
+                        line +=
+                            string("\\verb|") + line[i] + "|";
                     }
                     else
                     {
@@ -674,9 +727,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 unsigned int i = 2;
                 while (i < line.size() && line[i] != ']')
                 {
-                    if (specialCharacters.find(line[i]) != string::npos)
+                    if (specialCharacters.find(line[i]) !=
+                        string::npos)
                     {
-                        alt += string("\\verb|") + line[i] + "|";
+                        alt +=
+                            string("\\verb|") + line[i] + "|";
                     }
                     else
                     {
@@ -687,9 +742,11 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 i += 2;
                 while (i < line.size() && line[i] != ')')
                 {
-                    if (specialCharacters.find(line[i]) != string::npos)
+                    if (specialCharacters.find(line[i]) !=
+                        string::npos)
                     {
-                        path += string("\\verb|") + line[i] + "|";
+                        path +=
+                            string("\\verb|") + line[i] + "|";
                     }
                     else
                     {
@@ -704,7 +761,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     if (line[i] >= '0' && line[i] <= '9')
                     {
                         string num = "00";
-                        while (i < line.size() && line[i] >= '0' && line[i] <= '9')
+                        while (i < line.size() &&
+                               line[i] >= '0' && line[i] <= '9')
                         {
                             num += line[i];
                             i++;
@@ -712,7 +770,10 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
 
                         if (i < line.size() && line[i] == '%')
                         {
-                            num = num.substr(0, num.size() - 2) + "." + num.substr(num.size() - 2);
+                            num =
+                                num.substr(0, num.size() - 2) +
+                                "." +
+                                num.substr(num.size() - 2);
                             options += num + "\\textwidth ";
                             i++;
                         }
@@ -723,7 +784,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                     }
 
                     // Avoid issues with commenting
-                    if (i < line.size() && line[i] != '%' && line[i] != '}')
+                    if (i < line.size() && line[i] != '%' &&
+                        line[i] != '}')
                     {
                         options += line[i];
                     }
@@ -738,7 +800,8 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
                 // Convert to latex
                 output << "\\begin{figure}[h]\n"
                        << "\\centering\n"
-                       << "\\includegraphics[" << options << "]{" << path << "}\n"
+                       << "\\includegraphics[" << options
+                       << "]{" << path << "}\n"
                        << "\\caption {";
 
                 // Catches any markdown syntax in captions
@@ -786,13 +849,15 @@ void Engine::processFile(const string &InputFilepath, const string &OutputFilepa
     if (!debug)
     {
         // Clear build folder
-        smartSys(rm + buildSpace, log);
+        filesystem::remove_all(buildSpace);
     }
 
     return;
 }
 
-void Engine::processChunk(const string Header, const string &Contents, ostream &Stream)
+void Engine::processChunk(const string Header,
+                          const string &Contents,
+                          ostream &Stream)
 {
     // Parse header to select the correct builder
     string name, options;
@@ -809,15 +874,18 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
 
     if (doLog)
     {
-        log << "Parsed chunk header. Name: '" << name << "' options: '" << options << "'\n";
+        log << "Parsed chunk header. Name: '" << name
+            << "' options: '" << options << "'\n";
     }
 
     // Safety check
-    if (builders.count(name) == 0 || builders[name].commandPath == "")
+    if (builders.count(name) == 0 ||
+        builders[name].commandPath == "")
     {
         if (doLog)
         {
-            log << "Processing pathless name '" << name << "' (using name as command)\n";
+            log << "Processing pathless name '" << name
+                << "' (using name as command)\n";
         }
 
         builder toAdd;
@@ -827,13 +895,17 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     }
 
     // Construct appropriate temp file name
-    string srcfile = buildSpace + name + "_src_" + to_string(time(NULL)) + "." + builders[name].extension;
-    string tempfile = buildSpace + name + "_out_" + to_string(time(NULL)) + ".txt";
+    string srcfile = buildSpace + name + "_src_" +
+                     to_string(time(NULL)) + "." +
+                     builders[name].extension;
+    string tempfile = buildSpace + name + "_out_" +
+                      to_string(time(NULL)) + ".txt";
 
     const string illegalNameCharacters = "*^~`";
     for (unsigned int i = 0; i < srcfile.size(); i++)
     {
-        if (illegalNameCharacters.find(srcfile[i]) != string::npos)
+        if (illegalNameCharacters.find(srcfile[i]) !=
+            string::npos)
         {
             srcfile.erase(i, 1);
             i--;
@@ -841,7 +913,8 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     }
     for (unsigned int i = 0; i < tempfile.size(); i++)
     {
-        if (illegalNameCharacters.find(tempfile[i]) != string::npos)
+        if (illegalNameCharacters.find(tempfile[i]) !=
+            string::npos)
         {
             tempfile.erase(i, 1);
             i--;
@@ -849,38 +922,45 @@ void Engine::processChunk(const string Header, const string &Contents, ostream &
     }
 
     // Send our chunk contents to a file
-    smartSys(mkdir + buildSpace, log);
+    filesystem::create_directory(buildSpace);
 
     if (doLog)
     {
-        log << "Saving chunk source code to file '" << srcfile << "'\n";
+        log << "Saving chunk source code to file '" << srcfile
+            << "'\n";
     }
 
     ofstream output(srcfile);
 
     if (!output.is_open())
     {
-        throw runtime_error("Failed to open file for code output saving.");
+        throw runtime_error(
+            "Failed to open file for code output saving.");
     }
 
     output << Contents;
     output.close();
 
     // Compile and send output to our temp file
-    // Already system-independent, so long as filenames are formatted right
-    smartSys(builders[name].commandPath + " " + srcfile + " > " + tempfile, log);
+    // Already system-independent, so long as filenames are
+    // formatted right
+    smartSys(builders[name].commandPath + " " + srcfile +
+                 " > " + tempfile,
+             log);
 
     // Load output temp file into string
     if (doLog)
     {
-        log << "Loading output from file '" << tempfile << "'\n";
+        log << "Loading output from file '" << tempfile
+            << "'\n";
     }
     string line;
     ifstream input(tempfile);
 
     if (!input.is_open())
     {
-        throw runtime_error("Could not load code chunk output.");
+        throw runtime_error(
+            "Could not load code chunk output.");
     }
 
     while (!input.eof())
@@ -918,7 +998,8 @@ string Engine::toString() const
 
     for (auto p : builders)
     {
-        out << '"' << p.first << "\": \"" << p.second.commandPath << "\"\n";
+        out << '"' << p.first << "\": \""
+            << p.second.commandPath << "\"\n";
     }
 
     return out.str();
@@ -932,7 +1013,8 @@ string strip(const string &What)
     }
 
     string out(What);
-    while (out[0] == '\'' || out[0] == '"' || out[0] == ' ' || out[0] == ':' || out[0] == '=')
+    while (out[0] == '\'' || out[0] == '"' || out[0] == ' ' ||
+           out[0] == ':' || out[0] == '=')
     {
         out.erase(0, 1);
 
@@ -942,7 +1024,9 @@ string strip(const string &What)
         }
     }
 
-    while (out.back() == '\'' || out.back() == '"' || out.back() == ' ' || out.back() == ':' || out.back() == '=')
+    while (out.back() == '\'' || out.back() == '"' ||
+           out.back() == ' ' || out.back() == ':' ||
+           out.back() == '=')
     {
         out.erase(out.size() - 1, 1);
 
@@ -959,7 +1043,8 @@ void Engine::fromString(const string &From)
 {
     if (From.empty())
     {
-        throw runtime_error("Cannot load settings from an empty string.");
+        throw runtime_error(
+            "Cannot load settings from an empty string.");
     }
 
     // Parse loaders
@@ -1030,9 +1115,11 @@ void Engine::fromString(const string &From)
 
         if (doLog)
         {
-            log << "Loaded builder '" << name << "' with path '" << path << "' and chunk break print call '"
+            log << "Loaded builder '" << name << "' with path '"
+                << path << "' and chunk break print call '"
                 << printCall << "'\n";
-            log << "Builder set size: " << builders.size() << '\n';
+            log << "Builder set size: " << builders.size()
+                << '\n';
         }
 
         fromStream.ignore(128, '\n');
@@ -1058,7 +1145,8 @@ void Engine::processMDLine(const string &Line, ostream &output)
         if (line[i] == '\\')
         {
             // If * or `, don't print backslash literals
-            if (i + 1 < line.size() && line[i + 1] != '`' && line[i + 1] != '*')
+            if (i + 1 < line.size() && line[i + 1] != '`' &&
+                line[i + 1] != '*')
             {
                 output << '\\';
             }
@@ -1078,7 +1166,8 @@ void Engine::processMDLine(const string &Line, ostream &output)
         }
 
         // Latex reserved characters
-        else if (specialCharacters.find(line[i]) != string::npos)
+        else if (specialCharacters.find(line[i]) !=
+                 string::npos)
         {
             output << "\\verb|" << line[i] << "|";
         }
@@ -1113,7 +1202,8 @@ void Engine::processMDLine(const string &Line, ostream &output)
                 i++;
                 while (line.substr(i, 2) != "**")
                 {
-                    if (specialCharacters.find(line[i]) != string::npos)
+                    if (specialCharacters.find(line[i]) !=
+                        string::npos)
                     {
                         output << "\\verb|" << line[i] << "|";
                     }
@@ -1133,7 +1223,8 @@ void Engine::processMDLine(const string &Line, ostream &output)
 
                 while (i < line.size() && line[i] != '*')
                 {
-                    if (specialCharacters.find(line[i]) != string::npos)
+                    if (specialCharacters.find(line[i]) !=
+                        string::npos)
                     {
                         output << "\\verb|" << line[i] << "|";
                     }
@@ -1163,7 +1254,8 @@ void Engine::processMDLine(const string &Line, ostream &output)
                 i++;
                 while (line.substr(i, 2) != "__")
                 {
-                    if (specialCharacters.find(line[i]) != string::npos)
+                    if (specialCharacters.find(line[i]) !=
+                        string::npos)
                     {
                         output << "\\verb|" << line[i] << "|";
                     }
@@ -1183,7 +1275,8 @@ void Engine::processMDLine(const string &Line, ostream &output)
 
                 while (i < line.size() && line[i] != '_')
                 {
-                    if (specialCharacters.find(line[i]) != string::npos)
+                    if (specialCharacters.find(line[i]) !=
+                        string::npos)
                     {
                         output << "\\verb|" << line[i] << "|";
                     }
@@ -1223,7 +1316,8 @@ void Engine::buildAllChunks(const string &FileContents)
         getline(input, line);
 
         // Strip line
-        while (!line.empty() && stripChars.find(line[0]) != string::npos)
+        while (!line.empty() &&
+               stripChars.find(line[0]) != string::npos)
         {
             line.erase(0, 1);
         }
@@ -1235,17 +1329,25 @@ void Engine::buildAllChunks(const string &FileContents)
             bool doBreakLine = line.find("^") == string::npos;
             bool skip = line.find("~") != string::npos;
 
-            string header = line.substr(4, line.size() - 5);
-            while (header.back() == '}' || header.back() == '*' || header.back() == '^')
+            string header = line.substr(3);
+            while (header.back() == '}' ||
+                   header.back() == '*' || header.back() == '^')
             {
                 header.pop_back();
+            }
+
+            while (header.front() == '{')
+            {
+                header.erase(0, 1);
             }
 
             string contents;
             string name;
 
             unsigned int i;
-            for (i = 0; i < header.size() && header[i] != ',' && header[i] != '}'; i++)
+            for (i = 0; i < header.size() && header[i] != ',' &&
+                        header[i] != '}';
+                 i++)
             {
                 name += header[i];
             }
@@ -1257,17 +1359,20 @@ void Engine::buildAllChunks(const string &FileContents)
                 string toAdd = line;
 
                 // Strip for scanning
-                while (!line.empty() && stripChars.find(line[0]) != string::npos)
+                while (!line.empty() &&
+                       stripChars.find(line[0]) != string::npos)
                 {
                     line.erase(0, 1);
                 }
 
                 // Add if this is not a terminal line
-                if (line.size() < 3 || line.substr(0, 3) != "```")
+                if (line.size() < 3 ||
+                    line.substr(0, 3) != "```")
                 {
                     contents += toAdd + '\n';
                 }
-            } while (line.size() < 3 || line.substr(0, 3) != "```");
+            } while (line.size() < 3 ||
+                     line.substr(0, 3) != "```");
 
             if (header == "settings")
             {
@@ -1280,7 +1385,8 @@ void Engine::buildAllChunks(const string &FileContents)
             {
                 if (doLog)
                 {
-                    log << "Lone star chunk! Kicking compilation to parse-time.\n";
+                    log << "Lone star chunk! Kicking "
+                           "compilation to parse-time.\n";
                 }
                 continue;
             }
@@ -1293,27 +1399,33 @@ void Engine::buildAllChunks(const string &FileContents)
                 continue;
             }
 
-            else if (doBreakLine && builders.count(name) != 0 && builders[name].printChunkBreak != "")
+            else if (doBreakLine && builders.count(name) != 0 &&
+                     builders[name].printChunkBreak != "")
             {
-                contents += builders[name].printChunkBreak + "\n\n";
+                contents +=
+                    builders[name].printChunkBreak + "\n\n";
             }
             else if (doBreakLine)
             {
-                cout << "WARNING: Print is not known for language '" << name << "'\n";
+                cout << "WARNING: Print is not known for "
+                        "language '"
+                     << name << "'\n";
                 contents += "CHUNK_PARSE_ERROR\n";
             }
             else
             {
                 if (doLog)
                 {
-                    log << "Chunk is marked as outputless (^ operator)\n";
+                    log << "Chunk is marked as outputless (^ "
+                           "operator)\n";
                 }
             }
 
             // Append to code of similar type
             if (code.count(name) == 0)
             {
-                code[name] = pair<string, string>(header, contents);
+                code[name] =
+                    pair<string, string>(header, contents);
             }
             else
             {
@@ -1333,7 +1445,8 @@ void Engine::buildAllChunks(const string &FileContents)
     {
         stringstream chunk;
 
-        // Read the output of the chunk into the chunk string stream
+        // Read the output of the chunk into the chunk string
+        // stream
         processChunk(p.second.first, p.second.second, chunk);
 
         // Log the output in outputs
@@ -1374,11 +1487,14 @@ void Engine::buildAllChunks(const string &FileContents)
             }
             else
             {
-                chunkOutputs[output.first].push_back(currentChunk);
+                chunkOutputs[output.first].push_back(
+                    currentChunk);
 
                 if (doLog)
                 {
-                    log << "CHUNK:\n" << currentChunk << '\n' << "END CHUNK\n";
+                    log << "CHUNK:\n"
+                        << currentChunk << '\n'
+                        << "END CHUNK\n";
                 }
 
                 currentChunk.clear();
@@ -1386,11 +1502,13 @@ void Engine::buildAllChunks(const string &FileContents)
         } while (!chunk.eof());
 
         // Strip newlines
-        while (!currentChunk.empty() && currentChunk.front() == '\n')
+        while (!currentChunk.empty() &&
+               currentChunk.front() == '\n')
         {
             currentChunk.erase(0, 1);
         }
-        while (!currentChunk.empty() && currentChunk.back() == '\n')
+        while (!currentChunk.empty() &&
+               currentChunk.back() == '\n')
         {
             currentChunk.pop_back();
         }
@@ -1400,9 +1518,12 @@ void Engine::buildAllChunks(const string &FileContents)
 
         if (doLog)
         {
-            log << "CHUNK:\n" << currentChunk << '\n' << "END CHUNK\n";
+            log << "CHUNK:\n"
+                << currentChunk << '\n'
+                << "END CHUNK\n";
 
-            log << "File type '" << output.first << "' has " << chunkOutputs[output.first].size()
+            log << "File type '" << output.first << "' has "
+                << chunkOutputs[output.first].size()
                 << " output chunks.\n";
         }
 

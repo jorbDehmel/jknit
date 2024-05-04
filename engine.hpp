@@ -9,75 +9,76 @@ GPLv3 held by author
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
 
-#include <map>
-#include <string>
-#include <sstream>
-#include <iostream>
 #include <fstream>
-#include <vector>
-#include <chrono>
+#include <iostream>
+#include <map>
 #include <set>
+#include <string>
+#include <vector>
 
-#include "tags.hpp"
-using namespace std;
-
-#define VERSION "0.0.12"
+const static std::string VERSION = "0.0.12";
 
 // For system independence
 // Luckily, output redirecting via > works as-is
 // on DOS cuz that's basically all this program is
 #if (defined(_WIN32) || defined(_WIN64))
 // Windows because it just has to be different
-const string rm = "rmdir /s /q ";
-const string mkdir = "md ";
-const string buildSpace = "jknit\\";
+const std::string buildSpace = "jknit\\";
 #else
 // UNIX-based OSes
-const string rm = "rm -rf ";
-const string mkdir = "mkdir -p ";
-const string buildSpace = "jknit/";
+const std::string buildSpace = "jknit/";
 #endif
 
 struct builder
 {
-    string commandPath;
-    string printChunkBreak;
-    string extension = "txt";
+    std::string commandPath;
+    std::string printChunkBreak;
+    std::string extension = "txt";
 };
 
 extern bool debug, failWithCode;
 
 extern unsigned long long int systemWaitMS;
-void smartSys(const string &Command, ostream &Stream = cout);
+void smartSys(const std::string &Command,
+              std::ostream &Stream = std::cout);
 
 class Engine
 {
-public:
+  public:
     Engine(const bool &DoLog = false);
     ~Engine();
 
-    void processFile(const string &InputFilepath, const string &OutputFilepath, const bool &PresMode);
+    void processFile(const std::string &InputFilepath,
+                     const std::string &OutputFilepath,
+                     const bool &PresMode);
 
-    void processChunk(const string Header, const string &Contents, ostream &Stream);
+    void processChunk(const std::string Header,
+                      const std::string &Contents,
+                      std::ostream &Stream);
 
-    void setPath(const string &Name, const string &Path);
+    void setPath(const std::string &Name,
+                 const std::string &Path);
 
-    void setOptions(const string &Name, const string &Options);
-    void appendOptions(const string &Name, const string &Options);
+    void setOptions(const std::string &Name,
+                    const std::string &Options);
+    void appendOptions(const std::string &Name,
+                       const std::string &Options);
 
-    bool hasPath(const string &What) const;
+    bool hasPath(const std::string &What) const;
 
-    string toString() const;
-    void fromString(const string &From);
+    std::string toString() const;
+    void fromString(const std::string &From);
 
-    void toStream(ostream &Stream) const;
+    void toStream(std::ostream &Stream) const;
 
-    // Turns a line from markdown into latex and inserts it into a stream
-    void processMDLine(const string &Line, ostream &Stream);
+    // Turns a line from markdown into latex and inserts it into
+    // a stream
+    void processMDLine(const std::string &Line,
+                       std::ostream &Stream);
 
-    const string specialCharacters = "%$~#&^";
+    const std::string specialCharacters = "%$~#&^";
 
-    vector<string> latexHeader = {
+    std::vector<std::string> latexHeader = {
         "\\documentclass[10pt]{amsart}",
         "\\usepackage[margin=1in]{geometry}",
         "\\usepackage{csquotes}",
@@ -85,7 +86,7 @@ public:
         "\\usepackage{hyperref}",
         "\\usepackage{pdflscape}",
         "\\usepackage{relsize}",
-        "\\usepackage{moresize}"
+        "\\usepackage{moresize}",
         "\\geometry{letterpaper}",
         "\\usepackage[usenames,dvipsnames]{xcolor}",
         "\\usepackage{color}",
@@ -123,149 +124,79 @@ public:
         "        basicstyle =\\ttfamily\\relsize{-1},",
         "        breaklines = true,",
         "        columns = fullflexible}}",
-        "\\newenvironment{pres}{\\begin{landscape}\\Huge\\pagestyle{empty}}{\\end{landscape}}",
-        "\\newenvironment{titleslide}{\\pagecolor{titlebg}\\HUGE\\vspace*{0.1\\textheight}\\afterpage{\\nopagecolor}}{}",
+        "\\newenvironment{pres}{\\begin{landscape}",
+        "\\Huge\\pagestyle{empty}}{\\end{landscape}}",
+        "\\newenvironment{titleslide}{\\pagecolor{titlebg}",
+        "\\HUGE\\vspace*{0.1\\textheight}\\afterpage{",
+        "\\nopagecolor}}{",
+        "}",
         "\\newcommand{\\slide}{\\newpage{}}",
         "\\definecolor{titlebg} {RGB} {230, 255, 243} ",
         "\\begin{document}",
         "\\sffamily"};
 
-    vector<string> latexFooter = {
-        "\\end{document}"};
+    std::vector<std::string> latexFooter = {"\\end{document}"};
 
-    vector<string> startCode = {
-        "\\begin{code}"};
+    std::vector<std::string> startCode = {"\\begin{code}"};
 
-    vector<string> endCode = {
-        "\\end{code}\n"};
+    std::vector<std::string> endCode = {"\\end{code}\n"};
 
-    vector<string> startOutput = {
+    std::vector<std::string> startOutput = {
         "\\begin{codeoutput}"};
 
-    vector<string> endOutput = {
+    std::vector<std::string> endOutput = {
         "\\end{codeoutput}\n"};
 
-    vector<string> startMath = {
-        "\\["};
+    std::vector<std::string> startMath = {"\\["};
 
-    vector<string> endMath = {
-        "\\]~\\\\"};
+    std::vector<std::string> endMath = {"\\]~\\\\"};
 
-    vector<string> startHeader = {
-        "\\bf"};
+    std::vector<std::string> startHeader = {"\\bf"};
 
-    vector<string> endHeader;
+    std::vector<std::string> endHeader;
 
     bool doLog = false;
-    ofstream log;
+    std::ofstream log;
 
     // did NOT have fun typing these
-    set<string> lstSupportedLangs = {
-        "ABAP",
-        "ACM",
-        "ACSL",
-        "Algol",
-        "Assembler",
-        "bash",
-        "C",
-        "C++",
-        "CIL",
-        "Cobol",
-        "command.com",
-        "csh",
-        "Eiffel",
-        "elisp",
-        "Euphoria",
-        "GAP",
-        "Gnuplot",
-        "hansl",
-        "HTML",
-        "inform",
-        "JVMIS",
-        "Lingo",
-        "LLVM",
-        "Lua",
-        "Mathematica",
-        "Mercury",
-        "Miranda",
-        "ML",
-        "MuPAD",
-        "Oberon-2",
-        "Octave",
-        "Oz",
-        "Perl",
-        "PL/I",
-        "PostScript",
-        "Prolog",
-        "PSTricks",
-        "R",
-        "Rexx",
-        "Ruby",
-        "SAS",
-        "Scilab",
-        "SHELXL",
-        "SPARQL",
-        "Swift",
-        "TeX",
-        "VBScript",
-        "VHDL",
-        "XML",
-        "ACMscript",
-        "Ada",
-        "Ant",
-        "Awk",
-        "Basic",
-        "Caml",
-        "Clean",
-        "Comsol",
-        "Delphi",
-        "Elan",
-        "erlang",
-        "Fortran",
-        "GCL",
-        "Go",
-        "Haskell",
-        "IDL",
-        "Java",
-        "ksh",
-        "Lisp",
-        "Logo",
-        "make",
-        "Matlab",
-        "MetaPost",
-        "Mizar",
-        "Modula-2",
-        "NASTRAN",
-        "OCL",
-        "OORexx",
-        "Pascal",
-        "PHP",
-        "Plasm",
-        "POV",
-        "Promela",
-        "Python",
-        "Reduce",
-        "RSL",
-        "S",
-        "Scala",
-        "sh",
-        "Simula",
-        "SQL",
-        "tcl",
-        "Verilog",
-        "VRML",
-        "XSLT"};
+    std::set<std::string> lstSupportedLangs = {
+        "ABAP",        "ACM",       "ACSL",        "Algol",
+        "Assembler",   "bash",      "C",           "C++",
+        "CIL",         "Cobol",     "command.com", "csh",
+        "Eiffel",      "elisp",     "Euphoria",    "GAP",
+        "Gnuplot",     "hansl",     "HTML",        "inform",
+        "JVMIS",       "Lingo",     "LLVM",        "Lua",
+        "Mathematica", "Mercury",   "Miranda",     "ML",
+        "MuPAD",       "Oberon-2",  "Octave",      "Oz",
+        "Perl",        "PL/I",      "PostScript",  "Prolog",
+        "PSTricks",    "R",         "Rexx",        "Ruby",
+        "SAS",         "Scilab",    "SHELXL",      "SPARQL",
+        "Swift",       "TeX",       "VBScript",    "VHDL",
+        "XML",         "ACMscript", "Ada",         "Ant",
+        "Awk",         "Basic",     "Caml",        "Clean",
+        "Comsol",      "Delphi",    "Elan",        "erlang",
+        "Fortran",     "GCL",       "Go",          "Haskell",
+        "IDL",         "Java",      "ksh",         "Lisp",
+        "Logo",        "make",      "Matlab",      "MetaPost",
+        "Mizar",       "Modula-2",  "NASTRAN",     "OCL",
+        "OORexx",      "Pascal",    "PHP",         "Plasm",
+        "POV",         "Promela",   "Python",      "Reduce",
+        "RSL",         "S",         "Scala",       "sh",
+        "Simula",      "SQL",       "tcl",         "Verilog",
+        "VRML",        "XSLT"};
 
-protected:
-    map<string, builder> builders;
+  protected:
+    std::map<std::string, builder> builders;
 
-    // Scans for code chunks, collates them by builder, and compiles.
-    // Splits by inserting a builder's printChunkBreak AFTER each chunk runs
-    void buildAllChunks(const string &FileContents);
+    // Scans for code chunks, collates them by builder, and
+    // compiles. Splits by inserting a builder's printChunkBreak
+    // AFTER each chunk runs
+    void buildAllChunks(const std::string &FileContents);
 
     // Maps a language to its code chunk outputs in order
-    map<string, vector<string>> chunkOutputs;
-    map<string, int> curChunkByLang;
+    std::map<std::string, std::vector<std::string>>
+        chunkOutputs;
+    std::map<std::string, int> curChunkByLang;
 };
 
 #endif
