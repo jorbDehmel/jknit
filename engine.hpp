@@ -36,17 +36,18 @@ struct builder
     std::string extension = "txt";
 };
 
-extern bool debug, failWithCode;
-
-extern unsigned long long int systemWaitMS;
-void smartSys(const std::string &Command,
-              std::ostream &Stream = std::cout);
-
 class Engine
 {
   public:
-    Engine(const bool &DoLog = false);
+    Engine();
     ~Engine();
+
+    // Used to be globals
+    bool debug, failWithCode, doLog;
+    unsigned long long int systemWaitMS;
+
+    void smartSys(const std::string &Command,
+                  std::ostream &Stream = std::cout);
 
     void processFile(const std::string &InputFilepath,
                      const std::string &OutputFilepath,
@@ -78,84 +79,77 @@ class Engine
 
     const std::string specialCharacters = "%$~#&^";
 
-    std::vector<std::string> latexHeader = {
-        "\\documentclass[10pt]{amsart}",
-        "\\usepackage[margin=1in]{geometry}",
-        "\\usepackage{csquotes}",
-        "\\usepackage{graphicx}",
-        "\\usepackage{hyperref}",
-        "\\usepackage{pdflscape}",
-        "\\usepackage{relsize}",
-        "\\usepackage{moresize}",
-        "\\geometry{letterpaper}",
-        "\\usepackage[usenames,dvipsnames]{xcolor}",
-        "\\usepackage{color}",
-        "\\usepackage{amsmath}",
-        "\\usepackage{amssymb}",
-        "\\usepackage[many]{tcolorbox}",
-        "\\usepackage{afterpage}",
-        "\\tcbuselibrary{listings}",
-        "\\newtcblisting{code} {",
-        "   listing only,",
-        "   breakable,",
-        "   boxrule = 1pt,",
-        "   colframe = gray,",
-        "   listing options = {",
-        "       basicstyle = \\ttfamily\\relsize{-1},",
-        "       breaklines = true,",
-        "       columns = fullflexible,",
-        "       commentstyle = \\color{olive},",
-        "       keywordstyle = \\color{MidnightBlue},",
-        "       stringstyle = \\color{OliveGreen},",
-        "       breakatwhitespace = false,",
-        "       keepspaces = true,",
-        "       numbersep = 5pt,",
-        "       showspaces = false,",
-        "       showstringspaces = false,",
-        "       showtabs = false,",
-        "       tabsize = 2}} ",
-        "\\newtcblisting{codeoutput}{",
-        "    listing only,",
-        "    breakable,",
-        "    colback = white,",
-        "    boxrule = 1pt,",
-        "    colframe = gray,",
-        "    listing options = {",
-        "        basicstyle =\\ttfamily\\relsize{-1},",
-        "        breaklines = true,",
-        "        columns = fullflexible}}",
-        "\\newenvironment{pres}{\\begin{landscape}",
-        "\\Huge\\pagestyle{empty}}{\\end{landscape}}",
-        "\\newenvironment{titleslide}{\\pagecolor{titlebg}",
-        "\\HUGE\\vspace*{0.1\\textheight}\\afterpage{",
-        "\\nopagecolor}}{",
-        "}",
-        "\\newcommand{\\slide}{\\newpage{}}",
-        "\\definecolor{titlebg} {RGB} {230, 255, 243} ",
-        "\\begin{document}",
-        "\\sffamily"};
+    std::vector<std::string>
+        latexHeader =
+            {"\\documentclass[10pt]{amsart}",
+             "\\usepackage[margin=1in]{geometry}",
+             "\\usepackage{background}",
+             "\\usepackage{csquotes}",
+             "\\usepackage{graphicx}",
+             "\\usepackage{hyperref}",
+             "\\usepackage{pdflscape}",
+             "\\usepackage{relsize}",
+             "\\usepackage{moresize}",
+             "\\usepackage[dvipsnames]{xcolor}",
+             "\\usepackage{color}",
+             "\\usepackage{amsmath}",
+             "\\usepackage{amssymb}",
+             "\\usepackage[many]{tcolorbox}",
+             "\\usepackage{afterpage}",
+             "\\tcbuselibrary{listings}",
+             "\\geometry{letterpaper}",
+             "\\newtcblisting{code} {",
+             "listing only,",
+             "breakable,",
+             "boxrule = 1pt,",
+             "colframe = gray,",
+             "listing options = {",
+             "basicstyle = \\ttfamily\\relsize{-1},",
+             "breaklines = true,",
+             "columns = fullflexible,",
+             "commentstyle = \\color{olive},",
+             "keywordstyle = \\color{MidnightBlue},",
+             "stringstyle = \\color{OliveGreen},",
+             "breakatwhitespace = false,",
+             "keepspaces = true,",
+             "numbersep = 5pt,",
+             "showspaces = false,",
+             "showstringspaces = false,",
+             "showtabs = false,",
+             "tabsize = 2}} ",
+             "\\newtcblisting{codeoutput}{",
+             "listing only,",
+             "breakable,",
+             "colback = white,",
+             "boxrule = 1pt,",
+             "colframe = gray,",
+             "listing options = {",
+             "basicstyle =\\ttfamily\\relsize{-1},",
+             "breaklines = true,",
+             "columns = fullflexible}}",
+             "\\newenvironment{pres}{\\begin{landscape}"
+             "\\Huge\\pagestyle{empty}\\clearpage}{\\end{"
+             "landscape}"
+             "}",
+             "\\newenvironment{titleslide}{"
+             "\\HUGE\\vspace*{0.1\\textheight}\\afterpage{"
+             "\\nopagecolor}}{}",
+             "\\newcommand{\\slide}{\\newpage{}\\nopagecolor}",
+             "\\newcommand{\\bgimg}[1]{\\backgroundsetup{angle="
+             "90,"
+             "scale=1,contents={"
+             "\\includegraphics[width=\\paperwidth,height="
+             "\\paperheight]{#1}}}}",
+             "\\begin{document}",
+             "\\sffamily"},
+        latexFooter = {"\\end{document}"},
+        startCode = {"\\begin{code}"},
+        endCode = {"\\end{code}\n"},
+        startOutput = {"\\begin{codeoutput}"},
+        endOutput = {"\\end{codeoutput}\n"},
+        startMath = {"\\["}, endMath = {"\\]~\\\\"},
+        startHeader = {"\\bf"}, endHeader;
 
-    std::vector<std::string> latexFooter = {"\\end{document}"};
-
-    std::vector<std::string> startCode = {"\\begin{code}"};
-
-    std::vector<std::string> endCode = {"\\end{code}\n"};
-
-    std::vector<std::string> startOutput = {
-        "\\begin{codeoutput}"};
-
-    std::vector<std::string> endOutput = {
-        "\\end{codeoutput}\n"};
-
-    std::vector<std::string> startMath = {"\\["};
-
-    std::vector<std::string> endMath = {"\\]~\\\\"};
-
-    std::vector<std::string> startHeader = {"\\bf"};
-
-    std::vector<std::string> endHeader;
-
-    bool doLog = false;
     std::ofstream log;
 
     // did NOT have fun typing these

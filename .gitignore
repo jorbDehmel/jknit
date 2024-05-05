@@ -13,6 +13,7 @@ pkg/
 *.log
 *.pdf
 *.png
+*.pptx
 *.zst
 *.tar
 *.listing

@@ -1,9 +1,7 @@
 jpres Demonstration
 ====================================================
-skip
-among
-us
-skip
+
+\bgimg{image.png}
 
 Jordan Dehmel
 
@@ -36,7 +34,7 @@ function printmatrix (mat)
 endfunction
 ```
 
-This is a funciton call in octave.
+This is a function call in octave.
 It uses our matrix from before to demonstrate scoping and function calls.
 
 ```{octave}
@@ -91,7 +89,7 @@ Presentation Features
 
 - You can try
 - To do bullet points
-- These look quite nice in .rpres
+- These look quite nice in `.rpres`
 - I am testing whether they look good with my `jknit` system
-- **bold face** and also *iteralicized* and `inline code` and $n + 5 = n + 123$ inline **math**
+- **bold face** and also *italicized* and `inline code` and $n + 5 = n + 123$ inline **math**
 - __alternative bold using underscores__ and _similar italics_

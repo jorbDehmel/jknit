@@ -15,15 +15,16 @@ using namespace std;
 // A CLI for jknit
 int main(const int argc, const char *argv[])
 {
+    Engine e;
+
     string inputPath = "", outputPath = "jknit_output.tex";
 
-    bool doLog = false;
     bool doTimer = false;
     bool quiet = false;
     bool pres = false;
 
-    debug = false;
-    failWithCode = false;
+    e.debug = false;
+    e.failWithCode = false;
 
     vector<string> fromFiles;
 
@@ -55,7 +56,7 @@ int main(const int argc, const char *argv[])
                 case 'L':
                 case 'l':
                     // Do log
-                    doLog = true;
+                    e.doLog = true;
                     break;
                 case 'T':
                 case 't':
@@ -98,11 +99,11 @@ int main(const int argc, const char *argv[])
                     break;
                 case 'D':
                 case 'd':
-                    debug = true;
+                    e.debug = true;
                     break;
                 case 'E':
                 case 'e':
-                    failWithCode = true;
+                    e.failWithCode = true;
                     break;
                 case 'P':
                 case 'p':
@@ -190,10 +191,7 @@ int main(const int argc, const char *argv[])
     }
 
     // Pres mode
-    pres = pres || (inputPath.find(".rpres") != string::npos) ||
-           (inputPath.find(".jpres") != string::npos);
-
-    Engine e(doLog);
+    pres = pres || (inputPath.find(".rpres") != string::npos);
 
 #if (defined(_WIN32) || defined(_WIN64))
 
@@ -364,11 +362,11 @@ int main(const int argc, const char *argv[])
             cout << tags::violet_bold
                  << "Elapsed ms: " << elapsed << '\n'
                  << "Ms waiting for code chunk output: "
-                 << systemWaitMS << '\n'
+                 << e.systemWaitMS << '\n'
                  << "JKnit-attributable ms: "
-                 << elapsed - systemWaitMS << '\n'
+                 << elapsed - e.systemWaitMS << '\n'
                  << "Percent code-chunk-attributable: "
-                 << 100 * (double)systemWaitMS / elapsed
+                 << 100 * (double)e.systemWaitMS / elapsed
                  << "%\n"
                  << tags::reset;
         }

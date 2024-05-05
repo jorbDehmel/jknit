@@ -12,10 +12,7 @@ GPLv3 held by author
 #include <sstream>
 using namespace std;
 
-bool debug = false, failWithCode = false;
-
-unsigned long long int systemWaitMS = 0;
-void smartSys(const string &Command, ostream &Stream)
+void Engine::smartSys(const string &Command, ostream &Stream)
 {
     Stream << "Calling command `" << Command << "`\n";
 
@@ -44,9 +41,11 @@ void smartSys(const string &Command, ostream &Stream)
     return;
 }
 
-Engine::Engine(const bool &DoLog)
+Engine::Engine()
 {
-    doLog = DoLog;
+    debug = false;
+    failWithCode = false;
+    doLog = false;
 
     if (doLog)
     {
@@ -465,7 +464,7 @@ void Engine::processFile(const string &InputFilepath,
 
                         for (auto l : startHeader)
                         {
-                            output << l << ' ';
+                            output << l;
                         }
 
                         output << "\\sffamily{";
@@ -486,7 +485,7 @@ void Engine::processFile(const string &InputFilepath,
 
                         for (auto l : endHeader)
                         {
-                            output << l << ' ';
+                            output << l;
                         }
 
                         output << "\\bigskip{}\n";
@@ -565,7 +564,7 @@ void Engine::processFile(const string &InputFilepath,
 
                 for (auto l : startHeader)
                 {
-                    output << l << ' ';
+                    output << l;
                 }
 
                 output << "\\sffamily{";
@@ -574,7 +573,7 @@ void Engine::processFile(const string &InputFilepath,
 
                 for (auto l : endHeader)
                 {
-                    output << l << ' ';
+                    output << l;
                 }
 
                 output << "\\bigskip{}\n";
