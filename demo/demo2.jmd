@@ -6,3 +6,29 @@ This is some running `Python` code.
 ```python
 print('Hello, world!')
 ```
+
+Here is some basic `Octave` code.
+
+```octave
+f = @(x) x^2 + 2*x + 4;
+f(100)
+```
+
+Here is `Python` with a graph:
+
+```python^
+from typing import List
+from matplotlib import pyplot as plt
+
+xs: List[float] = [0.1 * i for i in range(100)]
+ys: List[float] = \
+    [x ** 4 + 2 * (x ** 3) - 14 * x + 2 for x in xs]
+
+plt.plot(xs, ys)
+```
+
+```python~^
+plt.savefig('figure_1.png')
+```
+
+![](figure_1.png)

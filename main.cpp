@@ -15,16 +15,14 @@ using namespace std;
 // A CLI for jknit
 int main(const int argc, const char *argv[])
 {
-    Engine e;
-
     string inputPath = "", outputPath = "jknit_output.tex";
 
     bool doTimer = false;
     bool quiet = false;
     bool pres = false;
 
-    e.debug = false;
-    e.failWithCode = false;
+    bool debug, failWithCode, doLog;
+    debug = failWithCode = doLog = false;
 
     vector<string> fromFiles;
 
@@ -56,7 +54,7 @@ int main(const int argc, const char *argv[])
                 case 'L':
                 case 'l':
                     // Do log
-                    e.doLog = true;
+                    doLog = true;
                     break;
                 case 'T':
                 case 't':
@@ -99,11 +97,11 @@ int main(const int argc, const char *argv[])
                     break;
                 case 'D':
                 case 'd':
-                    e.debug = true;
+                    debug = true;
                     break;
                 case 'E':
                 case 'e':
-                    e.failWithCode = true;
+                    failWithCode = true;
                     break;
                 case 'P':
                 case 'p':
@@ -182,107 +180,13 @@ int main(const int argc, const char *argv[])
              << "Please specify an input path.\n"
              << tags::reset;
 
-#if (defined(_WIN32) || defined(_WIN64))
-        // In linux, failure is ok; You're already there
-        cin >> inputPath;
-#else
         return 1;
-#endif
     }
 
     // Pres mode
     pres = pres || (inputPath.find(".rpres") != string::npos);
 
-#if (defined(_WIN32) || defined(_WIN64))
-
-    // No guarantees that the tags will work
-    cout << tags::red_bold
-         << "Warning: Windows is not fully supported! You may "
-            "have to manually enter paths.\n"
-         << tags::reset;
-
-    cout << "Converted filepath from " << inputPath << " to ";
-    for (unsigned int i = 0; i < inputPath.size(); i++)
-    {
-        if (inputPath[i] == '/')
-        {
-            inputPath[i] = '\\';
-        }
-    }
-    cout << inputPath << '\n';
-
-    cout << "Converted filepath from " << outputPath << " to ";
-    for (unsigned int i = 0; i < outputPath.size(); i++)
-    {
-        if (outputPath[i] == '/')
-        {
-            outputPath[i] = '\\';
-        }
-    }
-    cout << outputPath << '\n';
-
-    // Detect and set octave path
-    try
-    {
-        string path;
-        try
-        {
-            string path = "C:\\Program Files\\GNU Octave";
-            for (const auto &p :
-                 filesystem::directory_iterator(path))
-            {
-                path = p.path().string();
-                break;
-            }
-        }
-        catch (...)
-        {
-            string path = "C:\\Octave";
-            for (const auto &p :
-                 filesystem::directory_iterator(path))
-            {
-                path = p.path().string();
-                break;
-            }
-        }
-
-        path += "\\mingw64\\bin\\octave.exe";
-        cout << path << '\n';
-
-        e.fromString("octave '" + path +
-                     "' disp('CHUNK_BREAK'); txt");
-    }
-    catch (...)
-    {
-        cout << "Could not locate Octave. Please ensure it is "
-                "installed.\n";
-    }
-
-    // Detect and set python path
-    try
-    {
-        string path =
-            "%%USERPATH%%\\AppData\\Local\\Programs\\Python\\";
-        for (const auto &p :
-             filesystem::directory_iterator(path))
-        {
-            path = p.path().string();
-            break;
-        }
-
-        path += "\\python.exe";
-        cout << path << '\n';
-
-        e.fromString("python '" + path +
-                     "' print('CHUNK_BREAK'); py");
-    }
-    catch (...)
-    {
-        cout << "Could not locate Python. Please ensure it is "
-                "installed.\n";
-    }
-#else
-    // I hate windows so much, this is all so easy on linux
+    Engine e(debug, failWithCode, doLog);
 
     // Interpretted languages
     e.fromString("python python3 print('CHUNK_BREAK') py\n");
@@ -311,8 +215,6 @@ int main(const int argc, const char *argv[])
     // Rust via rustc
     e.fromString("rust* /usr/include/compilation-drivers/"
                  "rustc_driver.py ; rs");
-
-#endif
 
     for (auto from : fromFiles)
     {

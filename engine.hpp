@@ -39,7 +39,8 @@ struct builder
 class Engine
 {
   public:
-    Engine();
+    Engine(bool _debug = false, bool _failWithCode = false,
+           bool _doLog = false);
     ~Engine();
 
     // Used to be globals

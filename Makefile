@@ -36,9 +36,12 @@ $(EXE): $(OBJECTS) $(HEADERS)
 	$(CC) $(LFLAGS) $(OBJECTS) -o $@
 
 remake:
-	$(MAKE) clean
-	$(MAKE)
+	$(MAKE) clean all
 
 clean:
 	rm -rf *.pdf *.aux *.log *.tex *.out *.o *.zst *.tar \
 		*.listing pkg jknit src
+
+format:
+	find . -type f \( -iname "*.cpp" -or -iname "*.hpp" \) \
+		-exec clang-format -i "{}" \;
