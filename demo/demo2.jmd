@@ -1,3 +1,10 @@
+```settings
+cpp /home/jorb/Programs/jknit/compilation-drivers/gpp_driver.py '' cpp
+c /home/jorb/Programs/jknit/compilation-drivers/gcc_driver.py '' c
+oak /home/jorb/Programs/jknit/compilation-drivers/acorn_driver.py '' oak
+rust /home/jorb/Programs/jknit/compilation-drivers/rustc_driver.py '' rs
+```
+
 # Another Demo of JKnit
 ## Jordan Dehmel
 
@@ -16,7 +23,7 @@ f(100)
 
 Here is `Python` with a graph:
 
-```python^
+```python
 from typing import List
 from matplotlib import pyplot as plt
 
@@ -24,11 +31,58 @@ xs: List[float] = [0.1 * i for i in range(100)]
 ys: List[float] = \
     [x ** 4 + 2 * (x ** 3) - 14 * x + 2 for x in xs]
 
-plt.plot(xs, ys)
+plt.figure(figsize=(6, 8))
+plt.scatter(xs, ys)
+
+plt.title('Hi')
+plt.xlabel('foo')
+plt.ylabel('fizz')
 ```
 
-```python~^
-plt.savefig('figure_1.png')
+```python^~
+# Save figure from within a hidden code chunk
+plt.savefig('figure_1.png', dpi=300)
 ```
 
 ![](figure_1.png)
+
+And here's some bash:
+
+```bash
+echo "Hello, world!"
+```
+
+Some `C++`:
+
+```cpp*
+#include <iostream>
+int main()
+{
+    std::cout << "Hello, world!\n";
+    return 0;
+}
+```
+
+Some `C`:
+
+```c*
+#include <stdio.h>
+int main(void)
+{
+    puts("Hello, world!");
+    return 0;
+}
+```
+
+Some `Oak`:
+
+```oak*
+package!("std");
+include!("std/io.oak");
+
+let main() -> i32
+{
+    print("Hello, world!\n");
+    0i32
+}
+```

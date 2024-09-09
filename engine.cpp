@@ -1332,8 +1332,7 @@ void Engine::buildAllChunks(const string &FileContents)
             string header = line.substr(3);
             while (header.back() == '}' ||
                    header.back() == '*' ||
-                   header.back() == '^' ||
-                   header.back() == '~')
+                   header.back() == '^' || header.back() == '~')
             {
                 header.pop_back();
             }
@@ -1427,7 +1426,7 @@ void Engine::buildAllChunks(const string &FileContents)
                 {
                     cout << "WARNING: Print is not known for "
                             "language '"
-                        << name << "'\n";
+                         << name << "'\n";
                     contents += "CHUNK_PARSE_ERROR\n";
                 }
             }
