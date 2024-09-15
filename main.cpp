@@ -1,302 +1,248 @@
 /*
-Jordan "Jorb" Dehmel
-jdehmel@outlook.com
-github.com/jorbDehmel
-2023 - present
-GPLv3 held by author
+JKnit CLI
+2023-present
+Jordan Dehmel
 */
 
 #include "engine.hpp"
-#include "tags.hpp"
+#include "md_engine.hpp"
+#include "tex_engine.hpp"
 #include <chrono>
+#include <cstdint>
 #include <iostream>
-using namespace std;
+#include <list>
+#include <stdexcept>
+#include <string>
 
-// A CLI for jknit
-int main(const int argc, const char *argv[])
+static_assert(__cplusplus >= 2020'00UL);
+
+void load_engine(Engine &_e,
+                 const std::list<std::string> &_settings_files)
 {
-    string inputPath = "", outputPath = "jknit_output.tex";
-
-    bool doTimer = false;
-    bool quiet = false;
-    bool pres = false;
-
-    bool debug, failWithCode, doLog;
-    debug = failWithCode = doLog = false;
-
-    vector<string> fromFiles;
-
-    for (int i = 1; i < argc; i++)
+    for (const auto &f : _settings_files)
     {
-        if (argv[i][0] == '-')
+        _e.load_settings_file(f);
+    }
+
+    // Interpreted languages
+    _e.load_settings_line(
+        "py /bin/python3 'print(\"CHUNK_BREAK\")' py");
+    _e.load_settings_line(
+        "octave octave 'printf(\"CHUNK_BREAK\\n\");' m");
+    _e.load_settings_line(
+        "bash /usr/bin/sh 'echo CHUNK_BREAK' sh");
+    _e.load_settings_line(
+        "js node 'console.log('CHUNK_BREAK');' js");
+    _e.load_settings_line("r R 'print(\"CHUNK_BREAK\")' R");
+
+    // Compiled languages
+    _e.load_settings_line("clangpp "
+                          "/usr/include/compilation-drivers/"
+                          "clangpp_driver.py ; cpp");
+    _e.load_settings_line(
+        "gpp /usr/include/compilation-drivers/gpp_driver.py ; "
+        "cpp");
+    _e.load_settings_line(
+        "clang "
+        "/usr/include/compilation-drivers/clang_driver.py ; c");
+    _e.load_settings_line(
+        "gcc /usr/include/compilation-drivers/gcc_driver.py ; "
+        "c");
+    _e.load_settings_line(
+        "rust /usr/include/compilation-drivers/rustc_driver.py "
+        "; rs");
+    _e.load_settings_line(
+        "oak /usr/include/compilation-drivers/acorn_driver.py "
+        "'' oak");
+
+    // Aliases
+    _e.load_settings_line(
+        "cpp /usr/include/compilation-drivers/gpp_driver.py ; "
+        "cpp");
+    _e.load_settings_line(
+        "cxx /usr/include/compilation-drivers/gpp_driver.py ; "
+        "cpp");
+    _e.load_settings_line(
+        "c /usr/include/compilation-drivers/gcc_driver.py ; c");
+    _e.load_settings_line(
+        "python /bin/python3 'print(\"CHUNK_BREAK\")' py");
+    _e.load_settings_line(
+        "python3 /bin/python3 'print(\"CHUNK_BREAK\")' py");
+}
+
+int main(int c, char *v[])
+{
+    Settings settings;
+    std::list<std::string> settings_files;
+    RunStats stats;
+    bool target_tex = false;
+    settings.log = settings.time = settings.all_errors = false;
+    settings.source = "";
+    settings.target = "a.md";
+
+    // Parse CLI input
+    std::string arg;
+    for (int64_t cur_arg = 1; cur_arg < c; ++cur_arg)
+    {
+        arg = v[cur_arg];
+
+        // Handle normal flag
+        if (arg.front() == '-')
         {
-            int cur = i;
-
-            // Options
-            for (int j = 1; argv[cur][j] != '\0'; j++)
+            for (uint64_t i = 1; i < arg.size(); ++i)
             {
-                switch (argv[cur][j])
+                switch (arg[i])
                 {
-                case 'O':
-                case 'o':
-                    // Set output file, skip next option
-                    if (i + 1 >= argc)
-                    {
-                        cout << tags::red_bold
-                             << "Error: -o must be followed by "
-                                "a filepath.\n"
-                             << tags::reset;
-                        return 2;
-                    }
-                    i++;
-                    outputPath = argv[i];
-                    break;
-                case 'L':
-                case 'l':
-                    // Do log
-                    doLog = true;
-                    break;
+                case 't': // Time
                 case 'T':
-                case 't':
-                    // Do timer
-                    doTimer = true;
+                    settings.time = !settings.time;
                     break;
-                case 'Q':
-                case 'q':
-                    // Quiet
-                    quiet = true;
+                case 'l': // Log
+                case 'L':
+                    settings.log = !settings.log;
                     break;
-                case 'N':
-                case 'n':
-                    // No compile
-                    cout << tags::yellow_bold
-                         << "-n called: Aborting.\n"
-                         << tags::reset;
-                    return 0;
-                case 'V':
-                case 'v':
-                    // Version
-                    cout << tags::green_bold << VERSION << '\n'
-                         << "GPLv3, jdehmel@outlook.com\n"
-                         << "2023 - present\n"
-                         << tags::reset;
-                    break;
-                case 'F':
-                case 'f':
-                    // From next file
-                    if (i + 1 >= argc)
+                case 'o': // Set target
+                case 'O':
+                    ++cur_arg;
+                    if (cur_arg >= c)
                     {
-                        cout << tags::red_bold
-                             << "Error: -f must be followed by "
-                                "a filepath.\n"
-                             << tags::reset;
-                        return 2;
+                        std::cerr << "'-o' must not be last "
+                                  << "arg.\n";
+                        return 1;
                     }
-                    i++;
-                    fromFiles.push_back(argv[i]);
+                    settings.target = v[cur_arg];
                     break;
-                case 'D':
-                case 'd':
-                    debug = true;
+                case 'f': // Settings file
+                case 'F':
+                    ++cur_arg;
+                    if (cur_arg >= c)
+                    {
+                        std::cerr << "'-f' must not be last "
+                                  << "arg.\n";
+                        return 1;
+                    }
+                    settings_files.push_back(v[cur_arg]);
                     break;
+                case 'v': // Version
+                case 'V':
+                    std::cout << "JKnit version " << VERSION
+                              << '\n'
+                              << "2023-present, GPLv3\n";
+                    break;
+                case 'e': // Warnings to errors
                 case 'E':
-                case 'e':
-                    failWithCode = true;
+                    settings.all_errors = !settings.all_errors;
                     break;
-                case 'P':
-                case 'p':
-                    pres = true;
+                case 'x': // Force tex mode
+                case 'X':
+                    target_tex = !target_tex;
                     break;
+                case 'h': // Help
                 case 'H':
-                case 'h':
-                    // Help
-                    cout << tags::violet_bold
-                         << "JKnit is a lightweight, versatile "
-                            "tool for\n"
-                         << "compiling markdown documents with "
-                            "embedded\n"
-                         << "(running) code to LaTeX. It aims "
-                            "to be easy\n"
-                         << "to use with any embedded "
-                            "language. JKnit\n"
-                         << "can compile most .rmd files with "
-                            "minimal\n"
-                         << "additions.\n\n"
-                         << "Flags and their meaning:\n"
-                         << " -o \t Set output file to the "
-                            "next argument\n"
-                         << " -l \t Enable log\n"
-                         << " -t \t Enable timer\n"
-                         << " -q \t Quiet (no printing)\n"
-                         << " -n \t No compile (halt before "
-                            "running)\n"
-                         << " -v \t Show version\n"
-                         << " -f \t From file (load settings)\n"
-                         << " -d \t Debug mode\n"
-                         << " -e \t Fail on code error\n"
-                         << " -p \t Force presentation mode\n"
-                         << " -h \t Show help (this)\n\n"
-                         << "Jorb Dehmel, 2023, "
-                            "jdehmel@outlook.com\n"
-                         << "FOSS, Protected by GPLv3\n"
-                         << VERSION << '\n'
-                         << tags::reset;
-
+                    std::cout
+                        << "JKnit version " << VERSION << '\n'
+                        << "Live RMD-style markdown "
+                        << "documents\n\n"
+                        << "CLI flags:\n"
+                        << "-e Warnings to errors\n"
+                        << "-h Help (this)\n"
+                        << "-l Toggle log (default off)\n"
+                        << "-t Toggle timer (default off)\n"
+                        << "-v Version\n"
+                        << "-x Force TeX mode\n"
+                        << '\n'
+                        << "Jordan Dehmel, 2023 - present\n"
+                        << "GPLv3\n";
                     break;
                 default:
-                    cout << tags::yellow_bold
-                         << "Unrecognized option '"
-                         << argv[cur][j] << "'\n"
-                         << "Note: Use -h for a list of all "
-                            "commands.\n"
-                         << tags::reset;
+                    std::cerr << "Unrecognized flag '" << arg[i]
+                              << "'\n";
                     break;
-                };
+                }
             }
         }
+
+        // Default case; Set source
         else
         {
-            if (inputPath == "")
-            {
-                inputPath = argv[i];
-            }
-            else
-            {
-                cout << tags::yellow_bold
-                     << "Warning: Interpreting second filename "
-                        "arg as output file\n"
-                     << "(Please use -o notation in the "
-                        "future)\n"
-                     << tags::reset;
-
-                outputPath = argv[i];
-            }
+            settings.source = arg;
         }
     }
 
-    if (inputPath == "")
+    if (settings.target.ends_with(".tex"))
     {
-        cout << tags::red_bold
-             << "Please specify an input path.\n"
-             << tags::reset;
-
-        return 1;
+        target_tex = true;
+    }
+    else if (!target_tex && !settings.target.ends_with(".md"))
+    {
+        std::cerr << "WARNING: Unknown target file extension; "
+                  << "Target language will be markdown\n";
     }
 
-    // Pres mode
-    pres = pres || (inputPath.find(".rpres") != string::npos);
-
-    Engine e(debug, failWithCode, doLog);
-
-    // Interpretted languages
-    e.fromString("python python3 print('CHUNK_BREAK') py\n");
-    e.fromString("octave octave disp('CHUNK_BREAK') txt\n");
-    e.fromString("bash /usr/bin/sh 'echo CHUNK_BREAK' sh");
-    e.fromString("js node 'console.log('CHUNK_BREAK');' js");
-
-    // Compiled loner languages
-
-    // C++ via clang++
-    e.fromString("clang++* /usr/include/compilation-drivers/"
-                 "clangpp_driver.py ; cpp");
-
-    // C++ via g++
-    e.fromString("g++* /usr/include/compilation-drivers/"
-                 "gpp_driver.py ; cpp");
-
-    // C via clang
-    e.fromString("clang* /usr/include/compilation-drivers/"
-                 "clang_driver.py ; cpp");
-
-    // C (or supported assembly) via gcc
-    e.fromString("gcc* /usr/include/compilation-drivers/"
-                 "gcc_driver.py ; cpp");
-
-    // Rust via rustc
-    e.fromString("rust* /usr/include/compilation-drivers/"
-                 "rustc_driver.py ; rs");
-
-    for (auto from : fromFiles)
+    if (target_tex && settings.target == "a.md")
     {
-        // Load to string
-        ifstream file(from);
-        if (!file.is_open())
-        {
-            cout << tags::red_bold
-                 << "Error: Could not open settings file '"
-                 << from << "'. Skipping.\n"
-                 << tags::reset;
-            continue;
-        }
-
-        string contents, line;
-        while (getline(file, line))
-        {
-            contents += line + '\n';
-        }
-        file.close();
-
-        // Load engine from this string
-        e.fromString(contents);
+        settings.target = "a.tex";
     }
 
-    if (!quiet)
-    {
-        cout << tags::green_bold << "Compiling from '"
-             << inputPath << "' to '" << outputPath << "'...\n"
-             << tags::reset << flush;
-    }
-
+    // Generate loader object
+    // Run engine and save to file
     try
     {
-        if (doTimer && !quiet)
+        if (target_tex)
         {
-            // Timed
-            auto start = chrono::high_resolution_clock::now();
+            TEXEngine e(settings);
+            load_engine(e, settings_files);
 
-            e.processFile(inputPath, outputPath, pres);
+            if (settings.source.ends_with("pres"))
+            {
+                std::cout << "WARNING: Presentation mode is "
+                          << "experimental\n";
+                e.force_pres = true;
+            }
 
-            auto end = chrono::high_resolution_clock::now();
-            unsigned long long int elapsed =
-                chrono::duration_cast<chrono::milliseconds>(
-                    end - start)
-                    .count();
-            cout << tags::violet_bold
-                 << "Elapsed ms: " << elapsed << '\n'
-                 << "Ms waiting for code chunk output: "
-                 << e.systemWaitMS << '\n'
-                 << "JKnit-attributable ms: "
-                 << elapsed - e.systemWaitMS << '\n'
-                 << "Percent code-chunk-attributable: "
-                 << 100 * (double)e.systemWaitMS / elapsed
-                 << "%\n"
-                 << tags::reset;
+            stats = e.run();
         }
         else
         {
-            // Untimed
-            e.processFile(inputPath, outputPath, pres);
+            MDEngine e(settings);
+            load_engine(e, settings_files);
+            stats = e.run();
         }
     }
-    catch (const runtime_error &error)
+    catch (std::runtime_error &e)
     {
-        e.log.close();
-        cout << tags::red_bold << "Error: " << error.what()
-             << tags::reset;
-        return 4;
+        std::cerr << "ERROR: " << e.what() << '\n'
+                  << "(knitting halted)\n";
+        return 2;
     }
     catch (...)
     {
-        e.log.close();
-        cout << tags::red_bold
-             << "An unknown fatal error ocurred.\n"
-             << tags::reset;
-        return 4;
+        std::cerr << "UNKNOWN ERROR\n"
+                  << "(knitting halted)\n";
+        return 3;
     }
 
-    if (!quiet)
+    if (settings.time)
     {
-        cout << tags::green_bold << "Done.\n" << tags::reset;
+        const auto total_us = std::chrono::duration_cast<
+                                  std::chrono::microseconds>(
+                                  stats.stop - stats.start)
+                                  .count();
+        const auto jknit_us = total_us - stats.external_us;
+        const double percent_jknit =
+            100.0 * (double)(jknit_us) / (double)(total_us);
+        const double percent_extern = 100.0 - percent_jknit;
+
+        std::cout << "Total us:                   " << total_us
+                  << '\n'
+                  << "JKnit-attributable us:      " << jknit_us
+                  << '\n'
+                  << "Non-JKnit us:               "
+                  << total_us - jknit_us << '\n'
+                  << "Percent JKnit-attributable: "
+                  << percent_jknit << '\n'
+                  << "Percent Non-JKnit:          "
+                  << percent_extern << '\n';
     }
 
     return 0;

@@ -1,47 +1,35 @@
-SOURCES := engine.cpp main.cpp
-OBJECTS := $(SOURCES:.cpp=.o)
-HEADERS := engine.hpp
+TARGET := jknit.out
+CPP := g++ -std=c++20 -O3 -pedantic -Wall -g
+GLOBAL_DEPS := engine.hpp md_engine.hpp
 
-EXE := jknit.out
-#EXE := jknit.exe
-
-CC := clang++ -std=c++20 -o3
-#CC := x86_64-w64-mingw32-g++ --static
-LFLAGS :=
-CFLAGS := -Wall -pedantic -g #-Werror
-
-all: $(SOURCES) $(EXE)
-
-install: $(EXE)
-	sudo cp ./jknit.out /usr/bin/jknit
+.PHONY:	install
+install:	$(TARGET)
+	sudo cp $(TARGET) /usr/bin/$(TARGET:.out=)
 	sudo cp -r compilation-drivers /usr/include
-	sudo cp gui.py /usr/bin/jknit-gui
+	sudo chmod +x /usr/include/compilation-drivers/*
 
-	sudo chmod +x /usr/bin/jknit-gui \
-		/usr/include/compilation-drivers/*
-
+.PHONY:	uninstall
 uninstall:
-	sudo rm -f /usr/bin/jknit /usr/bin/jknit-gui
-	sudo rm -rf /usr/include/compilation-drivers
+	sudo rm -rf /usr/bin/$(TARGET:.out=) \
+		/usr/include/compilation-drivers
 
-reinstall:
-	$(MAKE) clean
-	$(MAKE) install
-
-.cpp.o:
-	$(CC) $(CFLAGS) -c -o $@ $<
-
-$(EXE): $(OBJECTS) $(HEADERS)
-	clang-format -i *.cpp *.hpp
-	$(CC) $(LFLAGS) $(OBJECTS) -o $@
-
-remake:
-	$(MAKE) clean all
-
+.PHONY:	clean
 clean:
-	rm -rf *.pdf *.aux *.log *.tex *.out *.o *.zst *.tar \
-		*.listing pkg jknit src
+	rm -f *.o *.out *.log *.png *.aux *.pdf a.*
 
+.PHONY:	format
 format:
 	find . -type f \( -iname "*.cpp" -or -iname "*.hpp" \) \
 		-exec clang-format -i "{}" \;
+
+.PHONY:	test
+test:
+	cd demos && jknit demo.jmd -o demo.tex && pdflatex demo.tex
+	cd demos && jknit demo2.jmd -o demo2.tex \
+		&& pdflatex demo2.tex
+
+$(TARGET):	main.o engine.o md_engine.o tex_engine.o
+	$(CPP) -o $@ $^
+
+%.o:	%.cpp $(GLOBAL_DEPS)
+	$(CPP) -c -o $@ $<

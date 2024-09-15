@@ -1,197 +1,96 @@
 /*
-Jordan "Jorb" Dehmel
-jdehmel@outlook.com
-github.com/jorbDehmel
+JKnit base engine. This inserts code output into Markdown
+documents, leaving the specific output to a child class.
 2023 - present
-GPLv3 held by author
+Jordan Dehmel
 */
 
-#ifndef ENGINE_HPP
-#define ENGINE_HPP
+#pragma once
 
+#include <chrono>
+#include <cstdint>
 #include <fstream>
-#include <iostream>
+#include <list>
 #include <map>
-#include <set>
+#include <queue>
 #include <string>
-#include <vector>
 
-const static std::string VERSION = "0.0.12";
+const static std::string VERSION = "0.1.0";
 
-// For system independence
-// Luckily, output redirecting via > works as-is
-// on DOS cuz that's basically all this program is
-#if (defined(_WIN32) || defined(_WIN64))
-// Windows because it just has to be different
-const std::string buildSpace = "jknit\\";
-#else
-// UNIX-based OSes
-const std::string buildSpace = "jknit/";
-#endif
-
-struct builder
+struct Settings
 {
-    std::string commandPath;
-    std::string printChunkBreak;
-    std::string extension = "txt";
+    std::string source, target;
+    bool time = false, log = false, all_errors = false;
 };
 
+struct RunStats
+{
+    std::chrono::high_resolution_clock::time_point start, stop;
+    uint64_t external_us = 0;
+};
+
+struct Builder
+{
+    std::string printChunkBreak, commandPath, extension;
+};
+
+// A text or code chunk. There are four types here: Text
+// (markdown), code, resolved code output, and unresolved code
+// output. Unresolved code output chunks contain some
+// identifying information such that their true output can be
+// recovered in the second parsing pass.
+struct Chunk
+{
+    std::string type;
+    uint64_t pos_in_type;
+    std::list<std::string> lines;
+
+    bool show_code = true, show_output = true, combine = true;
+};
+
+// Virtual base class; This does not say how to implement
+// `knit`, although the rest of the methods are implemented. A
+// child class may target markdown or tex, in which case we want
+// to leave the specific output virtual. To inherit, implement
+// the `knit` method.
 class Engine
 {
   public:
-    Engine(bool _debug = false, bool _failWithCode = false,
-           bool _doLog = false);
+    Engine(const Settings &_s);
     ~Engine();
 
-    // Used to be globals
-    bool debug, failWithCode, doLog;
-    unsigned long long int systemWaitMS;
+    void load_settings_file(const std::string &_filepath);
+    void load_settings_line(const std::string &_line);
 
-    void smartSys(const std::string &Command,
-                  std::ostream &Stream = std::cout);
-
-    void processFile(const std::string &InputFilepath,
-                     const std::string &OutputFilepath,
-                     const bool &PresMode);
-
-    void processChunk(const std::string Header,
-                      const std::string &Contents,
-                      std::ostream &Stream);
-
-    void setPath(const std::string &Name,
-                 const std::string &Path);
-
-    void setOptions(const std::string &Name,
-                    const std::string &Options);
-    void appendOptions(const std::string &Name,
-                       const std::string &Options);
-
-    bool hasPath(const std::string &What) const;
-
-    std::string toString() const;
-    void fromString(const std::string &From);
-
-    void toStream(std::ostream &Stream) const;
-
-    // Turns a line from markdown into latex and inserts it into
-    // a stream
-    void processMDLine(const std::string &Line,
-                       std::ostream &Stream);
-
-    const std::string specialCharacters = "%$~#&^";
-
-    std::vector<std::string>
-        latexHeader =
-            {"\\documentclass[10pt]{amsart}",
-             "\\usepackage[margin=1in]{geometry}",
-             "\\usepackage{background}",
-             "\\usepackage{csquotes}",
-             "\\usepackage{graphicx}",
-             "\\usepackage{hyperref}",
-             "\\usepackage{pdflscape}",
-             "\\usepackage{relsize}",
-             "\\usepackage{moresize}",
-             "\\usepackage[dvipsnames]{xcolor}",
-             "\\usepackage{color}",
-             "\\usepackage{amsmath}",
-             "\\usepackage{amssymb}",
-             "\\usepackage[many]{tcolorbox}",
-             "\\usepackage{afterpage}",
-             "\\tcbuselibrary{listings}",
-             "\\geometry{letterpaper}",
-             "\\newtcblisting{code} {",
-             "listing only,",
-             "breakable,",
-             "boxrule = 1pt,",
-             "colframe = gray,",
-             "listing options = {",
-             "basicstyle = \\ttfamily\\relsize{-1},",
-             "breaklines = true,",
-             "columns = fullflexible,",
-             "commentstyle = \\color{olive},",
-             "keywordstyle = \\color{MidnightBlue},",
-             "stringstyle = \\color{OliveGreen},",
-             "breakatwhitespace = false,",
-             "keepspaces = true,",
-             "numbersep = 5pt,",
-             "showspaces = false,",
-             "showstringspaces = false,",
-             "showtabs = false,",
-             "tabsize = 2}} ",
-             "\\newtcblisting{codeoutput}{",
-             "listing only,",
-             "breakable,",
-             "colback = white,",
-             "boxrule = 1pt,",
-             "colframe = gray,",
-             "listing options = {",
-             "basicstyle =\\ttfamily\\relsize{-1},",
-             "breaklines = true,",
-             "columns = fullflexible}}",
-             "\\newenvironment{pres}{\\begin{landscape}"
-             "\\Huge\\pagestyle{empty}\\clearpage}{\\end{"
-             "landscape}"
-             "}",
-             "\\newenvironment{titleslide}{"
-             "\\HUGE\\vspace*{0.1\\textheight}\\afterpage{"
-             "\\nopagecolor}}{}",
-             "\\newcommand{\\slide}{\\newpage{}\\nopagecolor}",
-             "\\newcommand{\\bgimg}[1]{\\backgroundsetup{angle="
-             "90,"
-             "scale=1,contents={"
-             "\\includegraphics[width=\\paperwidth,height="
-             "\\paperheight]{#1}}}}",
-             "\\begin{document}",
-             "\\sffamily"},
-        latexFooter = {"\\end{document}"},
-        startCode = {"\\begin{code}"},
-        endCode = {"\\end{code}\n"},
-        startOutput = {"\\begin{codeoutput}"},
-        endOutput = {"\\end{codeoutput}\n"},
-        startMath = {"\\["}, endMath = {"\\]~\\\\"},
-        startHeader = {"\\bf"}, endHeader;
-
-    std::ofstream log;
-
-    // did NOT have fun typing these
-    std::set<std::string> lstSupportedLangs = {
-        "ABAP",        "ACM",       "ACSL",        "Algol",
-        "Assembler",   "bash",      "C",           "C++",
-        "CIL",         "Cobol",     "command.com", "csh",
-        "Eiffel",      "elisp",     "Euphoria",    "GAP",
-        "Gnuplot",     "hansl",     "HTML",        "inform",
-        "JVMIS",       "Lingo",     "LLVM",        "Lua",
-        "Mathematica", "Mercury",   "Miranda",     "ML",
-        "MuPAD",       "Oberon-2",  "Octave",      "Oz",
-        "Perl",        "PL/I",      "PostScript",  "Prolog",
-        "PSTricks",    "R",         "Rexx",        "Ruby",
-        "SAS",         "Scilab",    "SHELXL",      "SPARQL",
-        "Swift",       "TeX",       "VBScript",    "VHDL",
-        "XML",         "ACMscript", "Ada",         "Ant",
-        "Awk",         "Basic",     "Caml",        "Clean",
-        "Comsol",      "Delphi",    "Elan",        "erlang",
-        "Fortran",     "GCL",       "Go",          "Haskell",
-        "IDL",         "Java",      "ksh",         "Lisp",
-        "Logo",        "make",      "Matlab",      "MetaPost",
-        "Mizar",       "Modula-2",  "NASTRAN",     "OCL",
-        "OORexx",      "Pascal",    "PHP",         "Plasm",
-        "POV",         "Promela",   "Python",      "Reduce",
-        "RSL",         "S",         "Scala",       "sh",
-        "Simula",      "SQL",       "tcl",         "Verilog",
-        "VRML",        "XSLT"};
+    RunStats run();
 
   protected:
-    std::map<std::string, builder> builders;
+    Settings settings;
+    std::ifstream source;
+    std::ofstream target, log;
+    std::map<std::string, Builder> builders;
 
-    // Scans for code chunks, collates them by builder, and
-    // compiles. Splits by inserting a builder's printChunkBreak
-    // AFTER each chunk runs
-    void buildAllChunks(const std::string &FileContents);
+    // Pseudo-RNG to help avoid local collisions in filenames
+    const std::string magic_number = std::to_string(time(NULL));
 
-    // Maps a language to its code chunk outputs in order
-    std::map<std::string, std::vector<std::string>>
-        chunkOutputs;
-    std::map<std::string, int> curChunkByLang;
+    // Run a code chunk and return its output as a chunk
+    Chunk run_code_chunk(const Builder &_builder,
+                         const Chunk &_code);
+
+    // Run the given shell command and get its output.
+    uint64_t external_us = 0;
+    Chunk run_and_get_output(const std::string &_cmd);
+
+    // Break a single output chunk into multiple
+    std::queue<Chunk> break_output_chunk(const Chunk &_c);
+
+    // Go through the input, extract code from `jmd` to output.
+    // This creates a list of text/code chunks which should then
+    // be constructed into output.
+    std::list<Chunk> parse();
+
+    // Constructs a series of text/code chunks into the output
+    // file. This is abstract, as the specific language
+    // targetted may vary.
+    virtual void knit(const std::list<Chunk> &_chunks) = 0;
 };
-
-#endif
