@@ -10,7 +10,12 @@ import os
 
 
 if __name__ == '__main__':
+    try:
+        result: int = os.system(
+            f'g++ {sys.argv[1]} -o a.out > /dev/null')
 
-    assert len(sys.argv) > 1
-    sys.exit(os.system(f'g++ -o output_temp.out {sys.argv[1]} '
-                       + '&& ./output_temp.out && rm -f output_temp.out'))
+        assert result == 0
+        result = os.system('./a.out')
+        assert result == 0
+    finally:
+        os.system('rm a.out')

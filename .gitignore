@@ -17,3 +17,5 @@ pkg/
 *.zst
 *.tar
 *.listing
+foo.*
+a.*

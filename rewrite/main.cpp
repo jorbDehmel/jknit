@@ -11,18 +11,20 @@ Jordan Dehmel
 #include <cstdint>
 #include <iostream>
 #include <list>
+#include <stdexcept>
 #include <string>
 
-void load_engine(
-    Engine &_e,
-    const std::list<std::string> &_settings_files)
+static_assert(__cplusplus >= 2020'00UL);
+
+void load_engine(Engine &_e,
+                 const std::list<std::string> &_settings_files)
 {
     for (const auto &f : _settings_files)
     {
         _e.load_settings_file(f);
     }
 
-    // Default settings
+    // Interpreted languages
     _e.load_settings_line(
         "py /bin/python3 'print(\"CHUNK_BREAK\")' py");
     _e.load_settings_line(
@@ -33,6 +35,26 @@ void load_engine(
         "bash /usr/bin/sh 'echo CHUNK_BREAK' sh");
     _e.load_settings_line(
         "js node 'console.log('CHUNK_BREAK');' js");
+    _e.load_settings_line(
+        "r R 'print(\"CHUNK_BREAK\")' R");
+
+    // Compiled languages
+    _e.load_settings_line(
+        "clangpp /usr/include/compilation-drivers/clangpp_driver.py ; cpp");
+    _e.load_settings_line(
+        "gpp /usr/include/compilation-drivers/gpp_driver.py ; cpp");
+    _e.load_settings_line(
+        "clang /usr/include/compilation-drivers/clang_driver.py ; c");
+    _e.load_settings_line(
+        "gcc /usr/include/compilation-drivers/gcc_driver.py ; c");
+    _e.load_settings_line(
+        "rust /usr/include/compilation-drivers/rustc_driver.py ; rs");
+
+    // Aliases
+    _e.load_settings_line(
+        "cpp /usr/include/compilation-drivers/gpp_driver.py ; cpp");
+    _e.load_settings_line(
+        "c /usr/include/compilation-drivers/gcc_driver.py ; c");
 }
 
 int main(int c, char *v[])
@@ -47,7 +69,7 @@ int main(int c, char *v[])
 
     // Parse CLI input
     std::string arg;
-    for (uint64_t cur_arg = 1; cur_arg < c; ++cur_arg)
+    for (int64_t cur_arg = 1; cur_arg < c; ++cur_arg)
     {
         arg = v[cur_arg];
 
@@ -90,8 +112,8 @@ int main(int c, char *v[])
                     break;
                 case 'v': // Version
                 case 'V':
-                    std::cout << "JKnit version "
-                              << VERSION << '\n'
+                    std::cout << "JKnit version " << VERSION
+                              << '\n'
                               << "2023-present, GPLv3\n";
                     break;
                 case 'e': // Warnings to errors
@@ -105,24 +127,23 @@ int main(int c, char *v[])
                 case 'h': // Help
                 case 'H':
                     std::cout
-                            << "JKnit version " << VERSION
-                            << '\n'
-                            << "Live RMD-style markdown "
-                            << "documents\n\n"
-                            << "CLI flags:\n"
-                            << "-e Warnings to errors\n"
-                            << "-h Help (this)\n"
-                            << "-l Toggle log (default off)\n"
-                            << "-t Toggle timer (default off)\n"
-                            << "-v Version\n"
-                            << "-x Force TeX mode\n"
-                            << '\n'
-                            << "Jordan Dehmel, 2023 - present\n"
-                            << "GPLv3\n";
+                        << "JKnit version " << VERSION << '\n'
+                        << "Live RMD-style markdown "
+                        << "documents\n\n"
+                        << "CLI flags:\n"
+                        << "-e Warnings to errors\n"
+                        << "-h Help (this)\n"
+                        << "-l Toggle log (default off)\n"
+                        << "-t Toggle timer (default off)\n"
+                        << "-v Version\n"
+                        << "-x Force TeX mode\n"
+                        << '\n'
+                        << "Jordan Dehmel, 2023 - present\n"
+                        << "GPLv3\n";
                     break;
                 default:
                     std::cerr << "Unrecognized flag '" << arg[i]
-                            << "'\n";
+                              << "'\n";
                     break;
                 }
             }
@@ -135,36 +156,74 @@ int main(int c, char *v[])
         }
     }
 
+    if (settings.target.ends_with(".tex"))
+    {
+        target_tex = true;
+    }
+    else if (!target_tex && !settings.target.ends_with(".md"))
+    {
+        std::cerr << "WARNING: Unknown target file extension; "
+                  << "Target language will be markdown\n";
+    }
+
+    if (target_tex && settings.target == "a.md")
+    {
+        settings.target = "a.tex";
+    }
+
     // Generate loader object
     // Run engine and save to file
-    if (target_tex)
+    try
     {
-        TEXEngine e(settings);
-        load_engine(e, settings_files);
-        stats = e.run();
+        if (target_tex)
+        {
+            TEXEngine e(settings);
+            load_engine(e, settings_files);
+
+            if (settings.source.ends_with("pres"))
+            {
+                std::cout << "WARNING: Presentation mode is "
+                          << "experimental\n";
+                e.force_pres = true;
+            }
+
+            stats = e.run();
+        }
+        else
+        {
+            MDEngine e(settings);
+            load_engine(e, settings_files);
+            stats = e.run();
+        }
     }
-    else
+    catch (std::runtime_error &e)
     {
-        MDEngine e(settings);
-        load_engine(e, settings_files);
-        stats = e.run();
+        std::cerr << "ERROR: " << e.what() << '\n'
+                  << "(knitting halted)\n";
+        return 2;
+    }
+    catch (...)
+    {
+        std::cerr << "UNKNOWN ERROR\n"
+                  << "(knitting halted)\n";
+        return 3;
     }
 
     if (settings.time)
     {
         const auto total_us = std::chrono::duration_cast<
-                    std::chrono::microseconds>(
-                        stats.stop - stats.start).count();
+                                  std::chrono::microseconds>(
+                                  stats.stop - stats.start)
+                                  .count();
         const auto jknit_us = total_us - stats.external_us;
-        const double percent_jknit = 100.0 *
-                                     (double)(jknit_us) /
-                                     (double)(total_us);
+        const double percent_jknit =
+            100.0 * (double)(jknit_us) / (double)(total_us);
         const double percent_extern = 100.0 - percent_jknit;
 
-        std::cout << "Total us:                   "
-                  << total_us << '\n'
-                  << "JKnit-attributable us:      "
-                  << jknit_us << '\n'
+        std::cout << "Total us:                   " << total_us
+                  << '\n'
+                  << "JKnit-attributable us:      " << jknit_us
+                  << '\n'
                   << "Non-JKnit us:               "
                   << total_us - jknit_us << '\n'
                   << "Percent JKnit-attributable: "

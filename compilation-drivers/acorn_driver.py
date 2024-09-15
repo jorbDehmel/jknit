@@ -10,5 +10,12 @@ import os
 
 
 if __name__ == '__main__':
-    result: int = os.system(f'acorn -MEe {sys.argv[1]}')
-    assert result == 0
+    try:
+        result: int = os.system(
+            f'acorn -Me {sys.argv[1]} -o a.out > /dev/null')
+
+        assert result == 0
+        result = os.system('./a.out')
+        assert result == 0
+    finally:
+        os.system('rm a.out')

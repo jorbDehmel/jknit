@@ -1,8 +1,5 @@
 ```settings
-cpp /home/jorb/Programs/jknit/compilation-drivers/gpp_driver.py '' cpp
-c /home/jorb/Programs/jknit/compilation-drivers/gcc_driver.py '' c
-oak /home/jorb/Programs/jknit/compilation-drivers/acorn_driver.py '' oak
-rust /home/jorb/Programs/jknit/compilation-drivers/rustc_driver.py '' rs
+oak /usr/include/compilation-drivers/acorn_driver.py '' oak
 ```
 
 # Another Demo of JKnit

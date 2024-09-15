@@ -1,81 +1,72 @@
-```settings
-clangpp /home/jorb/Programs/jknit/compilation-drivers/clangpp_driver.py '' cpp
-clang /home/jorb/Programs/jknit/compilation-drivers/clang_driver.py '' c
-cpp /home/jorb/Programs/jknit/compilation-drivers/gpp_driver.py '' cpp
-c /home/jorb/Programs/jknit/compilation-drivers/gcc_driver.py '' c
-oak /home/jorb/Programs/jknit/compilation-drivers/acorn_driver.py '' oak
-rust /home/jorb/Programs/jknit/compilation-drivers/rustc_driver.py '' rs
-R R '' R
-```
-
 jpres Demonstration
 ====================================================
-
 \bgimg{image.png}
-
 Jordan Dehmel
-
 Title
 ====================================================
-
-```{octave}
+```OCTAVE
 % This is a matrix
 A = [1, 2, 3; 4, 5, 6; 7, 8, 9]
 ```
-
 The following Octave code shares the scope of all Octave code which was previously run.
 Thus, A exists in scope, and the following produces output.
-
-```{octave}
+```OCTAVE
 A
 ```
+```
+A =
 
+   1   2   3
+   4   5   6
+   7   8   9
+
+```
 Functions in Octave
 ====================================================
-
 This is a function definition in Octave.
 This chunk is marked with a ^, meaning that
 it produces no output.
-
-```{octave}^
+```OCTAVE
 function printmatrix (mat)
   disp('The following matrix was inputted:');
   mat
 endfunction
 ```
-
 This is a function call in octave.
 It uses our matrix from before to demonstrate scoping and function calls.
-
-```{octave}
+```OCTAVE
 printmatrix(A)
 ```
+```
+The following matrix was inputted:
+mat =
 
+   1   2   3
+   4   5   6
+   7   8   9
+
+```
 Languages
 ====================================================
-
 JKnit also offers native compatibility with C++, Python, bash, JavaScript and Rust.
 These must be installed on your machine.
-
-```{bash}
+```BASH
 echo "Hello from bash!"
 ```
-
+```
+Hello from bash!
+```
 Compiled Languages
 ====================================================
-
 C++ and Rust are both compiled languages which require main functions.
 Thus, it does not make much sense to link multiple chunks together.
 By default, they are marked as "loner" chunks via the \* operator in
 their name.
-
 C++
 ====================================================
-
-```{clangpp*}
+```CLANGPP
 #include <iostream>
 using namespace std;
-
 // Comment comment comment
 int main()
 {
@@ -84,19 +75,21 @@ int main()
   return 0;
 }
 ```
-
+```
+Hello from C++!
+```
 Rust
 ====================================================
-
-```{rust*}
+```RUST
 fn main() {
   println!("Hello from Rust!");
 }
 ```
-
+```
+Hello from Rust!
+```
 Presentation Features
 ====================================================
-
 - You can try
 - To do bullet points
 - These look quite nice in `.rpres`

@@ -7,13 +7,13 @@ Jordan Dehmel
 
 #pragma once
 
+#include <chrono>
 #include <cstdint>
 #include <fstream>
-#include <string>
-#include <map>
 #include <list>
-#include <chrono>
+#include <map>
 #include <queue>
+#include <string>
 
 const static std::string VERSION = "0.1.0";
 
@@ -74,8 +74,8 @@ class Engine
     const std::string magic_number = std::to_string(time(NULL));
 
     // Run a code chunk and return its output as a chunk
-    Chunk run_code_chunk(
-        const Builder &_builder, const Chunk &_code);
+    Chunk run_code_chunk(const Builder &_builder,
+                         const Chunk &_code);
 
     // Run the given shell command and get its output.
     uint64_t external_us = 0;

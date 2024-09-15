@@ -1,12 +1,12 @@
 #include "engine.hpp"
 #include <cctype>
 #include <chrono>
+#include <cstdint>
 #include <filesystem>
 #include <iostream>
-#include <sstream>
-#include <cstdint>
 #include <memory.h>
 #include <queue>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -35,7 +35,8 @@ std::string strip_header(const std::string &_from)
     uint64_t position = 3;
     std::string out;
 
-    while (position < _from.size() && !std::isalnum(_from[position]))
+    while (position < _from.size() &&
+           !std::isalnum(_from[position]))
     {
         ++position;
     }
@@ -93,8 +94,8 @@ void parse_header(const std::string &_header, Chunk &_into)
 }
 
 // Return a new chunk containing the output of the given code.
-Chunk Engine::run_code_chunk(
-    const Builder &_builder, const Chunk &_code)
+Chunk Engine::run_code_chunk(const Builder &_builder,
+                             const Chunk &_code)
 {
     // Save as file
     Chunk out;
@@ -108,8 +109,8 @@ Chunk Engine::run_code_chunk(
         if (settings.all_errors)
         {
             throw std::runtime_error(
-                "Could not write temp files; Check permissions."
-            );
+                "Could not write temp files; Check "
+                "permissions.");
         }
         else
         {
@@ -203,8 +204,8 @@ Chunk Engine::run_and_get_output(const std::string &_cmd)
 {
     const static uint64_t buffer_size = 128;
     static char buffer[buffer_size];
-    static std::chrono::high_resolution_clock::time_point
-        start, stop;
+    static std::chrono::high_resolution_clock::time_point start,
+        stop;
     static uint64_t elapsed_us;
 
     if (settings.time)
@@ -229,8 +230,8 @@ Chunk Engine::run_and_get_output(const std::string &_cmd)
     FILE *pipe = popen(_cmd.c_str(), "r");
     if (!pipe)
     {
-        throw std::runtime_error(
-            "Failed to run command '" + _cmd + "'");
+        throw std::runtime_error("Failed to run command '" +
+                                 _cmd + "'");
     }
 
     try
@@ -275,8 +276,10 @@ Chunk Engine::run_and_get_output(const std::string &_cmd)
     if (settings.time)
     {
         stop = std::chrono::high_resolution_clock::now();
-        elapsed_us = std::chrono::duration_cast<
-            std::chrono::microseconds>(stop - start).count();
+        elapsed_us =
+            std::chrono::duration_cast<
+                std::chrono::microseconds>(stop - start)
+                .count();
         external_us += elapsed_us;
 
         if (settings.log)
@@ -301,8 +304,8 @@ Engine::Engine(const Settings &_s)
 
         if (log.is_open())
         {
-            log << "JKnit engine instantiated at "
-                << time(NULL) << '\n';
+            log << "JKnit engine instantiated at " << time(NULL)
+                << '\n';
         }
         else if (settings.all_errors)
         {
@@ -353,8 +356,7 @@ void Engine::load_settings_file(const std::string &_filepath)
 
     if (settings.log)
     {
-        log << "Loading settings file '"
-            << _filepath << "'\n";
+        log << "Loading settings file '" << _filepath << "'\n";
     }
 
     // Iterate over lines
@@ -486,6 +488,7 @@ std::list<Chunk> Engine::parse()
 {
     std::string line, header;
     Chunk current_chunk;
+    uint64_t cur_chunk_ws_prefix = 0;
     std::list<Chunk> output;
     uint64_t whitespace_prefix;
     std::map<std::string, Chunk> combined_languages;
@@ -504,8 +507,8 @@ std::list<Chunk> Engine::parse()
         }
         header = line.substr(whitespace_prefix);
 
-        if (strncmp(line.c_str() + whitespace_prefix,
-                    "```", 3) == 0)
+        if (strncmp(line.c_str() + whitespace_prefix, "```",
+                    3) == 0)
         {
             output.push_back(current_chunk);
 
@@ -513,6 +516,7 @@ std::list<Chunk> Engine::parse()
             {
                 // Beginning a code chunk
                 parse_header(header, current_chunk);
+                cur_chunk_ws_prefix = whitespace_prefix;
 
                 if (current_chunk.type == "SETTINGS")
                 {
@@ -534,7 +538,7 @@ std::list<Chunk> Engine::parse()
                     if (builders.count(lang) != 0)
                     {
                         for (const auto &cur_line :
-                            current_chunk.lines)
+                             current_chunk.lines)
                         {
                             combined_languages[lang]
                                 .lines.push_back(cur_line);
@@ -548,8 +552,8 @@ std::list<Chunk> Engine::parse()
                     else if (settings.all_errors)
                     {
                         throw std::runtime_error(
-                            "Invalid language ID '" +
-                            lang + "'");
+                            "Invalid language ID '" + lang +
+                            "'");
                     }
                     else
                     {
@@ -572,14 +576,22 @@ std::list<Chunk> Engine::parse()
         {
             if (settings.log)
             {
-                log << "Settings line '"
-                    << line << "'\n";
+                log << "Settings line '" << line << "'\n";
             }
             load_settings_line(line);
         }
-        else
+        else if (!line.empty())
         {
-            current_chunk.lines.push_back(line);
+            if (cur_chunk_ws_prefix <= line.size() &&
+                current_chunk.type != "TEXT")
+            {
+                current_chunk.lines.push_back(
+                    line.substr(cur_chunk_ws_prefix));
+            }
+            else
+            {
+                current_chunk.lines.push_back(line);
+            }
         }
     }
     output.push_back(current_chunk);
@@ -594,8 +606,8 @@ std::list<Chunk> Engine::parse()
 
         if (settings.log)
         {
-            log << "Building knitted chunk in lang '"
-                << lang << "'...\n";
+            log << "Building knitted chunk in lang '" << lang
+                << "'...\n";
         }
 
         const auto output = run_code_chunk(builder, src);
@@ -634,8 +646,8 @@ std::list<Chunk> Engine::parse()
             else if (settings.all_errors)
             {
                 throw std::runtime_error(
-                    "No remaining output for lang '" +
-                    lang + "'");
+                    "No remaining output for lang '" + lang +
+                    "'");
             }
             else
             {
@@ -656,7 +668,8 @@ std::list<Chunk> Engine::parse()
                 }
 
                 const auto builder = builders.at(lang);
-                const auto to_insert = run_code_chunk(builder, *it);
+                const auto to_insert =
+                    run_code_chunk(builder, *it);
 
                 if (settings.log)
                 {

@@ -1,10 +1,3 @@
----
-This is ignored because it is rstudio exclusive
----
-
-```{r, echo=FALSE}~
-This is never evaluated due to the ~
-```
 
 ## JKnit Demonstration
 ### Jordan Dehmel
@@ -80,21 +73,46 @@ Thus, it does not make much sense to link multiple chunks together.
 By default, they are marked as "loner" chunks via the \* operator in
 their name.
 
-```{clang++*}
+```{clangpp*}
 #include <iostream>
-using namespace std;
-
-// Comment comment comment
 int main()
 {
-  cout << "Hello from C++!\n";
-  int a = 1 + 2 + 3 + 56;
-  return 0;
+    std::cout << "Hello from C++!\n";
+    return 0;
 }
 ```
 
 ```{rust*}
 fn main() {
-  println!("Hello from Rust!");
+    println!("Hello from Rust!");
 }
 ```
+
+> blockquotes
+> are
+> very important
+
+- Lists may also exist
+- They may
+    have multiple lines
+    in them
+    - They may have nested lists
+        a) Even possibly nested
+        b) lists of enumerative or
+        c) differing
+            - types
+    - Or go back down
+        or even do this
+        weird thing
+        ```python
+        print('Or have code in them')
+        ```
+    - And then keep going
+
+    - Or have a newline break
+
+Zeroth
+- First
+    - Second
+        - Third
+            - Fourth

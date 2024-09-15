@@ -1,9 +1,0 @@
-# 3rd test of JKnit
-
-Some math:
-
-$$
-    F = (A, F) \\
-    A: (\Sigma^* \times I) \to (\{0, 1\} \times I) \\
-    F: (\Sigma^*) \to (\Sigma^* \times I) \\
-$$

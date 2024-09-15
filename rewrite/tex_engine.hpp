@@ -10,12 +10,12 @@ GPLv3 held by author
 
 #include "engine.hpp"
 #include <set>
+static_assert(__cplusplus >= 2020'00UL);
 
 class TEXEngine : public Engine
 {
   public:
-    TEXEngine(const Settings &_s)
-        : Engine(_s)
+    TEXEngine(const Settings &_s) : Engine(_s)
     {
     }
 
@@ -122,6 +122,9 @@ class TEXEngine : public Engine
     bool force_pres = false;
 
   protected:
-
     void knit(const std::list<Chunk> &_chunks);
+
+  private:
+    void handle_md(const std::list<std::string> &_lines,
+               std::ostream &_target);
 };
