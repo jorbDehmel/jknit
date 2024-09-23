@@ -1,6 +1,11 @@
 # Changelog of JKnit
 Jordan Dehmel, 2024 - present
 
+# `0.1.1`
+- Added support for raw commands in headers
+- Header commands will now have `%` replaced with the source
+    file
+
 # `0.1.0`
 - Full rewrite to improve code quality
 - Can now target `md` or `tex`, made it fairly easy to add new

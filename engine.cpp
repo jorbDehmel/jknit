@@ -35,6 +35,7 @@ std::string strip_header(const std::string &_from)
     uint64_t position = 3;
     std::string out;
 
+    // Move position to the end of the leading non-alphanumerics
     while (position < _from.size() &&
            !std::isalnum(_from[position]))
     {
@@ -42,20 +43,24 @@ std::string strip_header(const std::string &_from)
     }
 
     out = _from.substr(position);
-    position = 0;
 
-    while (position < out.size() && std::isalnum(out[position]))
+    // Trim off trailing non-alphanumerics
+    position = out.size() - 1;
+    while (position > 0 && !std::isalnum(out[position]))
     {
-        ++position;
+        --position;
     }
 
-    out = out.substr(0, position);
-
-    for (uint64_t i = 0; i < out.size(); ++i)
+    // Get out and turn it uppercase
+    out = out.substr(0, position + 1);
+    if (out.find(" ") == std::string::npos)
     {
-        if (std::isalpha(out[i]))
+        for (uint64_t i = 0; i < out.size(); ++i)
         {
-            out[i] = toupper(out[i]);
+            if (std::isalpha(out[i]))
+            {
+                out[i] = toupper(out[i]);
+            }
         }
     }
 
@@ -141,7 +146,17 @@ Chunk Engine::run_code_chunk(const Builder &_builder,
     f.close();
 
     // Construct command
-    command = _builder.commandPath + " " + input_file;
+    if (command.find("%") == std::string::npos)
+    {
+        command = _builder.commandPath + " " + input_file;
+    }
+    else
+    {
+        while (command.find("%") != std::string::npos)
+        {
+            command.replace(command.find("%"), 1, input_file);
+        }
+    }
 
     // Run
     try
@@ -685,16 +700,33 @@ std::list<Chunk> Engine::parse()
                 output.insert(it, to_insert);
                 --it;
             }
-            else if (settings.all_errors)
-            {
-                throw std::runtime_error(
-                    "Invalid language ID '" + lang + "'");
-            }
+
+            // Unknown builder; Attempt to treat as command
             else
             {
-                std::cerr << "WARNING: "
-                          << "Invalid language ID '" << lang
-                          << "'\n";
+                if (settings.log)
+                {
+                    log << "Building loner chunk via command '"
+                        << lang << "'...\n```\n";
+                }
+
+                Builder builder;
+                builder.commandPath = lang;
+                builder.extension = "txt";
+                builder.printChunkBreak = "";
+
+                const auto to_insert =
+                    run_code_chunk(builder, *it);
+
+                if (settings.log)
+                {
+                    log << "Done.\n";
+                }
+
+                // Insert after this item
+                ++it;
+                output.insert(it, to_insert);
+                --it;
             }
         }
     }
