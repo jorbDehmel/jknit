@@ -1,6 +1,11 @@
 # Changelog of JKnit
 Jordan Dehmel, 2024 - present
 
+# `0.1.2`
+- Added `debug-install` option, with default being stripped
+    executable. Previously debug was default.
+- Fixed issue with `tex` headers being wrong font
+
 # `0.1.1`
 - Added support for raw commands in headers
 - Header commands will now have `%` replaced with the source

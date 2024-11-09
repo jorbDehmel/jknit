@@ -3,7 +3,7 @@ Jordan Dehmel, 2024
 
 Demonstrates `dot` files in `jmd`.
 
-```{dot -Tpng -o dot_out.png %}*~
+```{dot -Tpng -o dot_out.png %}*
 digraph {
     dpi=300;
     a -> b -> c -> d, e;

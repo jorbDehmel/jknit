@@ -15,7 +15,7 @@ Jordan Dehmel
 #include <queue>
 #include <string>
 
-const static std::string VERSION = "0.1.0";
+const static std::string VERSION = "0.1.2";
 
 struct Settings
 {

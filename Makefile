@@ -1,9 +1,16 @@
 TARGET := jknit.out
 CPP := g++ -std=c++20 -O3 -pedantic -Wall -g
-GLOBAL_DEPS := engine.hpp md_engine.hpp
+GLOBAL_DEPS := engine.hpp md_engine.hpp tex_engine.hpp
 
 .PHONY:	install
 install:	$(TARGET)
+	strip --strip-all $(TARGET) -o $(TARGET).stripped.out
+	sudo cp $(TARGET).stripped.out /usr/bin/$(TARGET:.out=)
+	sudo cp -r compilation-drivers /usr/include
+	sudo chmod +x /usr/include/compilation-drivers/*
+
+.PHONY:	debug-install
+debug-install:	$(TARGET)
 	sudo cp $(TARGET) /usr/bin/$(TARGET:.out=)
 	sudo cp -r compilation-drivers /usr/include
 	sudo chmod +x /usr/include/compilation-drivers/*
@@ -24,9 +31,13 @@ format:
 
 .PHONY:	test
 test:
-	cd demos && jknit demo.jmd -o demo.tex && pdflatex demo.tex
-	cd demos && jknit demo2.jmd -o demo2.tex \
-		&& pdflatex demo2.tex
+	for CASE in demo demo2 demo3 ; \
+	do \
+		cd demos ; \
+		jknit $$CASE.jmd -o $$CASE.md ; \
+		jknit $$CASE.jmd -o $$CASE.tex ; \
+		pdflatex $$CASE.tex ; \
+	done
 
 $(TARGET):	main.o engine.o md_engine.o tex_engine.o
 	$(CPP) -o $@ $^

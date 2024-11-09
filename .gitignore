@@ -5,6 +5,7 @@ tests/
 __pycache__/
 src/
 pkg/
+demos/*.md
 
 *.o
 *.out

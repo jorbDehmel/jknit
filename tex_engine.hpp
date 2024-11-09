@@ -23,7 +23,7 @@ class TEXEngine : public Engine
 
     const std::vector<std::string>
         latexHeader =
-            {"\\documentclass[10pt]{amsart}",
+            {"\\documentclass[10pt]{article}",
              "\\usepackage[margin=1in]{geometry}",
              "\\usepackage{background}",
              "\\usepackage{csquotes}",
@@ -38,6 +38,7 @@ class TEXEngine : public Engine
              "\\usepackage{amssymb}",
              "\\usepackage[many]{tcolorbox}",
              "\\usepackage{afterpage}",
+             "\\usepackage{sectsty}",
              "\\tcbuselibrary{listings}",
              "\\geometry{letterpaper}",
              "\\newtcblisting{code} {",
@@ -82,6 +83,7 @@ class TEXEngine : public Engine
              "scale=1,contents={"
              "\\includegraphics[width=\\paperwidth,height="
              "\\paperheight]{#1}}}}",
+             "\\allsectionsfont{\\sffamily}",
              "\\begin{document}",
              "\\sffamily"},
         latexFooter = {"\\end{document}"},

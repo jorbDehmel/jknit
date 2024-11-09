@@ -219,7 +219,7 @@ void TEXEngine::handle_md(const std::list<std::string> &_lines,
 
             _target << "\\sffamily{";
             handle_md({line.substr(num_pounds)}, _target);
-            _target << "}\\nopunct}~\n";
+            _target << "}}~\n";
 
             _target << "\\bigskip{}\n";
             continue;

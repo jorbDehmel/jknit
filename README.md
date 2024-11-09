@@ -6,11 +6,15 @@ jdehmel@outlook.com \
 `github.com/jorbDehmel/jknit`
 
 JKnit is an extremely lightweight mathematical/computational
-document knitting tool. It is purely FOSS forever, and aims to
-intuitive, easy and fast. It compiles source files composed of
-code embedded in documentation into pure documentation files.
-This allows running code within good looking, feature-rich
-documents.
+document knitting tool for literate programming. It is purely
+FOSS forever under the GPLv3, and aims to intuitive, easy and
+fast. It compiles source files composed of code embedded in
+documentation into pure documentation files. This allows running
+code within good looking, feature-rich documents. JKnit follows
+the UNIX mindset of "do one thing well": It translates these
+formatted documentation files to `md` or `tex`, and nothing
+else. It does not feature built-in containerization. It does not
+feature built-in custom interpreters.
 
 JKnit takes in `jmd` (similar to `rmd`) files and targets either
 `md` or `tex`.
@@ -33,6 +37,14 @@ Compiled (non-knit) languages:
 - Rust via `rustc`
 - [Oak](https://github.com/jorbDehmel/oak) via `acorn`
 
+Additionally, it is trivial to add support for any additional
+language. Under the hood, JKnit saves the contents of a code
+chunk to a source file, calls some command on it, and appends
+the output of that command as a code output chunk. Thus, any
+interpretted language can be added by specifying its "runner"
+command, and any compiled language can be added by building a
+trivial interpretted compile/run script.
+
 ## Installation requirements
 
 These are actually just suggestions, but you will find that
@@ -48,15 +60,15 @@ JKnit will have little function without them.
 
 All but the last of these items allow JKnit to compile and/or
 run their respective languages. The final one, however, is used
-to translate JKnit's output `.tex` files into more useful
-formats like `.pdf`.
+to translate JKnit's output `.tex` and `.md` files into more
+useful formats like `.pdf`.
 
 ## Linux Installation
 
 Simply run the command `make install` while in this directory.
-Similarly, run `make uninstall` to uninstall it. JKnit is
-purposefully lightweight, and takes only a few megabytes of
-storage for the binary and compilation drivers.
+If you want to retain runtime `GDB` information in the binary,
+run `make install-debug` instead. Either way, run
+`make uninstall` to remove it.
 
 ## The CLI (Command Line Interface)
 
