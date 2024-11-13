@@ -22,7 +22,8 @@ uninstall:
 
 .PHONY:	clean
 clean:
-	rm -f *.o *.out *.log *.png *.aux *.pdf a.*
+	rm -f *.o *.out *.log *.png *.aux *.pdf a.* *.listing
+	$(MAKE) -C demos clean
 
 .PHONY:	format
 format:
@@ -31,13 +32,7 @@ format:
 
 .PHONY:	test
 test:
-	for CASE in demo demo2 demo3 ; \
-	do \
-		cd demos ; \
-		jknit $$CASE.jmd -o $$CASE.md ; \
-		jknit $$CASE.jmd -o $$CASE.tex ; \
-		pdflatex $$CASE.tex ; \
-	done
+	$(MAKE) -C demos test
 
 $(TARGET):	main.o engine.o md_engine.o tex_engine.o
 	$(CPP) -o $@ $^

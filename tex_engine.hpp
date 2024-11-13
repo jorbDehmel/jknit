@@ -3,7 +3,6 @@ Jordan "Jorb" Dehmel
 jdehmel@outlook.com
 github.com/jorbDehmel
 2023 - present
-GPLv3 held by author
 */
 
 #pragma once
@@ -70,19 +69,6 @@ class TEXEngine : public Engine
              "basicstyle =\\ttfamily\\relsize{-1},",
              "breaklines = true,",
              "columns = fullflexible}}",
-             "\\newenvironment{pres}{\\begin{landscape}"
-             "\\Huge\\pagestyle{empty}\\clearpage}{\\end{"
-             "landscape}"
-             "}",
-             "\\newenvironment{titleslide}{"
-             "\\HUGE\\vspace*{0.1\\textheight}\\afterpage{"
-             "\\nopagecolor}}{}",
-             "\\newcommand{\\slide}{\\newpage{}\\nopagecolor}",
-             "\\newcommand{\\bgimg}[1]{\\backgroundsetup{angle="
-             "90,"
-             "scale=1,contents={"
-             "\\includegraphics[width=\\paperwidth,height="
-             "\\paperheight]{#1}}}}",
              "\\allsectionsfont{\\sffamily}",
              "\\begin{document}",
              "\\sffamily"},
@@ -120,8 +106,6 @@ class TEXEngine : public Engine
         "RSL",         "S",         "SCALA",       "SH",
         "SIMULA",      "SQL",       "TCL",         "VERILOG",
         "VRML",        "XSLT"};
-
-    bool force_pres = false;
 
   protected:
     void knit(const std::list<Chunk> &_chunks);

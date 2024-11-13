@@ -50,23 +50,6 @@ These must be installed on your machine.
 echo "Hello from bash!"
 ```
 
-\begin{pres}
-
-# Presentations
-
-This section demonstrates .jmd's ability for **presentations**.
-This is not the goal, but it also can work.
-
-```{python}
-print('Hello from Python!')
-```
-
-```{js}
-console.log('Hello from JavaScript!');
-```
-
-\end{pres}
-
 C++ and Rust are both compiled languages which require main functions.
 Thus, it does not make much sense to link multiple chunks together.
 By default, they are marked as "loner" chunks via the \* operator in

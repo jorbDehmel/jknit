@@ -1,3 +1,4 @@
+
 # JKnit
 
 Jordan Dehmel \
@@ -7,8 +8,8 @@ jdehmel@outlook.com \
 
 JKnit is an extremely lightweight mathematical/computational
 document knitting tool for literate programming. It is purely
-FOSS forever under the GPLv3, and aims to intuitive, easy and
-fast. It compiles source files composed of code embedded in
+FOSS forever under the MIT license, and aims to intuitive, easy
+and fast. It compiles source files composed of code embedded in
 documentation into pure documentation files. This allows running
 code within good looking, feature-rich documents. JKnit follows
 the UNIX mindset of "do one thing well": It translates these
@@ -44,6 +45,51 @@ the output of that command as a code output chunk. Thus, any
 interpretted language can be added by specifying its "runner"
 command, and any compiled language can be added by building a
 trivial interpretted compile/run script.
+
+## Example Workflows
+
+### Creating MarkDown Documentation
+
+In source code documentation, it is often useful to embed code
+input *and* output. To do so, we can write our documentation in
+`jmd` and use the following command to generate `md` from it.
+
+```sh
+jknit INPUT.jmd -o OUTPUT.md
+```
+
+### Creating a PDF Writeup
+
+It may also be useful to create PDF writeups, where the goal is
+the printed page. This can be done by first targeting `LaTeX`
+and then using a `LaTeX`-to-PDF compiler like `pdflatex`.
+
+```sh
+# Create LaTeX document with code output
+jknit INPUT.jmd -o INTERMEDIATE.tex
+
+# Compile LaTeX to pdf
+pdflatex INTERMEDIATE.tex
+```
+
+You can also use `pandoc` to convert directly from `md` to `pdf`
+(avoiding JKnit's `tex` intermediate step), but I personally
+find `pandoc`'s versions less visually appealing.
+
+### Creating a Presentation
+
+A final common workflow is to embed code input/output in `pptx`
+or related presentation documents. This can be done by
+targetting markdown and using an existing
+markdown-to-presentation tool like `marp`.
+
+```sh
+# Embed source code output in markdown
+jknit INPUT.jmd -o INTERMEDIATE.md
+
+# Create presentation from markdown
+marp INTERMEDIATE.md --pptx -o OUTPUT.pptx
+```
 
 ## Installation requirements
 
@@ -133,13 +179,6 @@ This is what will be used to tell the chunks apart.
 The "extension" is the file extension associated with that
 language.
 
-For instance, the following code will add support for the cling
-`C++` interpreter.
-
-\`\`\`settings \
-cling cling cout<<"CHUNK_BREAK\n"; cpp \
-\`\`\`
-
 If you wish to include spaces in the command or printChunkBreak
 sections, surround them in either single or double quotation
 marks.
@@ -205,4 +244,4 @@ More examples can be seen in `./demos`.
 
 ## License
 
-This software is protected by the GPLv3.
+This software is protected by the MIT license.

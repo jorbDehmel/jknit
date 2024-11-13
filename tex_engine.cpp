@@ -1,7 +1,6 @@
 /*
 Jordan Dehmel
 2023 - present
-GPLv3
 */
 
 #include "tex_engine.hpp"
@@ -21,12 +20,6 @@ void TEXEngine::knit(const std::list<Chunk> &_chunks)
     }
 
     // Body
-    if (force_pres)
-    {
-        target << "\\pagestyle{empty}\n"
-               << "\\begin{pres}\n"
-               << "\\begin{titleslide}\n";
-    }
     for (const auto &chunk : _chunks)
     {
         if (chunk.lines.empty())
@@ -95,10 +88,6 @@ void TEXEngine::knit(const std::list<Chunk> &_chunks)
                 target << l << '\n';
             }
         }
-    }
-    if (force_pres)
-    {
-        target << "\\end{pres}\n";
     }
 
     // Footer
@@ -390,10 +379,6 @@ void TEXEngine::handle_md(const std::list<std::string> &_lines,
             line.starts_with("___") || line.starts_with("=="))
         {
             // Horizontal rule
-            if (force_pres)
-            {
-                _target << "\\slide{}\n";
-            }
             _target << "\\hrule{}\n";
             continue;
         }

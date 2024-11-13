@@ -1,72 +1,75 @@
-jpres Demonstration
-====================================================
-\bgimg{image.png}
-Jordan Dehmel
-Title
-====================================================
-```OCTAVE
+
+# jpres Demonstration
+
+
+Author LastName
+
+---
+
+# Title
+
+```{octave}
 % This is a matrix
 A = [1, 2, 3; 4, 5, 6; 7, 8, 9]
 ```
+
 The following Octave code shares the scope of all Octave code which was previously run.
 Thus, A exists in scope, and the following produces output.
-```OCTAVE
+
+```{octave}
 A
 ```
-```
-A =
 
-   1   2   3
-   4   5   6
-   7   8   9
+---
 
-```
-Functions in Octave
-====================================================
+# Functions in Octave
+
 This is a function definition in Octave.
 This chunk is marked with a ^, meaning that
 it produces no output.
-```OCTAVE
+
+```{octave}^
 function printmatrix (mat)
   disp('The following matrix was inputted:');
   mat
 endfunction
 ```
+
 This is a function call in octave.
 It uses our matrix from before to demonstrate scoping and function calls.
-```OCTAVE
+
+```{octave}
 printmatrix(A)
 ```
-```
-The following matrix was inputted:
-mat =
 
-   1   2   3
-   4   5   6
-   7   8   9
+---
 
-```
-Languages
-====================================================
+# Languages
+
 JKnit also offers native compatibility with C++, Python, bash, JavaScript and Rust.
 These must be installed on your machine.
-```BASH
+
+```{bash}
 echo "Hello from bash!"
 ```
-```
-Hello from bash!
-```
-Compiled Languages
-====================================================
+
+---
+
+# Compiled Languages
+
 C++ and Rust are both compiled languages which require main functions.
 Thus, it does not make much sense to link multiple chunks together.
 By default, they are marked as "loner" chunks via the \* operator in
 their name.
-C++
-====================================================
-```CLANGPP
+
+---
+
+# C++
+
+```{clangpp*}
 #include <iostream>
 using namespace std;
+
 // Comment comment comment
 int main()
 {
@@ -75,21 +78,21 @@ int main()
   return 0;
 }
 ```
-```
-Hello from C++!
-```
-Rust
-====================================================
-```RUST
+
+---
+
+# Rust
+
+```{rust*}
 fn main() {
   println!("Hello from Rust!");
 }
 ```
-```
-Hello from Rust!
-```
-Presentation Features
-====================================================
+
+---
+
+# Presentation Features
+
 - You can try
 - To do bullet points
 - These look quite nice in `.rpres`

@@ -127,7 +127,7 @@ int main(int c, char *v[])
                 case 'V':
                     std::cout << "JKnit version " << VERSION
                               << '\n'
-                              << "2023-present, GPLv3\n";
+                              << "2023-present, MIT license\n";
                     break;
                 case 'e': // Warnings to errors
                 case 'E':
@@ -141,8 +141,8 @@ int main(int c, char *v[])
                 case 'H':
                     std::cout
                         << "JKnit version " << VERSION << '\n'
-                        << "Live RMD-style markdown "
-                        << "documents\n\n"
+                        << "Markdown documents with live "
+                        << "code\n\n"
                         << "CLI flags:\n"
                         << "-e Warnings to errors\n"
                         << "-h Help (this)\n"
@@ -152,7 +152,7 @@ int main(int c, char *v[])
                         << "-x Force TeX mode\n"
                         << '\n'
                         << "Jordan Dehmel, 2023 - present\n"
-                        << "GPLv3\n";
+                        << "MIT license\n";
                     break;
                 default:
                     std::cerr << "Unrecognized flag '" << arg[i]
@@ -192,14 +192,6 @@ int main(int c, char *v[])
         {
             TEXEngine e(settings);
             load_engine(e, settings_files);
-
-            if (settings.source.ends_with("pres"))
-            {
-                std::cout << "WARNING: Presentation mode is "
-                          << "experimental\n";
-                e.force_pres = true;
-            }
-
             stats = e.run();
         }
         else

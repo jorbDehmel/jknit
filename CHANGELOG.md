@@ -1,6 +1,16 @@
 # Changelog of JKnit
 Jordan Dehmel, 2024 - present
 
+# `0.1.3`
+- Switched from GPLv3 to MIT on the latest rewrite. This was
+    originally the intent with the rewrite, and the continued
+    inclusion of the GPL was a mistake. I believe that few, if
+    any, distributions of the rewrite currently exist. This may
+    or may not cause licensing issues in the future.
+- Dropped experimental presentation support; After converting
+    `jmd` to `md`, use a tool like `marp` to convert
+    presentations
+
 # `0.1.2`
 - Added `debug-install` option, with default being stripped
     executable. Previously debug was default.
