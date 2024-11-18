@@ -19,6 +19,12 @@ void TEXEngine::knit(const std::list<Chunk> &_chunks)
         target << l << '\n';
     }
 
+    if (!forceFormalFont)
+    {
+        target << "\\allsectionsfont{\\sffamily}\n"
+               << "\\sffamily\n";
+    }
+
     // Body
     for (const auto &chunk : _chunks)
     {
@@ -115,13 +121,11 @@ void TEXEngine::handle_md(const std::list<std::string> &_lines,
         line = *it;
         if (line.empty())
         {
-            // Ignore empty lines, even for whitespace counting
             if (in_blockquote)
             {
                 _target << "\\end{displayquote}\n";
                 in_blockquote = false;
             }
-            continue;
         }
 
         prev_ws_offset = ws_offset;
@@ -206,9 +210,8 @@ void TEXEngine::handle_md(const std::list<std::string> &_lines,
                 break;
             };
 
-            _target << "\\sffamily{";
             handle_md({line.substr(num_pounds)}, _target);
-            _target << "}}~\n";
+            _target << "}~\n";
 
             _target << "\\bigskip{}\n";
             continue;
@@ -363,14 +366,16 @@ void TEXEngine::handle_md(const std::list<std::string> &_lines,
             _target << "\\begin{figure}[h]\n"
                     << "\\centering\n"
                     << "\\includegraphics[" << options << "]{"
-                    << path << "}\n"
-                    << "\\caption {";
+                    << path << "}\n";
 
-            // Catches any markdown syntax in captions
-            handle_md({alt}, _target);
+            if (!alt.empty())
+            {
+                _target << "\\caption {";
+                handle_md({alt}, _target);
+                _target << "}\n";
+            }
 
-            _target << "}\n"
-                    << "\\end {figure}\n";
+            _target << "\\end {figure}\n";
 
             continue;
         }
@@ -427,6 +432,18 @@ void TEXEngine::handle_md(const std::list<std::string> &_lines,
 
             switch (c)
             {
+            case '\\':
+                if (i + 1 < line.size() &&
+                    (line[i + 1] == '_' || line[i + 1] == '*'))
+                {
+                    _target << line[i + 1];
+                    ++i;
+                }
+                else
+                {
+                    _target << c;
+                }
+                break;
             case '*':
             case '_':
                 ++i;

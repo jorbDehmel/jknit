@@ -15,12 +15,13 @@ Jordan Dehmel
 #include <queue>
 #include <string>
 
-const static std::string VERSION = "0.1.3";
+const static std::string VERSION = "0.1.4";
 
 struct Settings
 {
     std::string source, target;
-    bool time = false, log = false, all_errors = false;
+    bool time = false, log = false, all_errors = false,
+         forceFancyFonts = false;
 };
 
 struct RunStats

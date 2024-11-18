@@ -1,5 +1,5 @@
 .PHONY:	test
-test:
+test: clean
 	for CASE in demo demo2 demo3 ; \
 	do \
 		jknit $$CASE.jmd -o $$CASE.md ; \

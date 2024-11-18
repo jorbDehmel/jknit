@@ -9,6 +9,7 @@ Jordan Dehmel
 #include "tex_engine.hpp"
 #include <chrono>
 #include <cstdint>
+#include <filesystem>
 #include <iostream>
 #include <list>
 #include <stdexcept>
@@ -76,7 +77,8 @@ int main(int c, char *v[])
     std::list<std::string> settings_files;
     RunStats stats;
     bool target_tex = false;
-    settings.log = settings.time = settings.all_errors = false;
+    settings.log = settings.time = settings.all_errors =
+        settings.forceFancyFonts = false;
     settings.source = "";
     settings.target = "a.md";
 
@@ -93,9 +95,52 @@ int main(int c, char *v[])
             {
                 switch (arg[i])
                 {
-                case 't': // Time
-                case 'T':
-                    settings.time = !settings.time;
+                case 'c': // Chdir
+                case 'C':
+                    ++cur_arg;
+                    if (cur_arg >= c)
+                    {
+                        std::cerr << "'-C' must not be last "
+                                  << "arg.\n";
+                        return 1;
+                    }
+                    std::filesystem::current_path(v[cur_arg]);
+                    break;
+                case 'e': // Warnings to errors
+                case 'E':
+                    settings.all_errors = !settings.all_errors;
+                    break;
+                case 'f': // Settings file
+                case 'F':
+                    ++cur_arg;
+                    if (cur_arg >= c)
+                    {
+                        std::cerr << "'-f' must not be last "
+                                  << "arg.\n";
+                        return 1;
+                    }
+                    settings_files.push_back(v[cur_arg]);
+                    break;
+                case 'h': // Help
+                case 'H':
+                    std::cout
+                        << "JKnit version " << VERSION << '\n'
+                        << "Markdown documents with live "
+                        << "code\n\n"
+                        << "CLI flags (case-independent):\n"
+                        << "-c Change working directory\n"
+                        << "-e Warnings to errors\n"
+                        << "-f Load settings file\n"
+                        << "-h Help (this)\n"
+                        << "-l Toggle log (default off)\n"
+                        << "-o Set output file\n"
+                        << "-q Quit without error\n"
+                        << "-t Toggle timer (default off)\n"
+                        << "-v Version\n"
+                        << "-x Force TeX mode\n"
+                        << '\n'
+                        << "Jordan Dehmel, 2023 - present\n"
+                        << "MIT license\n";
                     break;
                 case 'l': // Log
                 case 'L':
@@ -112,16 +157,12 @@ int main(int c, char *v[])
                     }
                     settings.target = v[cur_arg];
                     break;
-                case 'f': // Settings file
-                case 'F':
-                    ++cur_arg;
-                    if (cur_arg >= c)
-                    {
-                        std::cerr << "'-f' must not be last "
-                                  << "arg.\n";
-                        return 1;
-                    }
-                    settings_files.push_back(v[cur_arg]);
+                case 'q': // Quit w/o error
+                case 'Q':
+                    return 0;
+                case 't': // Time
+                case 'T':
+                    settings.time = !settings.time;
                     break;
                 case 'v': // Version
                 case 'V':
@@ -129,30 +170,26 @@ int main(int c, char *v[])
                               << '\n'
                               << "2023-present, MIT license\n";
                     break;
-                case 'e': // Warnings to errors
-                case 'E':
-                    settings.all_errors = !settings.all_errors;
-                    break;
                 case 'x': // Force tex mode
                 case 'X':
-                    target_tex = !target_tex;
-                    break;
-                case 'h': // Help
-                case 'H':
-                    std::cout
-                        << "JKnit version " << VERSION << '\n'
-                        << "Markdown documents with live "
-                        << "code\n\n"
-                        << "CLI flags:\n"
-                        << "-e Warnings to errors\n"
-                        << "-h Help (this)\n"
-                        << "-l Toggle log (default off)\n"
-                        << "-t Toggle timer (default off)\n"
-                        << "-v Version\n"
-                        << "-x Force TeX mode\n"
-                        << '\n'
-                        << "Jordan Dehmel, 2023 - present\n"
-                        << "MIT license\n";
+                    if (!target_tex)
+                    {
+                        target_tex = true;
+                        settings.forceFancyFonts = false;
+                    }
+                    else
+                    {
+                        if (settings.forceFancyFonts)
+                        {
+                            target_tex =
+                                settings.forceFancyFonts =
+                                false;
+                        }
+                        else
+                        {
+                            settings.forceFancyFonts = true;
+                        }
+                    }
                     break;
                 default:
                     std::cerr << "Unrecognized flag '" << arg[i]

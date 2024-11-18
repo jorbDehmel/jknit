@@ -14,11 +14,16 @@ static_assert(__cplusplus >= 2020'00UL);
 class TEXEngine : public Engine
 {
   public:
-    TEXEngine(const Settings &_s) : Engine(_s)
+    TEXEngine(const Settings &_s) : Engine(_s),
+        forceFormalFont(_s.forceFancyFonts)
     {
     }
 
     const std::string specialCharacters = "%$~#&^";
+
+    // If true, uses the default LaTeX font. If false, uses the
+    // (IMO more visually appealling) sf font.
+    bool forceFormalFont = false;
 
     const std::vector<std::string>
         latexHeader =
@@ -69,9 +74,7 @@ class TEXEngine : public Engine
              "basicstyle =\\ttfamily\\relsize{-1},",
              "breaklines = true,",
              "columns = fullflexible}}",
-             "\\allsectionsfont{\\sffamily}",
-             "\\begin{document}",
-             "\\sffamily"},
+             "\\begin{document}"},
         latexFooter = {"\\end{document}"},
         startCode = {"\\begin{code}"},
         endCode = {"\\end{code}\n"},

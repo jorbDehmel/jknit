@@ -1,6 +1,14 @@
 # Changelog of JKnit
 Jordan Dehmel, 2024 - present
 
+# `0.1.4`
+- Added `-C` and `-x` CLI flags
+- Added `forceFormalFont` option, which occurs if you use `-xx`.
+    This will use the default `tex` font, rather than the
+    informal one usually used.
+- Fixed bug preventing paragraph breaks from working when
+    targetting LaTeX
+
 # `0.1.3`
 - Switched from GPLv3 to MIT on the latest rewrite. This was
     originally the intent with the rewrite, and the continued
