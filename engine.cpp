@@ -215,6 +215,7 @@ std::queue<Chunk> Engine::break_output_chunk(const Chunk &_c)
 }
 
 // Run the given shell command and get its output.
+// SYSTEM DEPENDENT
 Chunk Engine::run_and_get_output(const std::string &_cmd)
 {
     const static uint64_t buffer_size = 128;
