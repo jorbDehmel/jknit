@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install g++ npm pandoc texlive-full
+        sudo apt install g++ npm
         sudo npm install -g @marp-team/marp-cli
         sudo make install
 

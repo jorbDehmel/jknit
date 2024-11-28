@@ -4,7 +4,6 @@ test: clean
 	do \
 		jknit $$CASE.jmd -o $$CASE.md ; \
 		jknit $$CASE.jmd -o $$CASE.tex ; \
-		pdflatex $$CASE.tex ; \
 	done
 	if marp --version 2>&1 > /dev/null ; then \
 		jknit presentation.jmd -o presentation.md ; \
