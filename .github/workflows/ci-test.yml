@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install g++ npm python3 octave cargo
+        sudo apt install g++ npm python3 octave cargo graphviz
         sudo npm install -g @marp-team/marp-cli
         pip install matplotlib numpy
         sudo make install
