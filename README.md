@@ -1,6 +1,8 @@
 
 # JKnit
 
+![Test Badge](https://github.com/jorbDehmel/jknit/actions/workflows/ci-test.yml/badge.svg)
+
 Jordan Dehmel \
 2023 - Present \
 jdehmel@outlook.com \
