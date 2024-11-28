@@ -19,8 +19,9 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install g++ npm
+        sudo apt install g++ npm python3 octave cargo
         sudo npm install -g @marp-team/marp-cli
+        pip install matplotlib numpy
         sudo make install
 
     - name: Run tests
