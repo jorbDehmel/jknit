@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install g++ marp pandoc texlive
+        sudo apt install g++ marp-cli pandoc texlive
 
     - name: Run tests
       run: |
