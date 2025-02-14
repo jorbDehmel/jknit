@@ -1,8 +1,9 @@
-/*
-JKnit CLI
-2023-present
-Jordan Dehmel
-*/
+/**
+ * @file main.cpp
+ * @brief CLI for JKnit
+ * @year 2023 - present
+ * @author Jordan Dehmel
+ */
 
 #include "engine.hpp"
 #include "md_engine.hpp"
@@ -17,6 +18,14 @@ Jordan Dehmel
 
 static_assert(__cplusplus >= 2020'00UL);
 
+/**
+ * @brief Loads an engine instance with all the default
+ * languages, optionally including some number of settings
+ * files.
+ * @param _e The engine to load into
+ * @param _settings_files If provided, the files to load before
+ * defaults.
+ */
 void load_engine(Engine &_e,
                  const std::list<std::string> &_settings_files)
 {
@@ -183,7 +192,7 @@ int main(int c, char *v[])
                         {
                             target_tex =
                                 settings.forceFancyFonts =
-                                false;
+                                    false;
                         }
                         else
                         {

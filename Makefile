@@ -22,13 +22,26 @@ uninstall:
 
 .PHONY:	clean
 clean:
-	rm -f *.o *.out *.log *.png *.aux *.pdf a.* *.listing
+	find . -type f -iname "*.o" -or -iname "*.out" -or -iname \
+		"*.log" -or -iname "*.png" -or -iname "*.aux" -or \
+		-iname "*.pdf" -or -iname "a.*" -or -iname "*.listing" \
+		-exec rm -f "{}" \;
+	find . -type f -regex ".*[0-9]+_jknit\.[a-z]+\$$" \
+		-exec rm -f "{}" \;
+	rm -rf html latex
 	$(MAKE) -C demos clean
 
 .PHONY:	format
 format:
 	find . -type f \( -iname "*.cpp" -or -iname "*.hpp" \) \
 		-exec clang-format -i "{}" \;
+
+.PHONY:	docs
+docs:
+	doxygen .
+	$(MAKE) -C latex
+	@echo "Doxygen-generated reference manual can be found " \
+		"at ./latex/refman.pdf"
 
 .PHONY:	test
 test:

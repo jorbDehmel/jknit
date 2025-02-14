@@ -6,7 +6,10 @@ __pycache__/
 src/
 pkg/
 demos/*.md
+html/
+latex/
 
+*_jknit.*
 *.o
 *.out
 *.tex

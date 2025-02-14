@@ -349,16 +349,6 @@ Engine::Engine(const Settings &_s)
     }
 }
 
-Engine::~Engine()
-{
-    source.close();
-    target.close();
-    if (settings.log)
-    {
-        log.close();
-    }
-}
-
 // Load a file, read each line as settings
 void Engine::load_settings_file(const std::string &_filepath)
 {

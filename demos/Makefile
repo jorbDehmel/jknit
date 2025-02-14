@@ -12,5 +12,4 @@ test: clean
 
 .PHONY:	clean
 clean:
-	rm -f *.o *.out *.log *.png *.aux *.pdf a.* *.listing \
-		*.tex *.pptx *.md
+	rm -f *.md *.tex *.png

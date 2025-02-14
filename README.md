@@ -83,14 +83,14 @@ find `pandoc`'s versions less visually appealing.
 A final common workflow is to embed code input/output in `pptx`
 or related presentation documents. This can be done by
 targetting markdown and using an existing
-markdown-to-presentation tool like `marp`.
+markdown-to-presentation tool like `marp` or `pandoc`.
 
 ```sh
 # Embed source code output in markdown
 jknit INPUT.jmd -o INTERMEDIATE.md
 
 # Create presentation from markdown
-marp INTERMEDIATE.md --pptx -o OUTPUT.pptx
+pandoc -t beamer INTERMEDIATE.md -o OUTPUT.pptx
 ```
 
 ## Installation requirements
