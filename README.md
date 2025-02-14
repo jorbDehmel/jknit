@@ -98,13 +98,13 @@ pandoc -t beamer INTERMEDIATE.md -o OUTPUT.pptx
 These are actually just suggestions, but you will find that
 JKnit will have little function without them.
 
- 1 - Python
- 2 - Octave (MatLab alternative)
- 3 - Cargo (for Rust)
- 4 - Nodejs (for JavaScript)
- 5 - Clang (for C++, via LLVM)
- 6 - `gcc`, `g++`
- 7 - MikTex, TeXLive, `pandoc`
+1. Python
+2. Octave (MatLab alternative)
+3. Cargo (for Rust)
+4. Nodejs (for JavaScript)
+5. Clang (for C++, via LLVM)
+6. `gcc`, `g++`
+7. MikTex, TeXLive, `pandoc`
 
 All but the last of these items allow JKnit to compile and/or
 run their respective languages. The final one, however, is used
@@ -194,10 +194,12 @@ marks.
  `~`      | Hide code
 
 Operator combos and examples:
-`*^` - `C++` code without output
-`*~` - `C++` output without code
-`^~` - Load-bearing but ugly `Python` code
-`*^~` - Code which has no effect and is not shown: Ignored.
+
+- `*^` would be good for `C++` code without output
+- `*~` would be good for `C++` output without code
+- `^~` would be good for load-bearing but ugly `Python` code
+- `*^~` would be good for code which has no effect and is not
+    shown: Ignored.
 
 ## Adding Language Support
 
