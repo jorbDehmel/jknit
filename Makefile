@@ -22,10 +22,10 @@ uninstall:
 
 .PHONY:	clean
 clean:
-	find . -type f -iname "*.o" -or -iname "*.out" -or -iname \
-		"*.log" -or -iname "*.png" -or -iname "*.aux" -or \
-		-iname "*.pdf" -or -iname "a.*" -or -iname "*.listing" \
-		-exec rm -f "{}" \;
+	find . -type f \( -iname "*.o" -or -iname "*.out" -or \
+		-iname "*.log" -or -iname "*.png" -or -iname "*.aux" \
+		-or -iname "*.pdf" -or -iname "a.*" -or -iname \
+		"*.listing" \) -exec rm -f "{}" \;
 	find . -type f -regex ".*[0-9]+_jknit\.[a-z]+\$$" \
 		-exec rm -f "{}" \;
 	rm -rf html latex

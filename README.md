@@ -8,6 +8,8 @@ Jordan Dehmel \
 jdehmel@outlook.com \
 `github.com/jorbDehmel/jknit`
 
+## About
+
 JKnit is an extremely lightweight mathematical/computational
 document knitting tool for literate programming. It is purely
 FOSS forever under the MIT license, and aims to intuitive, easy
@@ -32,13 +34,14 @@ Interpreted languages:
 - `bash`
 - JavaScript via `node`
 
-Compiled (non-knit) languages:
+Compiled languages:
 - C++ via `clang++`
 - C++ via `g++`
 - C via `clang`
 - C via `gcc`
 - Rust via `rustc`
 - [Oak](https://github.com/jorbDehmel/oak) via `acorn`
+- Graphviz/dot via `dot`
 
 Additionally, it is trivial to add support for any additional
 language. Under the hood, JKnit saves the contents of a code
@@ -47,6 +50,32 @@ the output of that command as a code output chunk. Thus, any
 interpretted language can be added by specifying its "runner"
 command, and any compiled language can be added by building a
 trivial interpretted compile/run script.
+
+
+## Installation requirements
+
+These are actually just suggestions, but you will find that
+JKnit will have little function without them.
+
+1. Python
+2. Octave (MatLab alternative)
+3. Cargo (for Rust)
+4. Nodejs (for JavaScript)
+5. Clang (for C++, via LLVM)
+6. `gcc`, `g++`
+7. MikTex, TeXLive, `pandoc`
+
+All but the last of these items allow JKnit to compile and/or
+run their respective languages. The final one, however, is used
+to translate JKnit's output `.tex` and `.md` files into more
+useful formats like `.pdf`.
+
+## Linux Installation
+
+Simply run the command `make install` while in this directory.
+If you want to retain runtime `GDB` information in the binary,
+run `make install-debug` instead. Either way, run
+`make uninstall` to remove it.
 
 ## Example Workflows
 
@@ -93,31 +122,6 @@ jknit INPUT.jmd -o INTERMEDIATE.md
 pandoc -t beamer INTERMEDIATE.md -o OUTPUT.pptx
 ```
 
-## Installation requirements
-
-These are actually just suggestions, but you will find that
-JKnit will have little function without them.
-
-1. Python
-2. Octave (MatLab alternative)
-3. Cargo (for Rust)
-4. Nodejs (for JavaScript)
-5. Clang (for C++, via LLVM)
-6. `gcc`, `g++`
-7. MikTex, TeXLive, `pandoc`
-
-All but the last of these items allow JKnit to compile and/or
-run their respective languages. The final one, however, is used
-to translate JKnit's output `.tex` and `.md` files into more
-useful formats like `.pdf`.
-
-## Linux Installation
-
-Simply run the command `make install` while in this directory.
-If you want to retain runtime `GDB` information in the binary,
-run `make install-debug` instead. Either way, run
-`make uninstall` to remove it.
-
 ## The CLI (Command Line Interface)
 
 Command line flags and their meanings are shown below.
@@ -161,6 +165,19 @@ The language is specified by the string following the three
 backticks (for `md` support), and can optionally be enclosed by
 curly brackets (for `rmd` support).
 
+If the name is not something we have information on, it will be
+treated as a command. In such a case, any instance of `%` in the
+command will be replaced with the source file. For example,
+
+\```{dot -Tpng -o dot_out.png %}* \
+digraph { \
+    dpi=300; \
+    a -> b -> c -> d, e; \
+} \
+\```
+
+is one way to compile `graphviz` files to `dot_out.png`.
+
 ## Loading Settings
 
 To include support for an additional interpreted language,
@@ -187,11 +204,11 @@ marks.
 
 ## Chunk Options
 
- Operator | Purpose
-----------|-------------
- `*`      | Lone chunk
- `^`      | Hide output
- `~`      | Hide code
+ Operator | Verbose     | Purpose
+----------|-------------|-------------
+ `*`      | `single`    | Lone chunk
+ `^`      | `silent`    | Hide output
+ `~`      | `invisible` | Hide code
 
 Operator combos and examples:
 

@@ -72,11 +72,23 @@ void parse_header(const std::string &_header, Chunk &_into)
 {
     // Parse settings from the given header
     /*
-     Operator | Purpose
-    ----------|-------------
-     `*`      | Lone chunk
-     `^`      | Hide output
-     `~`      | Hide code
+     Operator | Verbose     | Purpose
+    ----------|-------------|-------------
+     `*`      | `single`    | Lone chunk
+     `^`      | `silent`    | Hide output
+     `~`      | `invisible` | Hide code
+
+    Valid headers:
+    ```c*^~
+    ```{c}*^~
+    ```c single silent invisible
+    ```{c % *.o} silent invisible
+
+    header =
+          name tags
+        | { name } tags
+        ;
+    tags = tags tag | ;
     */
 
     if (_header.find('*') != std::string::npos)

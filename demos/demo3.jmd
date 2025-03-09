@@ -11,3 +11,12 @@ digraph {
 ```
 
 ![Diagram](dot_out.png)
+
+```dot*~
+digraph {
+    dpi=300;
+    a -> b, c -> d, e, f;
+}
+```
+
+![Diagram 2](jknit_figure_1.png)

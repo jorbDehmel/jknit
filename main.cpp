@@ -65,7 +65,15 @@ void load_engine(Engine &_e,
         "oak /usr/include/compilation-drivers/acorn_driver.py "
         "'' oak");
 
+    // Figure languages
+    _e.load_settings_line(
+        "gv /usr/include/compilation-drivers/dot_driver.py '' "
+        "gv");
+
     // Aliases
+    _e.load_settings_line(
+        "dot /usr/include/compilation-drivers/dot_driver.py '' "
+        "gv");
     _e.load_settings_line(
         "cpp /usr/include/compilation-drivers/gpp_driver.py ; "
         "cpp");
